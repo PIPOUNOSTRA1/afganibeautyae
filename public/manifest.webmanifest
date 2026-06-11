@@ -1,0 +1,21 @@
+{
+  "name": "لمسة بيوتي | Lamsa Beauty",
+  "short_name": "Lamsa Beauty",
+  "description": "متجر عناية وجمال متنوع للدفع عند الاستلام مع شحن سريع وضمان رضا.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "dir": "rtl",
+  "lang": "ar",
+  "background_color": "#F7F1E6",
+  "theme_color": "#5F2E3D",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
