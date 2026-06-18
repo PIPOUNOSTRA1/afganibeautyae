@@ -1,4 +1,49 @@
-// KOREAN BEAUTY Skincare Store Core Logic
+// AFGHAN BEAUTY Store Core Logic
+
+// =====================================================
+// IMAGE HELPER — fixes GitHub Pages broken images
+// =====================================================
+// Compute base path for GitHub Pages compatibility
+// On GitHub Pages the site lives at /repo-name/ so we need to prepend the base path
+const BASE_PATH = (function() {
+  // If there's a <base> tag, use it
+  const baseEl = document.querySelector('base[href]');
+  if (baseEl) return baseEl.href.replace(/\/$/, '') + '/';
+  // Otherwise detect from current page path
+  const path = window.location.pathname;
+  // Get directory of current page (works for both root and subdirectory deployments)
+  const dir = path.substring(0, path.lastIndexOf('/') + 1);
+  return dir;
+})();
+
+const PRODUCT_IMG = BASE_PATH + 'assets/afghan-oil.png';
+const AVATAR_IMG  = BASE_PATH + 'assets/store-avatar.png';
+
+// Try to load stored logo URL from admin
+function getProductImage(productId) {
+  try {
+    const stored = localStorage.getItem('afghanbeauty_products_config');
+    if (stored) {
+      const prods = JSON.parse(stored);
+      if (prods[productId] && prods[productId].image) return resolveImagePath(prods[productId].image);
+    }
+  } catch(e) {}
+  // fallback
+  const defaults = { 1: PRODUCT_IMG, 2: PRODUCT_IMG, 3: PRODUCT_IMG };
+  return defaults[productId] || PRODUCT_IMG;
+}
+
+// Resolve relative image paths to work on GitHub Pages subdirectory deployments
+function resolveImagePath(imgPath) {
+  if (!imgPath) return PRODUCT_IMG;
+  // Already absolute URL (http/https/data URI) — leave as-is
+  if (/^(https?:\/\/|data:)/.test(imgPath)) return imgPath;
+  // Already starts with BASE_PATH — leave as-is
+  if (imgPath.startsWith(BASE_PATH)) return imgPath;
+  // Strip leading "./" if present
+  imgPath = imgPath.replace(/^\.\//, '');
+  return BASE_PATH + imgPath;
+}
 
 // Default skincare products database
 const defaultProducts = {
@@ -48,7 +93,7 @@ const defaultProducts = {
     unit: '300 مل',
     status: 'active',
     freeShipping: false,
-    image: 'assets/shampoo.png',
+    image: 'assets/afghan-oil.png',
     desc_title: 'لماذا شامبو الأفغاني الأصلي؟',
     desc_body: 'تركيبة عشبية مطهرة مدعمة بخلاصة الثوم الأسود والبروتين المغذي. يطهر الفروة من الرواسب والدهون دون تجفيفها، مما يمهد الطريق لامتصاص مثالي لزيت الأفغاني وزيادة سرعة الإنبات.',
     desc_bullets: '✦ ينظف الفروة بعمق ويزيل القشرة والدهون المتراكمة التي تسد البصيلات\n✦ خالٍ تماماً من السلفات والسيليكون والبارابين لتجنب إجهاد الشعر والتلف\n✦ مدعم بالبيوتين والكيراتين لتقوية جذع الشعرة وحمايتها من التكسر\n✦ يزيد من كفاءة امتصاص الفروة لزيت الأفغاني بنسبة 200%\n✦ يمنح الشعر رائحة عشبية منعشة ولمعاناً طبيعياً ساحراً',
@@ -70,7 +115,7 @@ const defaultProducts = {
     faq_4_a: 'نعم، يحتوي على خلاصة الثوم الأسود المخمر الغني بالبروتينات ومضادات الأكسدة التي تقوي جذور الشعر وتمنع تساقطه دون ترك أي رائحة غير مرغوبة.',
     faq_5_q: 'ما هي بلد الصنع للمنتج؟',
     faq_5_a: 'المنتج مصنع ومرخص في المملكة العربية السعودية بموجب أعلى المعايير الصحية ومطابق للمواصفات الإماراتية المعتمدة لاستيراد مستحضرات التجميل.',
-    gallery_tube: 'assets/shampoo.png',
+    gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
     gallery_formula: ''
   },
@@ -84,7 +129,7 @@ const defaultProducts = {
     unit: '60 مل',
     status: 'active',
     freeShipping: false,
-    image: 'assets/beard-serum.png',
+    image: 'assets/afghan-oil.png',
     desc_title: 'لماذا سيروم اللحية والشارب المكثف؟',
     desc_body: 'تركيبة خفيفة وسريعة الامتصاص مخصصة لشعر الوجه للرجال. يدمج زيت الأفغاني المركز مع مستخلص الجينسينغ وزيت الأركان لتنشيط الدورة الدموية في الخدين وتعبئة فراغات اللحية والشارب بفعالية وسرعة.',
     desc_bullets: '✦ يعالج فراغات اللحية والشارب الناتجة عن ضعف البصيلات أو قلة النمو\n✦ يسرع نمو شعر الوجه ويزيد من سماكته وخشونته الذكورية الجذابة\n✦ قوام خفيف جداً يمتص خلال ثوانٍ ولا يترك أي ملمس دهني أو لمعة مزعجة\n✦ يرطب بشرة الوجه ويمنع الحكة والتقشر المصاحب لنمو اللحية\n✦ يحفز البصيلات النائمة لإنبات شعر جديد وقوي وبشكل متناسق',
@@ -106,7 +151,7 @@ const defaultProducts = {
     faq_4_a: 'بالتأكيد، السيروم آمن وفعال للاستخدام على جميع مناطق نمو شعر الوجه بما في ذلك الشارب والذقن والخدين والسوالف.',
     faq_5_q: 'هل المنتج يحتوي على مواد هرمونية؟',
     faq_5_a: 'لا، السيروم خفيف وطبيعي 100% ويعتمد بالكامل على مستخلصات النباتات والزيوت الطبيعية التي تحفز البصيلات بشكل فيزيولوجي آمن دون التأثير على الهرمونات.',
-    gallery_tube: 'assets/beard-serum.png',
+    gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
     gallery_formula: ''
   }
@@ -155,9 +200,8 @@ function renderCatalogGrid() {
     
     const savePct = p.oldPrice ? Math.round((1 - p.price / p.oldPrice) * 100) : 0;
     
-    const visualHTML = p.image
-      ? `<img src="${p.image}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;display:block;margin:auto;border-radius:10px;">`
-      : `<img src="assets/celimax-tube.png" alt="${p.name}" style="width:130px;height:200px;object-fit:contain;display:block;margin:auto;drop-shadow(0 8px 24px rgba(185,215,10,0.3));">`;
+    const resolvedImg = resolveImagePath(p.image || 'assets/afghan-oil.png');
+    const visualHTML = `<img src="${resolvedImg}" alt="${p.name}" style="width:100%;height:100%;object-fit:contain;display:block;margin:auto;border-radius:10px;">`;
 
     const card = document.createElement('div');
     card.className = `bundle-card ${p.id == 2 ? 'popular' : ''}`;
@@ -251,6 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   } catch(e) {}
 
+  // Fix all static image paths in HTML for GitHub Pages compatibility
+  fixStaticImagePaths();
   applyDynamicLogo();
   initAnnouncementBar();
   initMobileMenu();
@@ -261,6 +307,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initStockPulse();
   applyDynamicPrices();
 });
+
+// Fix static img src attributes in HTML that use relative 'assets/' paths
+function fixStaticImagePaths() {
+  document.querySelectorAll('img[src^="assets/"]').forEach(img => {
+    img.src = resolveImagePath(img.getAttribute('src'));
+  });
+}
 
 // Apply dynamic store logo if customized in admin panel
 function applyDynamicLogo() {
@@ -462,7 +515,7 @@ function addProductToCart(prodId, quantity = 1) {
       name: p.name,
       price: getUnitPrice(prodId, quantity),
       quantity: quantity,
-      image: p.image || ''
+      image: resolveImagePath(p.image || 'assets/afghan-oil.png')
     });
   }
 
@@ -488,7 +541,7 @@ function addProductToCartWithQtyDiscount(prodId, qty) {
       name: p.name,
       price: getUnitPrice(prodId, qty),
       quantity: qty,
-      image: p.image || ''
+      image: resolveImagePath(p.image || 'assets/afghan-oil.png')
     });
   }
 
@@ -562,9 +615,8 @@ function renderCart() {
   itemsContainer.innerHTML = '';
   
   cart.forEach((item, index) => {
-    const visualHTML = item.image
-      ? `<img src="${item.image}" alt="${item.name}" style="width:50px;height:75px;object-fit:contain;border-radius:6px;display:block;margin:auto;">`
-      : `<img src="assets/celimax-tube.png" alt="${item.name}" style="width:50px;height:75px;object-fit:contain;border-radius:6px;display:block;margin:auto;">`;
+    const resolvedCartImg = resolveImagePath(item.image || 'assets/afghan-oil.png');
+    const visualHTML = `<img src="${resolvedCartImg}" alt="${item.name}" style="width:50px;height:75px;object-fit:contain;border-radius:6px;display:block;margin:auto;">`;
 
     const itemHTML = `
       <div class="cart-item" style="margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:1rem; display:flex; gap:1rem;">
@@ -699,9 +751,8 @@ function renderLpCartCards() {
   }
 
   container.innerHTML = cart.map((item, index) => {
-    const visualHTML = item.image
-      ? `<img src="${item.image}" alt="${item.name}" style="width:60px;height:80px;object-fit:contain;display:block;margin:auto;">`
-      : `<img src="assets/celimax-tube.png" alt="${item.name}" style="width:60px;height:80px;object-fit:contain;display:block;margin:auto;">`;
+    const resolvedLpImg = resolveImagePath(item.image || 'assets/afghan-oil.png');
+    const visualHTML = `<img src="${resolvedLpImg}" alt="${item.name}" style="width:60px;height:80px;object-fit:contain;display:block;margin:auto;">`;
 
     return `
       <div class="offer-card best" style="display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; border:1px solid var(--border); border-radius:16px;">
@@ -798,7 +849,7 @@ function updateLpSummary() {
     listContainer.innerHTML = cart.map(item => `
       <div class="lp-summary-product" style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);">
         <div class="lp-summary-thumb" style="width: 45px; height: 60px; background: radial-gradient(circle at 50% 30%,#FAF8F2,#EBF0EC); border-radius: 8px; padding: 0.25rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          ${item.image ? `<img src="${item.image}" style="width:100%;height:100%;object-fit:contain;">` : `<img src="assets/afghan-oil.png" style="width:100%;height:100%;object-fit:contain;">`}
+          <img src="${resolveImagePath(item.image || 'assets/afghan-oil.png')}" style="width:100%;height:100%;object-fit:contain;">
         </div>
         <div style="flex:1;">
           <p style="font-weight: 800; font-size: 0.85rem; color: var(--text);">${item.name} × ${item.quantity}</p>
@@ -1033,9 +1084,9 @@ function loadProductDetails() {
     if (faqHTML) faqContainer.innerHTML = faqHTML;
   }
 
-  const displayTubeImg = p.gallery_tube || p.image || 'assets/afghan-oil.png';
-  const displayTextureImg = p.gallery_texture || 'assets/afghan-oil.png';
-  const displayFormulaImg = p.gallery_formula || 'assets/afghan-oil.png';
+  const displayTubeImg = resolveImagePath(p.gallery_tube || p.image || 'assets/afghan-oil.png');
+  const displayTextureImg = resolveImagePath(p.gallery_texture || 'assets/afghan-oil.png');
+  const displayFormulaImg = resolveImagePath(p.gallery_formula || 'assets/afghan-oil.png');
 
   const viewTube = document.getElementById('galleryViewTube');
   if (viewTube) {

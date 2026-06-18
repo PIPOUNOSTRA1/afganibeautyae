@@ -1,9 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>لوحة التحكم | كوريان بيوتي AFGHAN BEAUTY</title>
+  <title>لوحة التحكم | أفغاني بيوتي AFGHAN BEAUTY</title>
   <link rel="icon" type="image/png" href="assets/store-avatar.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -597,9 +597,93 @@
       .sidebar, .topbar { display: none !important; }
       .main { margin: 0; }
     }
-  </style>
+</style>
 </head>
 <body>
+
+<!-- ======== LOGIN SCREEN ======== -->
+<div id="loginScreen" style="position:fixed;inset:0;z-index:9999;background:var(--bg-dark);display:flex;align-items:center;justify-content:center;padding:2rem;">
+  <div style="background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:3rem 2.5rem;max-width:420px;width:100%;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,0.6);">
+    <div style="width:72px;height:72px;background:linear-gradient(135deg,var(--primary),var(--primary-hover));border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;box-shadow:0 0 40px var(--primary-glow);">
+      <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:var(--bg-dark);fill:none;stroke-width:2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h2 style="font-size:1.5rem;font-weight:900;margin-bottom:0.3rem;">لوحة تحكم أفغاني بيوتي</h2>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:2rem;">AFGHAN BEAUTY · Admin Dashboard</p>
+    <div style="text-align:right;margin-bottom:1rem;">
+      <label style="font-size:0.82rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:0.5rem;">🔑 كلمة المرور</label>
+      <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" style="width:100%;background:rgba(0,0,0,0.3);border:1px solid var(--border);border-radius:12px;padding:0.95rem 1.15rem;font-family:var(--font-ar);font-size:0.92rem;color:var(--text);transition:border-color 0.2s;direction:ltr;text-align:center;letter-spacing:0.15em;" onkeydown="if(event.key==='Enter')attemptLogin()">
+    </div>
+    <div id="loginError" style="display:none;background:rgba(229,115,115,0.12);border:1px solid var(--cancelled);border-radius:10px;padding:0.6rem;font-size:0.78rem;color:var(--cancelled);font-weight:700;margin-bottom:1rem;">❌ كلمة المرور غير صحيحة</div>
+    <button onclick="attemptLogin()" style="width:100%;background:linear-gradient(135deg,var(--primary),var(--primary-hover));color:var(--bg-dark);border:none;border-radius:12px;font-family:var(--font-ar);font-weight:900;font-size:1rem;padding:0.95rem;cursor:pointer;box-shadow:0 8px 24px var(--primary-glow);transition:all 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      🔐 تسجيل الدخول
+    </button>
+    <p style="font-size:0.68rem;color:var(--text-dim);margin-top:1.25rem;">الوصول مقيد لمالك المتجر فقط</p>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Admin Auth System — Password + API Key (URL)
+// ============================================================
+const ADMIN_PASS_KEY    = 'afghanbeauty_admin_pass';
+const ADMIN_SESSION_KEY = 'afghanbeauty_admin_session';
+const ADMIN_APIKEY_KEY  = 'afghanbeauty_api_key';
+
+// Generate a random API key if not set yet
+function ensureApiKey() {
+  let key = localStorage.getItem(ADMIN_APIKEY_KEY);
+  if (!key) {
+    key = 'AB-' + Array.from(crypto.getRandomValues(new Uint8Array(18)))
+      .map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+    localStorage.setItem(ADMIN_APIKEY_KEY, key);
+  }
+  return key;
+}
+
+function getApiKey()       { return ensureApiKey(); }
+function getAdminPassword(){ return localStorage.getItem(ADMIN_PASS_KEY) || 'admin123'; }
+
+function grantAccess() {
+  sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+  const el = document.getElementById('loginScreen');
+  if (el) el.style.display = 'none';
+}
+
+// ── 1. Check URL ?key= param ──────────────────────────────────
+(function checkUrlKey() {
+  const params = new URLSearchParams(window.location.search);
+  const urlKey = params.get('key');
+  if (urlKey && urlKey === getApiKey()) {
+    // Remove key from URL for security (replace state)
+    const cleanUrl = window.location.pathname;
+    history.replaceState({}, document.title, cleanUrl);
+    grantAccess();
+  }
+})();
+
+// ── 2. Check existing session ─────────────────────────────────
+if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.getElementById('loginScreen');
+    if (el) el.style.display = 'none';
+  });
+}
+
+// ── 3. Password login ─────────────────────────────────────────
+function attemptLogin() {
+  const input = document.getElementById('loginPassword').value.trim();
+  const errEl = document.getElementById('loginError');
+  if (input === getAdminPassword()) {
+    grantAccess();
+    errEl.style.display = 'none';
+  } else {
+    errEl.style.display = 'block';
+    document.getElementById('loginPassword').value = '';
+    document.getElementById('loginPassword').focus();
+  }
+}
+</script>
+
 <div class="layout">
 
   <!-- ======== SIDEBAR ======== -->
@@ -609,7 +693,7 @@
         <img src="assets/store-avatar.png" alt="AFGHAN BEAUTY" style="width:100%;height:100%;object-fit:cover;border-radius:50%">
       </div>
       <div class="logo-text">
-        <h2>كوريان بيوتي</h2>
+        <h2>أفغاني بيوتي</h2>
         <span>AFGHAN BEAUTY ADMIN</span>
       </div>
     </a>
@@ -691,7 +775,7 @@
     <div class="topbar">
       <div class="topbar-title">
         <h1 id="pageTitle">لوحة الإحصائيات</h1>
-        <p id="pageSubtitle">نظرة شاملة على أداء متجر كوريان بيوتي</p>
+        <p id="pageSubtitle">نظرة شاملة على أداء متجر أفغاني بيوتي</p>
       </div>
       <div class="topbar-right">
         <div class="time-chip" id="timeBadge">--:--</div>
@@ -1428,7 +1512,7 @@
             <div class="form-group">
               <label class="form-label">رسالة الترحيب التلقائية (بعد الطلب)</label>
               <textarea class="form-textarea" id="tk-wa-msg" style="min-height:70px">أهلاً بكِ! تم استلام طلبكِ بنجاح ✅
-ُسيتم شحن طلبك خلال 24 ساعة. شكراً لثقتكِ بكوريان بيوتي 💚</textarea>
+ُسيتم شحن طلبك خلال 24 ساعة. شكراً لثقتكِ بأفغاني بيوتي 💚</textarea>
             </div>
             <button class="btn sm" style="border-color:#25D366;color:#25D366" onclick="copyWhatsAppLink()">📋 نسخ رابط WhatsApp</button>
           </div>
@@ -1472,6 +1556,62 @@
             <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             إنشاء رابط جديد
           </button>
+        </div>
+
+        <!-- ===== TAAGER API KEY CARD ===== -->
+        <div class="card" id="taager-api-card" style="margin-bottom:1.5rem;border-color:rgba(197,168,92,0.35);background:linear-gradient(135deg,rgba(197,168,92,0.06),rgba(197,168,92,0.02))">
+          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;flex-wrap:wrap">
+            <!-- Taager Logo Badge -->
+            <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid rgba(197,168,92,0.3);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <span style="font-size:1.4rem">🏪</span>
+            </div>
+            <div style="flex:1">
+              <h3 style="font-size:1rem;font-weight:900;margin-bottom:0.15rem">منصة تاجر (Taager)</h3>
+              <p style="font-size:0.78rem;color:var(--text-muted);margin:0">ربط حساب التاجر الخاص بك عبر مفتاح الـ API</p>
+            </div>
+            <div id="taager-status-badge" style="display:none;padding:0.3rem 0.9rem;border-radius:50px;font-size:0.72rem;font-weight:800;background:var(--delivered-soft);color:var(--delivered);border:1px solid rgba(129,199,132,0.3)">
+              ✅ متصل
+            </div>
+          </div>
+
+          <!-- API Key Input Row -->
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;margin-bottom:0.85rem">
+            <div style="flex:1;min-width:240px;position:relative">
+              <input type="password" id="taager-api-input"
+                class="form-input"
+                placeholder="أدخل Taager API Key هنا..."
+                style="font-family:var(--font-en);letter-spacing:0.04em;padding-left:2.75rem;direction:ltr;text-align:left"
+                oninput="taagerKeyChanged()">
+              <button onclick="toggleTaagerKeyVisibility()"
+                style="position:absolute;left:0.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-dim);padding:0;display:flex"
+                title="إظهار/إخفاء">
+                <svg id="taager-eye-icon" viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+            </div>
+            <button class="btn primary" onclick="saveTaagerKey()" id="taager-save-btn" style="flex-shrink:0">
+              <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              حفظ المفتاح
+            </button>
+            <button class="btn danger" onclick="clearTaagerKey()" id="taager-clear-btn" style="flex-shrink:0;display:none">
+              <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              حذف
+            </button>
+          </div>
+
+          <!-- Feedback msg -->
+          <div id="taager-msg" style="display:none;font-size:0.8rem;font-weight:700;padding:0.6rem 1rem;border-radius:8px;margin-bottom:0.85rem"></div>
+
+          <!-- Info Row -->
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
+            <a href="https://merchant.taager.com/profile/api" target="_blank" rel="noopener"
+              style="font-size:0.78rem;color:var(--primary);font-weight:700;display:flex;align-items:center;gap:0.35rem;text-decoration:none">
+              <svg viewBox="0 0 24 24" style="width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              احصل على مفتاحك من تاجر
+            </a>
+            <span style="font-size:0.72rem;color:var(--text-dim)">المفتاح محفوظ محلياً على جهازك فقط ولا يُرسل لأي خادم</span>
+          </div>
         </div>
 
         <!-- Affiliate Stats -->
@@ -1647,16 +1787,16 @@
             <p>تعديل العناوين والنصوص الرئيسية التي تظهر للزوار</p>
             <div class="form-group">
               <label class="form-label">عنوان المنتج الرئيسي</label>
-              <input type="text" class="form-input" id="txt-ar-hero-title" value="RETINAL SHOT — معزز شد البشرة وشد التجاعيد">
+              <input type="text" class="form-input" id="txt-ar-hero-title" value="زيت الأفغاني الأصلي الذهبي — سر الكثافة والنعومة الشرقية">
             </div>
             <div class="form-group">
               <label class="form-label">وصف المنتج في الهيرو</label>
-              <textarea class="form-textarea" id="txt-ar-hero-desc">التركيبة السريرية الأسرع بـ 10 أضعاف من الريتينول التقليدي. يدمج 0.1% ريتينال نقي، 3% ببتيد الماتريكسيل، و1% بانثينول لشد فوري للبشرة المترهلة.</textarea>
+              <textarea class="form-textarea" id="txt-ar-hero-desc">التركيبة التقليدية المعززة بالزيوت الطبيعية لإنبات وتكثيف الشعر ومنع التساقط نهائياً للرجال والنساء واللحية. تركيبة مركزة بـ 7 زيوت عشبية طبيعية 100% بدون أي مواد كيميائية أو مينوكسيديل.</textarea>
             </div>
             <div class="form-grid-2">
               <div class="form-group">
                 <label class="form-label">اسم المتجر</label>
-                <input type="text" class="form-input" id="txt-ar-store-name" value="كوريان بيوتي">
+                <input type="text" class="form-input" id="txt-ar-store-name" value="أفغاني بيوتي">
               </div>
               <div class="form-group">
                 <label class="form-label">شعار العلامة (Tagline)</label>
@@ -1665,15 +1805,15 @@
             </div>
             <div class="form-group">
               <label class="form-label">نص شريط الإعلانات (الرسالة 1)</label>
-              <input type="text" class="form-input" id="txt-ar-ann1" value="معزز شد البشرة بريتينال شوت بتركيز 0.1% وماتريكسيل 3% لعلاج التجاعيد">
+              <input type="text" class="form-input" id="txt-ar-ann1" value="زيت الأفغاني الأصلي الذهبي - سر الكثافة والنعومة الشرقية لإنبات الشعر وتعبئة الفراغات">
             </div>
             <div class="form-group">
               <label class="form-label">نص شريط الإعلانات (الرسالة 2)</label>
-              <input type="text" class="form-input" id="txt-ar-ann2" value="ضمان ذهبي 30 يوماً — استرجاع كامل إن لم تلاحظي نتائج شد البشرة">
+              <input type="text" class="form-input" id="txt-ar-ann2" value="ضمان ذهبي 30 يوماً (استرجاع كامل) إن لم تلاحظ نتائج نمو وتكثيف الشعر">
             </div>
             <div class="form-group">
               <label class="form-label">نص شريط الإعلانات (الرسالة 3)</label>
-              <input type="text" class="form-input" id="txt-ar-ann3" value="شحن سريع مبرد لكافة مناطق المملكة والدفع عند الاستلام">
+              <input type="text" class="form-input" id="txt-ar-ann3" value="شحن سريع ومجاني لكافة إمارات الدولة عند الطلب بقيمة 199 درهم أو أكثر">
             </div>
             <button class="btn primary" onclick="saveLangContent('ar')">💾 حفظ النصوص العربية</button>
           </div>
@@ -1728,7 +1868,7 @@
               </div>
               <div class="form-group">
                 <label class="form-label">انستقرام</label>
-                <input type="text" class="form-input" id="txt-contact-ig" value="@koreanbeauty.ksa">
+                <input type="text" class="form-input" id="txt-contact-ig" value="@afghanbeauty.ae">
               </div>
             </div>
             <button class="btn primary" onclick="saveContactInfo()">💾 حفظ معلومات التواصل</button>
@@ -1742,11 +1882,11 @@
             <div class="form-grid-2">
               <div class="form-group">
                 <label class="form-label">العنوان الرئيسي للمنتج</label>
-                <input type="text" class="form-input" id="txt-prod-title" placeholder="Retinal Shot — معزز شد البشرة وتجديد الخلايا العميق بالريتينال النقي">
+                <input type="text" class="form-input" id="txt-prod-title" placeholder="زيت الأفغاني الأصلي الذهبي (Golden Afghan Oil)">
               </div>
               <div class="form-group">
                 <label class="form-label">العنوان في مسار التنقل (Breadcrumb)</label>
-                <input type="text" class="form-input" id="txt-prod-breadcrumb" placeholder="معزز شد البشرة ريتينال شوت">
+                <input type="text" class="form-input" id="txt-prod-breadcrumb" placeholder="زيت الأفغاني الأصلي الذهبي">
               </div>
               <div class="form-group">
                 <label class="form-label">نص عدد التقييمات</label>
@@ -1755,13 +1895,13 @@
             </div>
             <div class="form-group">
               <label class="form-label">الوصف القصير للمنتج (أسفل العروض)</label>
-              <textarea class="form-textarea" id="txt-prod-short-desc" rows="3" placeholder="الريتينال شوت هو معزز شد البشرة الأول بتركيز ريتينال مستقر 0.1%..."></textarea>
+              <textarea class="form-textarea" id="txt-prod-short-desc" rows="3" placeholder="التركيبة التقليدية المعززة بالزيوت الطبيعية لإنبات وتكثيف الشعر ومنع التساقط"></textarea>
             </div>
 
             <h4 style="margin-top:1.5rem;color:var(--primary);border-bottom:1px solid var(--border-light);padding-bottom:0.5rem">2. تبويب الوصف والفوائد</h4>
             <div class="form-group">
               <label class="form-label">عنوان قسم الوصف</label>
-              <input type="text" class="form-input" id="txt-prod-desc-title" placeholder="ما الذي يميز ريتينال شوت؟">
+              <input type="text" class="form-input" id="txt-prod-desc-title" placeholder="ما الذي يميز زيت الأفغاني الأصلي الذهبي؟">
             </div>
             <div class="form-group">
               <label class="form-label">نص قسم الوصف الرئيسي</label>
@@ -1813,8 +1953,8 @@
             <div style="display:flex;flex-direction:column;gap:1rem">
               <div style="border:1px solid var(--border-light);padding:1rem;border-radius:10px">
                 <strong style="display:block;margin-bottom:0.5rem">السؤال الأول</strong>
-                <input type="text" class="form-input" id="txt-prod-faq-1-q" placeholder="هل ريتينال شوت مناسب للبشرة الحساسة؟" style="margin-bottom:0.5rem">
-                <textarea class="form-textarea" id="txt-prod-faq-1-a" rows="2" placeholder="نعم، تصميم الريتينال شوت يراعي البشرة الحساسة بشكل خاص..."></textarea>
+                <input type="text" class="form-input" id="txt-prod-faq-1-q" placeholder="هل زيت الأفغاني الأصلي مناسب لجميع أنواع الشعر؟" style="margin-bottom:0.5rem">
+                <textarea class="form-textarea" id="txt-prod-faq-1-a" rows="2" placeholder="نعم، زيت الأفغاني الأصلي هو منتج طبيعي 100% يناسب جميع أنواع الشعر واللحية."></textarea>
               </div>
               <div style="border:1px solid var(--border-light);padding:1rem;border-radius:10px">
                 <strong style="display:block;margin-bottom:0.5rem">السؤال الثاني</strong>
@@ -1829,7 +1969,7 @@
               <div style="border:1px solid var(--border-light);padding:1rem;border-radius:10px">
                 <strong style="display:block;margin-bottom:0.5rem">السؤال الرابع</strong>
                 <input type="text" class="form-input" id="txt-prod-faq-4-q" placeholder="هل يمكن استخدامه أثناء الحمل والرضاعة؟" style="margin-bottom:0.5rem">
-                <textarea class="form-textarea" id="txt-prod-faq-4-a" rows="2" placeholder="لا يُنصح باستخدام الريتينال بأي شكل أثناء الحمل والرضاعة..."></textarea>
+                <textarea class="form-textarea" id="txt-prod-faq-4-a" rows="2" placeholder="لا، لأن زيت الأفغاني الذهبي يغذي البصيلات ويعالج مشاكل الشعر من الجذور بطريقة طبيعية وخالٍ تماماً من المينوكسيديل."></textarea>
               </div>
               <div style="border:1px solid var(--border-light);padding:1rem;border-radius:10px">
                 <strong style="display:block;margin-bottom:0.5rem">السؤال الخامس</strong>
@@ -1901,11 +2041,11 @@
             <p>Edit main headings and texts shown to visitors in English</p>
             <div class="form-group">
               <label class="form-label">Main Product Title (EN)</label>
-              <input type="text" class="form-input" id="txt-en-hero-title" value="RETINAL SHOT — Skin Tightening Booster">
+              <input type="text" class="form-input" id="txt-en-hero-title" value="GOLDEN AFGHAN OIL — Hair Growth & Density Booster">
             </div>
             <div class="form-group">
               <label class="form-label">Product Description (EN)</label>
-              <textarea class="form-textarea" id="txt-en-hero-desc">The clinical formula 10x faster than traditional retinol. Combines 0.1% pure retinal, 3% Matrixyl peptide, and 1% Panthenol for immediate firming of sagging skin.</textarea>
+              <textarea class="form-textarea" id="txt-en-hero-desc">The traditional formula enriched with natural oils to stimulate hair growth, stop hair loss, and fill beard gaps for men and women.</textarea>
             </div>
             <div class="form-grid-2">
               <div class="form-group">
@@ -1919,11 +2059,11 @@
             </div>
             <div class="form-group">
               <label class="form-label">Announcement Bar Text 1 (EN)</label>
-              <input type="text" class="form-input" id="txt-en-ann1" value="Retinal Shot Booster with 0.1% Retinal & 3% Matrixyl for wrinkle treatment">
+              <input type="text" class="form-input" id="txt-en-ann1" value="Golden Afghan Oil - Original Saudi Afghan oil for hair thickness and volume">
             </div>
             <div class="form-group">
               <label class="form-label">Announcement Bar Text 2 (EN)</label>
-              <input type="text" class="form-input" id="txt-en-ann2" value="30-Day Gold Guarantee — Full refund if you don't see firming results">
+              <input type="text" class="form-input" id="txt-en-ann2" value="30-Day Gold Guarantee — Full refund if you don't notice hair growth results">
             </div>
             <button class="btn" style="background:var(--primary);color:var(--bg-dark);border:none" onclick="saveLangContent('en')">💾 Save English Texts</button>
           </div>
@@ -1967,17 +2107,17 @@
           <p>النصوص التي تظهر في نتائج البحث Google</p>
           <div class="form-group">
             <label class="form-label">عنوان الصفحة (Title Tag) — الحد الأقصى 60 حرف</label>
-            <input type="text" class="form-input" id="seo-title" value="كوريان بيوتي | AFGHAN BEAUTY · معزز شد البشرة ريتينال شوت" maxlength="80">
+            <input type="text" class="form-input" id="seo-title" value="أفغاني بيوتي | AFGHAN BEAUTY · زيت الأفغاني الأصلي الذهبي" maxlength="80">
             <div id="seo-title-count" style="font-size:0.7rem;color:var(--text-dim);margin-top:4px;text-align:left">0 / 60</div>
           </div>
           <div class="form-group">
             <label class="form-label">وصف الصفحة (Meta Description) — الحد الأقصى 160 حرف</label>
-            <textarea class="form-textarea" id="seo-desc" maxlength="200">احصلي على بشرة مشدودة خالية من التجاعيد مع معزز شد البشرة ريتينال شوت بتركيز ريتينال 0.1% وماتريكسيل 3%.</textarea>
+            <textarea class="form-textarea" id="seo-desc" maxlength="200">احصل على شعر كثيف وصحي مع زيت الأفغاني الأصلي الذهبي. علاج طبيعي فعال لتساقط الشعر وتعبئة الفراغات للرجال والنساء واللحية.</textarea>
             <div id="seo-desc-count" style="font-size:0.7rem;color:var(--text-dim);margin-top:4px;text-align:left">0 / 160</div>
           </div>
           <div class="form-group">
             <label class="form-label">الكلمات المفتاحية (Keywords)</label>
-            <input type="text" class="form-input" id="seo-keywords" value="AFGHAN BEAUTY, ريتينال شوت, شد البشرة, تجاعيد, Retinal Shot">
+            <input type="text" class="form-input" id="seo-keywords" value="AFGHAN BEAUTY, زيت الأفغاني الأصلي, علاج تساقط الشعر, إنبات الفراغات, تكثيف اللحية">
           </div>
           <button class="btn primary" onclick="saveSeoSettings()">💾 حفظ إعدادات SEO</button>
         </div>
@@ -2036,23 +2176,80 @@
         <!-- Store Settings -->
         <div class="setting-card">
           <h3>🏪 إعدادات المتجر</h3>
-          <p>الإعدادات الأساسية لمتجر كوريان بيوتي</p>
+          <p>الإعدادات الأساسية لمتجر أفغاني بيوتي</p>
           <div class="toggle-wrap">
-            <div class="toggle-info"><h4>الدفع عند الاستلام (COD)</h4><p>تفعيل خيار الدفع النقدي عند التسليم</p></div>
-            <button class="toggle on" id="toggle-cod" onclick="this.classList.toggle('on')"></button>
+            <div class="toggle-info"><h4>الدفع عند الاستلام (COD) فقط</h4><p>تفعيل خيار الدفع النقدي عند التسليم كخيار وحيد في المتجر</p></div>
+            <button class="toggle on" id="toggle-cod" onclick="this.classList.toggle('on')" style="pointer-events:none"></button>
           </div>
           <div class="toggle-wrap">
-            <div class="toggle-info"><h4>الشحن المبرد المجاني</h4><p>مجاني للطلبات فوق 300 ر.س</p></div>
+            <div class="toggle-info"><h4>الشحن المبرد المجاني</h4><p>مجاني لجميع الطلبات كجزء من الهوية الجديدة</p></div>
             <button class="toggle on" id="toggle-shipping" onclick="this.classList.toggle('on')"></button>
-          </div>
-          <div class="toggle-wrap">
-            <div class="toggle-info"><h4>خصم الدفع الإلكتروني 10%</h4><p>منح خصم 10% عند الدفع ببطاقة</p></div>
-            <button class="toggle on" id="toggle-card-disc" onclick="this.classList.toggle('on')"></button>
           </div>
           <div class="toggle-wrap">
             <div class="toggle-info"><h4>مؤقت العروض</h4><p>إظهار عداد الوقت على صفحة المنتج</p></div>
             <button class="toggle on" id="toggle-timer" onclick="this.classList.toggle('on')"></button>
           </div>
+        </div>
+
+        <!-- Store Password Security Settings -->
+        <div class="setting-card">
+          <h3>🔐 أمان لوحة التحكم</h3>
+          <p>تعديل كلمة مرور الدخول للوحة التحكم (الافتراضية: admin123)</p>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">كلمة المرور الحالية</label>
+              <input type="password" class="form-input" id="s-curr-pass" placeholder="أدخل كلمة المرور الحالية">
+            </div>
+            <div class="form-group">
+              <label class="form-label">كلمة المرور الجديدة</label>
+              <input type="password" class="form-input" id="s-new-pass" placeholder="أدخل كلمة المرور الجديدة">
+            </div>
+          </div>
+          <button class="btn primary" onclick="changeAdminPassword()">🔑 تحديث كلمة المرور</button>
+          <div id="pass-msg" style="display:none;margin-top:0.75rem;font-size:0.82rem;font-weight:700"></div>
+        </div>
+
+        <!-- API Key Settings -->
+        <div class="setting-card" id="api-key-card">
+          <h3>🗝️ مفتاح API للدخول المباشر</h3>
+          <p>استخدم هذا الرابط السري للدخول لوحة التحكم مباشرةً بدون كلمة مرور</p>
+
+          <!-- Key Display -->
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem;font-family:var(--font-en);direction:ltr;">
+            <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.4rem;font-family:var(--font-ar);direction:rtl">مفتاح الـ API</div>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <code id="api-key-display" style="flex:1;font-size:0.85rem;color:var(--primary);letter-spacing:0.05em;word-break:break-all">جاري التحميل...</code>
+              <button class="btn sm" id="api-key-toggle-btn" onclick="toggleApiKeyVisibility()" title="إظهار/إخفاء" style="flex-shrink:0">
+                <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Direct URL -->
+          <div style="background:var(--surface);border:1px solid var(--border-light);border-radius:var(--radius-sm);padding:1rem;margin-bottom:1rem;font-family:var(--font-en);direction:ltr;">
+            <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:0.4rem;font-family:var(--font-ar);direction:rtl">رابط الدخول المباشر</div>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <code id="api-url-display" style="flex:1;font-size:0.75rem;color:var(--text-muted);word-break:break-all;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">...</code>
+              <button class="btn sm primary" onclick="copyApiUrl()" title="نسخ الرابط" style="flex-shrink:0">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                نسخ
+              </button>
+            </div>
+          </div>
+
+          <div id="api-key-msg" style="display:none;margin-bottom:0.75rem;font-size:0.82rem;font-weight:700;padding:0.6rem 1rem;border-radius:8px;"></div>
+
+          <div class="btn-row">
+            <button class="btn primary" onclick="copyApiUrl()">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              نسخ رابط الدخول
+            </button>
+            <button class="btn danger" onclick="regenerateApiKey()">
+              <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+              تجديد المفتاح
+            </button>
+          </div>
+          <p style="font-size:0.72rem;color:var(--text-dim);margin-top:0.75rem;">⚠️ احتفظ بهذا الرابط سراً. من يملكه يستطيع الدخول لوحة التحكم مباشرةً.</p>
         </div>
 
         <!-- Shipping Settings -->
@@ -2083,7 +2280,7 @@
             </div>
             <div style="display:flex;justify-content:space-between;font-size:0.85rem">
               <span style="color:var(--text-muted)">المتجر</span>
-              <span style="font-weight:700">كوريان بيوتي AFGHAN BEAUTY</span>
+              <span style="font-weight:700">أفغاني بيوتي AFGHAN BEAUTY</span>
             </div>
             <div style="display:flex;justify-content:space-between;font-size:0.85rem">
               <span style="color:var(--text-muted)">قاعدة البيانات</span>
@@ -2173,120 +2370,7 @@
   <div class="modal" style="max-width:850px;width:90%;max-height:90vh;display:flex;flex-direction:column">
     <div class="modal-header">
       <h3 id="productModalTitle">إضافة منتج جديد</h3>
-      <button class="modal-close" onclick="closeModal('productModal')"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    
-    <!-- Modal Navigation Tabs -->
-    <div style="display:flex;gap:0.75rem;padding:0.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface-light);overflow-x:auto">
-      <button class="btn sm modal-tab-btn active" onclick="switchModalTab(event, 'modalTabBasic')" style="border-radius:8px">الأساسيات والأسعار</button>
-      <button class="btn sm modal-tab-btn" onclick="switchModalTab(event, 'modalTabDesc')" style="border-radius:8px">الوصف والتفاصيل</button>
-      <button class="btn sm modal-tab-btn" onclick="switchModalTab(event, 'modalTabUseFaq')" style="border-radius:8px">الاستخدام والأسئلة</button>
-      <button class="btn sm modal-tab-btn" onclick="switchModalTab(event, 'modalTabGallery')" style="border-radius:8px">معرض الصور</button>
-    </div>
-
-    <div class="modal-body" style="flex:1;overflow-y:auto;padding:1.5rem">
-      <input type="hidden" id="pm-id">
-      
-      <!-- Tab 1: Basic & Prices -->
-      <div id="modalTabBasic" class="modal-tab-panel">
-        <div class="form-group">
-          <label class="form-label">اسم المنتج *</label>
-          <input type="text" class="form-input" id="pm-name" placeholder="مثال: معزز شد البشرة ريتينال شوت">
-        </div>
-        <div class="form-group">
-          <label class="form-label">عنوان فرعي / لمحة سريعة</label>
-          <input type="text" class="form-input" id="pm-subtitle" placeholder="مثال: معزز شد البشرة وتجديد الخلايا العميق بالريتينال النقي">
-        </div>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">سعر البيع الحالي (ر.س) *</label>
-            <input type="number" class="form-input" id="pm-price" min="1">
-          </div>
-          <div class="form-group">
-            <label class="form-label">السعر القديم / الأصلي (ر.س)</label>
-            <input type="number" class="form-input" id="pm-old-price" placeholder="اتركه فارغاً إن لم يكن هناك خصم">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الحجم / السعة</label>
-            <input type="text" class="form-input" id="pm-unit" placeholder="مثال: 30 مل أو 50 مل">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الحالة</label>
-            <select class="form-select" id="pm-status">
-              <option value="active">نشط (يظهر في المتجر)</option>
-              <option value="draft">مسودة (مخفي)</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab 2: Detailed Descriptions -->
-      <div id="modalTabDesc" class="modal-tab-panel" style="display:none">
-        <div class="form-group">
-          <label class="form-label">عنوان تبويب الوصف</label>
-          <input type="text" class="form-input" id="pm-desc-title" placeholder="ما الذي يميز هذا المنتج؟">
-        </div>
-        <div class="form-group">
-          <label class="form-label">النص الرئيسي للوصف</label>
-          <textarea class="form-textarea" id="pm-desc-body" rows="3" placeholder="اكتب هنا تفاصيل المنتج وتأثيره..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">النقاط الإضافية / الفوائد (نقطة واحدة في كل سطر)</label>
-          <textarea class="form-textarea" id="pm-desc-bullets" rows="4" placeholder="✦ الفائدة الأولى للمنتج&#10;✦ الفائدة الثانية للمنتج..."></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">عنوان فئة الاستخدام / لمن هو مناسب؟</label>
-          <input type="text" class="form-input" id="pm-target-title" placeholder="لمن هو مناسب؟">
-        </div>
-        <div class="form-group">
-          <label class="form-label">نقاط فئة الاستخدام (نقطة واحدة في كل سطر)</label>
-          <textarea class="form-textarea" id="pm-target-list" rows="4" placeholder="✔ البشرة التي تعاني من التجاعيد&#10;✔ مناسب لجميع أنواع البشرة..."></textarea>
-        </div>
-      </div>
-
-      <!-- Tab 3: Usage Steps & FAQ -->
-      <div id="modalTabUseFaq" class="modal-tab-panel" style="display:none">
-        <h4 style="color:var(--primary);margin-bottom:0.75rem;border-bottom:1px solid var(--border-light);padding-bottom:0.25rem">طريقة الاستخدام (3 خطوات)</h4>
-        <div class="form-grid-2">
-          <div class="form-group">
-            <label class="form-label">الخطوة 1: العنوان</label>
-            <input type="text" class="form-input" id="pm-howto-1-title" placeholder="الخطوة الأولى">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الخطوة 1: الشرح</label>
-            <input type="text" class="form-input" id="pm-howto-1-desc" placeholder="شرح طريقة التطبيق...">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الخطوة 2: العنوان</label>
-            <input type="text" class="form-input" id="pm-howto-2-title" placeholder="الخطوة الثانية">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الخطوة 2: الشرح</label>
-            <input type="text" class="form-input" id="pm-howto-2-desc" placeholder="شرح الخطوة الثانية...">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الخطوة 3: العنوان</label>
-            <input type="text" class="form-input" id="pm-howto-3-title" placeholder="الخطوة الثالثة">
-          </div>
-          <div class="form-group">
-            <label class="form-label">الخطوة 3: الشرح</label>
-            <input type="text" class="form-input" id="pm-howto-3-desc" placeholder="شرح الخطوة الثالثة...">
-          </div>
-        </div>
-
-        <h4 style="color:var(--primary);margin-top:1.5rem;margin-bottom:0.75rem;border-bottom:1px solid var(--border-light);padding-bottom:0.25rem">الأسئلة الشائعة (5 أسئلة وأجوبة)</h4>
-        <div style="display:flex;flex-direction:column;gap:0.75rem">
-          <div style="border:1px solid var(--border-light);padding:0.75rem;border-radius:10px">
-            <strong style="font-size:0.8rem">سؤال 1</strong>
-            <input type="text" class="form-input" id="pm-faq-1-q" placeholder="السؤال" style="margin-bottom:0.35rem;font-size:0.8rem;padding:0.4rem">
-            <textarea class="form-textarea" id="pm-faq-1-a" rows="2" placeholder="الإجابة" style="font-size:0.8rem;padding:0.4rem"></textarea>
-          </div>
-          <div style="border:1px solid var(--border-light);padding:0.75rem;border-radius:10px">
-            <strong style="font-size:0.8rem">سؤال 2</strong>
-            <input type="text" class="form-input" id="pm-faq-2-q" placeholder="السؤال" style="margin-bottom:0.35rem;font-size:0.8rem;padding:0.4rem">
-            <textarea class="form-textarea" id="pm-faq-2-a" rows="2" placeholder="الإجابة" style="font-size:0.8rem;padding:0.4rem"></textarea>
-          </div>
-          <div style="border:1px solid var(--border-light);padding:0.75rem;border-radius:10px">
+      <          <div style="border:1px solid var(--border-light);padding:0.75rem;border-radius:10px">
             <strong style="font-size:0.8rem">سؤال 3</strong>
             <input type="text" class="form-input" id="pm-faq-3-q" placeholder="السؤال" style="margin-bottom:0.35rem;font-size:0.8rem;padding:0.4rem">
             <textarea class="form-textarea" id="pm-faq-3-a" rows="2" placeholder="الإجابة" style="font-size:0.8rem;padding:0.4rem"></textarea>
@@ -2384,109 +2468,109 @@ let products = {};
 const defaultProducts = {
   1: {
     id: 1,
-    name: 'معزز شد البشرة ريتينال شوت (Retinal Shot)',
-    subtitle: 'معزز شد البشرة وتجديد الخلايا العميق بالريتينال النقي 0.1%',
-    price: 199,
-    oldPrice: 299,
+    name: 'زيت الأفغاني الأصلي الذهبي (Golden Afghan Oil)',
+    subtitle: 'التركيبة التقليدية المعززة بالزيوت الطبيعية لإنبات وتكثيف الشعر ومنع التساقط',
+    price: 129,
+    oldPrice: 249,
     qty: 1,
-    unit: '30 مل',
+    unit: '250 مل',
     status: 'active',
     freeShipping: false,
-    image: 'assets/retinal-shot.png',
-    desc_title: 'ما الذي يميز ريتينال شوت؟',
-    desc_body: 'معظم منتجات الريتينول المتاحة تعتمد على الريتينول التقليدي الذي يحتاج إلى تحولين كيميائيين قبل أن يصبح فعالاً داخل الخلية. الريتينال (Retinal/Retinaldehyde) يحتاج فقط إلى خطوة واحدة، مما يعني فعالية أسرع بـ 10 أضعاف وتهيجاً أقل من الريتينويك اسيد الموصوف طبياً.',
-    desc_bullets: '✦ يقلل عمق التجاعيد وخطوط التعبير بنسبة تصل إلى 45% في 8 أسابيع\n✦ يحسن نسيج البشرة ويوحد لونها مع تقليص المسامات الواسعة\n✦ يعزز كثافة الجلد وإيلاستيسيته من خلال تحفيز الكولاجين والإيلاستين\n✦ يحارب التصبغات والبقع الداكنة بتسريع دوران الخلايا الجلدية\n✦ البانثينول يمنع أي تقشر أو جفاف مصاحب لعلاج الريتينال',
+    image: 'assets/afghan-oil.png',
+    desc_title: 'ما الذي يميز زيت الأفغاني الأصلي الذهبي؟',
+    desc_body: 'مستخلص من أجود بذور نبتة القنب الطبيعية، معزز بـ 7 زيوت عشبية شرقية مركزة. يعمل على اختراق الفروة مباشرة لتنشيط البصيلات الخاملة، إيقاف التساقط نهائياً، وتعبئة الفراغات للرجال والنساء بطريقة طبيعية آمنة تماماً وخالية من المينوكسيديل.',
+    desc_bullets: '✦ يوقف تساقط الشعر بنسبة 95% خلال الأسبوعين الأولين من الاستخدام\n✦ ينبت الشعر في الفراغات والصلع غير الوراثي ويعيد ملء خط الشعر\n✦ يزيد طول الشعر بشكل ملحوظ بمعدل 3-5 سم شهرياً\n✦ يغذي الفروة ويقضي على القشرة والجفاف المسبب لضعف البصيلات\n✦ طبيعي 100% وخالٍ من المينوكسيديل أو أي مواد كيميائية ضارة',
     target_title: 'لمن هو مناسب؟',
-    target_list: '✔ من تعاني من تجاعيد التعبير حول العيون، الجبهة، والفم الناجمة عن تكرار الحركة.\n✔ من تعاني من البشرة المترهلة وفقدان الحيوية وتريد شداً طبيعياً دون إبر أو إجراءات.\n✔ من تجاوزت سن 25 وترغب في الوقاية المبكرة من الشيخوخة الجلدية.\n✔ البشرة الحساسة التي فشلت مع منتجات الريتينول التقليدية ذات التهيج الشديد.',
-    howto_1_title: 'غسيل البشرة بمنظف لطيف',
-    howto_1_desc: 'جففي وجهك تجفيفاً كاملاً قبل التطبيق. الرطوبة تزيد من احتمالية التهيج.',
-    howto_2_title: 'ضعي كمية صغيرة كحبة البازلاء',
-    howto_2_desc: 'كمية صغيرة تكفي للوجه كاملاً. وزعيها بلطف بأطراف الأصابع بعيداً عن منطقة العين المباشرة.',
-    howto_3_title: 'أتبعي بمرطب غني ليلي',
-    howto_3_desc: 'أضف طبقة مرطب بعد دقيقتين من تطبيق المعزز لقفل الرطوبة وزيادة الترطيب الليلي.',
-    faq_1_q: 'هل ريتينال شوت مناسب للبشرة الحساسة؟',
-    faq_1_a: 'نعم، تصميم الريتينال شوت يراعي البشرة الحساسة بشكل خاص. البانثينول بتركيز 1% يعمل كدرع مهدئ يقلل من احمرار وتقشر جلد الريتينال التقليدي. ننصح بالبدء بمرتين أسبوعياً وزيادة التدريج تدريجياً.',
-    faq_2_q: 'متى سأرى نتائج ملموسة؟',
-    faq_2_a: 'معظم المستخدمات يلاحظن تحسناً في نسيج البشرة ونعومتها بعد 2-3 أسابيع. للتجاعيد العميقة والشد الواضح، الدراسات السريرية تشير إلى 4-8 أسابيع من الاستخدام المنتظم لنتائج مرئية ومستدامة.',
-    faq_3_q: 'هل يمكن استخدامه مع منتجات أخرى في نفس الوقت؟',
-    faq_3_a: 'يُنصح بعدم دمجه مع الأحماض القوية (AHA/BHA/AHAs) في نفس الليلة لتجنب التهيج. يمكن استخدامه مع: سيروم الهيالورونيك اسيد (قبله)، المرطبات الغنية (بعده)، وواقي الشمس صباحاً (ضروري جداً).',
-    faq_4_q: 'هل يمكن استخدامه أثناء الحمل والرضاعة؟',
-    faq_4_a: 'لا يُنصح باستخدام الريتينال بأي شكل أثناء الحمل والرضاعة. هذه توصية طبية عامة لجميع منتجات الريتينويدات. يُنصح بالتواصل مع طبيبة الجلدية أو الطبيب المعالج قبل الاستخدام في هذه المراحل.',
-    faq_5_q: 'ما سياسة الاسترجاع والضمان؟',
-    faq_5_a: 'نقدم ضماناً ذهبياً لمدة 30 يوماً من تاريخ الاستلام. إن لم تلاحظي أي تحسن ملموس في بشرتكِ خلال هذه المدة عند الاستخدام الصحيح، سنعيد ثمن الطلب كاملاً دون أي أسئلة أو شروط معقدة.',
-    gallery_tube: '',
+    target_list: '✔ النساء اللواتي يعانين من تساقط الشعر الشديد والتلف الناتج عن مياه الإمارات الكلسية (Hard Water).\n✔ الرجال الذين يعانون من الفراغات وتراجع خط الشعر أو ضعف اللحية.\n✔ أصحاب الشعر الباهت والجاف الذي يحتاج إلى لمعان ونعومة فائقة.\n✔ الأطفال فوق سن 3 سنوات لتكثيف وتنعيم الشعر بأمان تام.',
+    howto_1_title: 'توزيع قطرات مناسبة على الفروة',
+    howto_1_desc: 'ضعي كمية كافية من الزيت على فروة رأس جافة أو رطبة مع التركيز على مناطق الفراغات والتساقط.',
+    howto_2_title: 'التدليك اللطيف بأطراف الأصابع',
+    howto_2_desc: 'دلكي الفروة بحركات دائرية هادئة لمدة 5 دقائق لتنشيط الدورة الدموية ومساعدة البصيلات على الامتصاص.',
+    howto_3_title: 'الترك والغسيل بالشامبو',
+    howto_3_desc: 'اتركي الزيت على الشعر لمدة 2 إلى 3 ساعات، ثم اغسليه جيداً باستخدام شامبو الأفغاني الأصلي المطور.',
+    faq_1_q: 'هل زيت الأفغاني الأصلي مناسب لجميع أنواع الشعر؟',
+    faq_1_a: 'نعم، زيت الأفغاني الأصلي هو منتج طبيعي 100% يناسب جميع أنواع الشعر (الجاف، الدهني، المصبوغ، والعادي) واللحية. تركيبته متوازنة لتغذية بصيلات الشعر دون سد مسام فروة الرأس.',
+    faq_2_q: 'متى تظهر نتائج إنبات وتكثيف الشعر؟',
+    faq_2_a: 'تلاحظ معظم العميلات والعملاء توقفاً ملحوظاً في تساقط الشعر وزيادة في النعومة خلال أول 10 إلى 14 يوماً. أما بالنسبة لإنبات الفراغات وتكثيف الشعر واللحية بشكل كامل، تظهر النتائج الواضحة خلال 4 إلى 8 أسابيع من الاستخدام المنتظم.',
+    faq_3_q: 'هل يعود الشعر للتساقط بعد التوقف عن استخدام الزيت؟',
+    faq_3_a: 'لا، لأن زيت الأفغاني الذهبي يغذي البصيلات ويعالج مشاكل الشعر من الجذور بطريقة طبيعية وخالٍ تماماً من المينوكسيديل. عندما تصل للنتيجة المطلوبة وتتوقف عن الاستخدام، لن يتساقط شعرك طالما تحافظ على روتين تغذية صحي وتتجنب العوامل الضارة.',
+    faq_4_q: 'كيف أضمن أن الزيت أصلي وليس مقلداً؟',
+    faq_4_a: 'منتجنا هو زيت الأفغاني الأصلي السعودي المرخص والمطابق للمواصفات، ويأتي بختم الضمان الذهبي والعلامة المائية الموثقة. كما نقدم ضماناً ذهبياً: إن لم تلاحظ أي نتائج ملموسة خلال 30 يوماً، يمكنك استرجاع أموالك بالكامل.',
+    faq_5_q: 'ما هي طريقة الاستخدام المثالية للشعر واللحية؟',
+    faq_5_a: 'للشعر: توضع قطرات مناسبة على الفروة مع التدليك لمدة 5 دقائق، ويترك من 2 إلى 3 ساعات ثم يغسل بشامبو الأفغاني الأصلي. يستخدم 3 مرات أسبوعياً. للحية: توضع قطرات بسيطة يومياً على الفراغات مع تدليك خفيف مساءً ولا داعي لغسله فوراً لسرعة امتصاصه الفائقة.',
+    gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
     gallery_formula: ''
   },
   2: {
     id: 2,
-    name: 'كريم شد وتغذية البشرة بالكولاجين (Collagen Cream)',
-    subtitle: 'كريم الكولاجين الغني لإعادة مرونة الجلد المترهل ومكافحة التجاعيد بنسبة 35%',
-    price: 239,
-    oldPrice: 349,
+    name: 'شامبو الأفغاني الأصلي المنشط (Afghan Shampoo)',
+    subtitle: 'الشامبو العشبي الخالي من السلفات والبارابين لتنظيف الفروة وتنشيط الجذور',
+    price: 99,
+    oldPrice: 149,
     qty: 1,
-    unit: '50 مل',
+    unit: '300 مل',
     status: 'active',
-    freeShipping: true,
-    image: 'assets/collagen-cream.png',
-    desc_title: 'ما الذي يميز كريم الكولاجين المطور؟',
-    desc_body: 'يحتوي كريم الكولاجين على جزيئات كولاجين بحري متناهية الصغر يمتصها الجلد بفعالية 5 أضعاف مقارنة بالكولاجين العادي. يساعد على ملء الخطوط الدقيقة وتغذية البشرة بعمق طوال الليل لإطلالة مشدودة ونضرة في الصباح.',
-    desc_bullets: '✦ يعزز كثافة البشرة ويقلل الترهل بنسبة 35% في 4 أسابيع\n✦ يغذي البشرة بعمق بفضل الدهون الطبيعية المتطابقة مع خلايا الجلد\n✦ يدعم مرونة الجلد ويوفر ترطيباً مستمراً لمدة 48 ساعة\n✦ خفيف القوام ويمتص بسرعة بدون ترك أي طبقة دهنية مزعجة\n✦ تركيبة غنية بالببتيدات والأحماض الأمينية المغذية للبشرة المجهدة',
-    target_title: 'لمن هو مناسب هذا الكريم؟',
-    target_list: '✔ من تعاني من فقدان مرونة الجلد وترهل الوجنتين والرقبة.\n✔ البشرة الجافة والجافة جداً التي تحتاج إلى تغذية عميقة ومستدامة.\n✔ من تبحث عن كريم مغذي ليلي وقائي ضد علامات تقدم السن.\n✔ جميع أنواع البشرة المجهدة والتالفة بفعل العوامل البيئية.',
-    howto_1_title: 'تنظيف البشرة بلطف',
-    howto_1_desc: 'اغسلي وجهك جيداً باستخدام الغسول المعتاد وربتي عليه بلطف ليجف تماماً.',
-    howto_2_title: 'توزيع الكريم بالتساوي',
-    howto_2_desc: 'خذي كمية مناسبة ووزعيها على الوجه والرقبة مع التدليك بحركات دائرية لأعلى.',
-    howto_3_title: 'الاستخدام اليومي المنتظم',
-    howto_3_desc: 'يُفضل استخدامه مرتين يومياً صباحاً ومساءً للحصول على أفضل نتائج علاجية ممكنة.',
-    faq_1_q: 'هل يمكن استخدامه تحت المكياج؟',
-    faq_1_a: 'نعم، يتميز الكريم بامتصاص سريع وقوام خفيف غير دهني، مما يجعله قاعدة ممتازة للترطيب قبل وضع المكياج صباحاً.',
-    faq_2_q: 'هل يحتوي على عطور صناعية؟',
-    faq_2_a: 'لا، الكريم خالٍ تماماً من العطور والصبغات الاصطناعية والمكونات الكيميائية الضارة لضمان حماية البشرة الحساسة من التهيج.',
-    faq_3_q: 'متى تبدأ النتائج بالظهور؟',
-    faq_3_a: 'ستلاحظين ترطيباً ونعومة فورية من الاستخدام الأول. أما بالنسبة لشد الترهلات الطفيف وتحسين مرونة الجلد، تظهر النتائج الواضحة خلال 3 إلى 4 أسابيع.',
-    faq_4_q: 'هل يتعارض مع سيروم الريتينال؟',
-    faq_4_a: 'بالعكس، الكولاجين والريتينال يشكلان ثنائياً ممتازاً! يُنصح بوضع سيروم الريتينال أولاً ليلاً، والانتظار لدقيقتين، ثم قفل الرطوبة والتغذية بكريم الكولاجين.',
+    freeShipping: false,
+    image: 'assets/afghan-oil.png',
+    desc_title: 'لماذا شامبو الأفغاني الأصلي؟',
+    desc_body: 'تركيبة عشبية مطهرة مدعمة بخلاصة الثوم الأسود والبروتين المغذي. يطهر الفروة من الرواسب والدهون دون تجفيفها، مما يمهد الطريق لامتصاص مثالي لزيت الأفغاني وزيادة سرعة الإنبات.',
+    desc_bullets: '✦ ينظف الفروة بعمق ويزيل القشرة والدهون المتراكمة التي تسد البصيلات\n✦ خالٍ تماماً من السلفات والسيليكون والبارابين لتجنب إجهاد الشعر والتلف\n✦ مدعم بالبيوتين والكيراتين لتقوية جذع الشعرة وحمايتها من التكسر\n✦ يزيد من كفاءة امتصاص الفروة لزيت الأفغاني بنسبة 200%\n✦ يمنح الشعر رائحة عشبية منعشة ولمعاناً طبيعياً ساحراً',
+    target_title: 'لمن هو مناسب هذا الشامبو؟',
+    target_list: '✔ من يعانون من قشرة الرأس والدهون الزائدة التي تخنق البصيلات.\n✔ أصحاب الشعر التالف والمصبوغ الذي يحتاج لشامبو خالي من المواد الكيميائية القاسية.\n✔ كخطوة أساسية مطهرة قبل تطبيق زيت الأفغاني الأصلي لضمان الامتصاص.\n✔ الفروة الحساسة المعرضة للتهيج والحكة.',
+    howto_1_title: 'تطبيق الشامبو على شعر مبلل',
+    howto_1_desc: 'ضعي كمية مناسبة من الشامبو على شعر وفروة رأس مبللة بالكامل.',
+    howto_2_title: 'تدليك الفروة بلطف',
+    howto_2_desc: 'دلكي الفروة بأطراف أصابعك بلطف لمدة دقيقتين لإنتاج رغوة غنية وتنظيف المسام.',
+    howto_3_title: 'الشطف الكامل بالماء',
+    howto_3_desc: 'اشطفي شعرك جيداً بماء فاتر لضمان إزالة أي بقايا للشامبو، ثم جففيه برفق.',
+    faq_1_q: 'هل يمكن استخدامه للشعر المصبوغ؟',
+    faq_1_a: 'نعم، شامبو الأفغاني خالٍ تماماً من السلفات والكلوريد والبارابين، وهي المواد التي تسبب بهتان صبغة الشعر، لذا فهو آمن تماماً للشعر المعالج بالبروتين والمصبوغ.',
+    faq_2_q: 'هل يحتوي على روائح عطور قوية؟',
+    faq_2_a: 'لا، يتميز الشامبو برائحة عشبية خفيفة وطبيعية تماماً مستخلصة من المكونات النباتية، وتختفي الرائحة تماماً بعد شطف الشعر بالماء.',
+    faq_3_q: 'كم مرة يجب استخدامه في الأسبوع؟',
+    faq_3_a: 'يُفضل استخدامه من 2 إلى 3 مرات أسبوعياً بالتزامن مع روتين تطبيق زيت الأفغاني الأصلي للحصول على فروة نظيفة وبصيلات مستعدة للامتصاص.',
+    faq_4_q: 'هل يحتوي على مستخلص الثوم الفعلي؟',
+    faq_4_a: 'نعم، يحتوي على خلاصة الثوم الأسود المخمر الغني بالبروتينات ومضادات الأكسدة التي تقوي جذور الشعر وتمنع تساقطه دون ترك أي رائحة غير مرغوبة.',
     faq_5_q: 'ما هي بلد الصنع للمنتج؟',
-    faq_5_a: 'كافة منتجاتنا مرخصة ومصنعة في كوريا الجنوبية وفق أعلى معايير التصنيع الطبية الكورية والعالمية (GMP).',
-    gallery_tube: '',
+    faq_5_a: 'المنتج مصنع ومرخص في المملكة العربية السعودية بموجب أعلى المعايير الصحية ومطابق للمواصفات الإماراتية المعتمدة لاستيراد مستحضرات التجميل.',
+    gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
     gallery_formula: ''
   },
   3: {
     id: 3,
-    name: 'سيروم الهيالورونيك اسيد للترطيب الفائق (HA Serum)',
-    subtitle: 'سيروم الترطيب العميق لملء الخلايا بالرطوبة وحماية الحاجز الجلدي 40 مل',
-    price: 179,
-    oldPrice: 249,
+    name: 'سيروم الفراغات المكثف للحية والشارب (Beard Serum)',
+    subtitle: 'السيروم المركز لإنبات شعر الوجه وتعبئة فراغات الذقن والشارب للرجال',
+    price: 129,
+    oldPrice: 199,
     qty: 1,
-    unit: '40 مل',
+    unit: '60 مل',
     status: 'active',
     freeShipping: false,
-    image: 'assets/ha-serum.png',
-    desc_title: 'لماذا سيروم الهيالورونيك اسيد؟',
-    desc_body: 'يحتوي هذا السيروم على 5 أوزان جزيئية مختلفة من حمض الهيالورونيك للتغلغل في كافة طبقات الجلد العميقة والسطحية. يوفر ترطيباً مضاعفاً ويملأ البشرة من الداخل للحصول على مظهر صحي وممتلئ خالي من خطوط الجفاف.',
-    desc_bullets: '✦ يمنح البشرة ترطيباً مائياً فورياً ويملأ خطوط الجفاف الدقيقة\n✦ يقوي حاجز البشرة الواقي ويمنع فقدان الرطوبة الطبيعية\n✦ مدمج مع فيتامين B5 (البانثينول) لتهدئة احمرار البشرة وتلطيفها\n✦ قوام مائي منعش يمتص في ثوانٍ دون ترك أي ملمس لزج\n✦ مناسب لجميع أنواع البشرة بلا استثناء بما فيها البشرة المعرضة للحبوب',
+    image: 'assets/afghan-oil.png',
+    desc_title: 'لماذا سيروم اللحية والشارب المكثف؟',
+    desc_body: 'تركيبة خفيفة وسريعة الامتصاص مخصصة لشعر الوجه للرجال. يدمج زيت الأفغاني المركز مع مستخلص الجينسينغ وزيت الأركان لتنشيط الدورة الدموية في الخدين وتعبئة فراغات اللحية والشارب بفعالية وسرعة.',
+    desc_bullets: '✦ يعالج فراغات اللحية والشارب الناتجة عن ضعف البصيلات أو قلة النمو\n✦ يسرع نمو شعر الوجه ويزيد من سماكته وخشونته الذكورية الجذابة\n✦ قوام خفيف جداً يمتص خلال ثوانٍ ولا يترك أي ملمس دهني أو لمعة مزعجة\n✦ يرطب بشرة الوجه ويمنع الحكة والتقشر المصاحب لنمو اللحية\n✦ يحفز البصيلات النائمة لإنبات شعر جديد وقوي وبشكل متناسق',
     target_title: 'لمن يوصى باستخدام السيروم؟',
-    target_list: '✔ البشرة التي تعاني من الجفاف المزمن والتقشر والبهتان.\n✔ أصحاب البشرة الدهنية والمختلطة التي تبحث عن ترطيب خفيف ومائي بدون زيوت.\n✔ كخطوة ترطيب أساسية مصاحبة للمقشرات والأحماض القوية.\n✔ من تريد إضفاء توهج ونضارة مائية طبيعية على بشرتها.',
-    howto_1_title: 'تطبيق السيروم على بشرة رطبة قليلاً',
-    howto_1_desc: 'يفضل وضع السيروم بعد التونر أو غسل الوجه مباشرة بينما لا يزال الجلد رطباً لامتصاص أقصى للرطوبة.',
+    target_list: '✔ الرجال الذين يعانون من فراغات غير منتظمة في اللحية والشارب.\n✔ أصحاب اللحية الضعيفة أو بطيئة النمو التي تحتاج لتسريع وتكثيف.\n✔ من يبحث عن مرطب ومنعم يومي لشعر اللحية يقضي على الحكة والقشرة.\n✔ الشباب الراغبين في تنشيط نمو شعر الوجه لأول مرة بشكل متناسق.',
+    howto_1_title: 'تنظيف الوجه بالماء الدافئ',
+    howto_1_desc: 'اغسل ذقنك ووجهك بماء دافئ لفتح المسام وتنشيط الجلد قبل الاستخدام.',
     howto_2_title: 'توزيع قطرات بسيطة',
-    howto_2_desc: 'ضعي 3 إلى 4 قطرات على كامل الوجه والرقبة وربتي بلطف بأطراف أصابعك حتى يمتص تماماً.',
-    howto_3_title: 'قفل الترطيب بالمرطب',
-    howto_3_desc: 'ضعي كريم المرطب الخاص بك فوراً بعد السيروم لحجز جزيئات الماء داخل خلايا البشرة.',
-    faq_1_q: 'هل يمكن استخدامه يومياً؟',
-    faq_1_a: 'نعم، السيروم آمن ولطيف للغاية ويُنصح باستخدامه مرتين يومياً، صباحاً ومساءً، كجزء أساسي من روتين العناية اليومي.',
-    faq_2_q: 'هل يسبب ظهور الحبوب للبشرة الدهنية؟',
-    faq_2_a: 'لا، تركيبته مائية خالية تماماً من الزيوت والمكونات التي تسد المسام (Non-comedogenic)، مما يجعله مثالياً للبشرة الدهنية والمعرضة للحبوب.',
-    faq_3_q: 'ما الفرق بينه وبين مرطبات الجلد العادية؟',
-    faq_3_a: 'سيروم الهيالورونيك يخترق عمق الجلد ليرطب الخلايا داخلياً، بينما الكريمات العادية ترطب الطبقة السطحية وتمنع تبخر الماء. استخدامهما معاً يضمن ترطيباً شاملاً.',
-    faq_4_q: 'هل يمكن استخدامه مع فيتامين سي؟',
-    faq_4_a: 'نعم، دمج الهيالورونيك اسيد مع فيتامين سي في الروتيني الصباحي يمنح بشرتك نضارة وحماية مضاعفة من الأكسدة وأشعة الشمس.',
-    faq_5_q: 'هل المنتج آمن للبشرة الحساسة؟',
-    faq_5_a: 'نعم، تم اختباره سريرياً من قبل أطباء الجلدية وثبت أنه خالٍ من أي مواد تسبب تهيج أو حساسية للجلد الحساس.',
-    gallery_tube: '',
+    howto_2_desc: 'ضع 3 إلى 5 قطرات على راحة يدك ووزعها بالتساوي على مناطق الفراغات والشعر في اللحية.',
+    howto_3_title: 'التدليك الخفيف بأطراف الأصابع',
+    howto_3_desc: 'دلك بشرة الوجه تحت اللحية بلطف بحركات دائرية لمدة دقيقة. لا داعي لغسله لسرعة امتصاصه الفائقة.',
+    faq_1_q: 'هل يسبب حساسية لبشرة الوجه؟',
+    faq_1_a: 'السيروم مصمم بزيوت طبيعية لطيفة جداً مثل الأركان ومستخلص الجينسينغ. إذا كانت بشرتك شديدة الحساسية، ننصح بتجربة قطرة واحدة على جزء صغير من الرقبة والانتظار 24 ساعة.',
+    faq_2_q: 'هل يترك أثراً دهنياً أو لمعة؟',
+    faq_2_a: 'لا، السيروم خفيف للغاية وسريع الامتصاص مقارنة بالزيوت التقليدية، مما يجعله مثالياً للاستخدام اليومي والخروج دون أي لمعان دهني أو ملمس لزج.',
+    faq_3_q: 'متى تظهر نتائج تعبئة فراغات اللحية؟',
+    faq_3_a: 'تبدأ البصيلات الخاملة بالاستجابة خلال 3 إلى 4 أسابيع من الاستخدام اليومي المستمر، وتلاحظ زيادة في طول وسماكة اللحية وامتلاء الفراغات في غضون 6 إلى 8 أسابيع.',
+    faq_4_q: 'هل يمكن استخدامه للشارب أيضاً؟',
+    faq_4_a: 'بالتأكيد، السيروم آمن وفعال للاستخدام على جميع مناطق نمو شعر الوجه بما في ذلك الشارب والذقن والخدين والسوالف.',
+    faq_5_q: 'هل المنتج يحتوي على مواد هرمونية؟',
+    faq_5_a: 'لا، السيروم خفيف وطبيعي 100% ويعتمد بالكامل على مستخلصات النباتات والزيوت الطبيعية التي تحفز البصيلات بشكل فيزيولوجي آمن دون التأثير على الهرمونات.',
+    gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
     gallery_formula: ''
   }
@@ -2495,8 +2579,8 @@ const defaultProducts = {
 const productPrices = {};
 
 const STATUS_LABELS = { pending:'معلق', shipped:'تم الشحن', delivered:'تم التوصيل', cancelled:'ملغي' };
-const SAUDI_NAMES = ['أروى الحربي','شهد القحطاني','فاطمة الدوسري','نورة المطيري','سارة العتيبي','لمى الشمري','رهف الزهراني','هنا العمري','دانة السبيعي','ريم النهدي','غلا القرشي','سلمى الغامدي'];
-const SAUDI_CITIES = ['الرياض','جدة','الدمام','مكة المكرمة','المدينة المنورة','الطائف','أبها','تبوك','بريدة','خميس مشيط','حائل','الجبيل'];
+const UAE_NAMES = ['مريم السويدي','عائشة الفلاسي','فاطمة الشامسي','حمدان المنصوري','سلطان المري','شيخة الظاهري','موزة الكعبي','هزاع المهيري','شمسة الحوسني','عبد الله البلوشي','عفراء الكتبى','سيف الكندى'];
+const UAE_CITIES = ['دبي','أبوظبي','الشارقة','العين','عجمان','رأس الخيمة','الفجيرة','أم القيوين'];
 
 let revenueChartInst, statusChartInst, analyticsRevenueInst, analyticsProductInst;
 
@@ -2521,7 +2605,7 @@ function loadData() {
       products = JSON.parse(s);
       // Migration check: reset old bundle structure OR if default products have no images yet
       const noImages = products[1] && !products[1].image && products[2] && !products[2].image;
-      if (!products[2] || !products[3] || (products[2] && (products[2].name.includes('عبوتين') || products[2].name.includes('توفير') || !products[2].name.includes('كولاجين'))) || noImages) {
+      if (!products[1] || !products[1].name.includes('الأفغاني') || !products[2] || !products[2].name.includes('شامبو')) {
         products = JSON.parse(JSON.stringify(defaultProducts));
         localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
       }
@@ -2562,11 +2646,11 @@ function updateTimeBadge() {
 // NAVIGATION
 // ============================================================
 const SECTIONS = {
-  overview:   { title:'لوحة الإحصائيات', sub:'نظرة شاملة على أداء متجر كوريان بيوتي' },
+  overview:   { title:'لوحة الإحصائيات', sub:'نظرة شاملة على أداء متجر أفغاني بيوتي' },
   orders:     { title:'إدارة الطلبات', sub:'متابعة وتحديث حالات الطلبات الواردة' },
   customers:  { title:'قاعدة العملاء', sub:'تحليل العملاء وتتبع قيمتهم الشاملة' },
   tracking:   { title:'تتبع الشحنات', sub:'متابعة حالة الشحن والتوصيل' },
-  products:   { title:'إدارة المنتجات والصور', sub:'تعديل أسعار وصور ومعلومات حزم ريتينال شوت' },
+  products:   { title:'إدارة المنتجات والصور', sub:'تعديل أسعار وصور ومعلومات منتجات أفغاني بيوتي' },
   analytics:  { title:'التحليلات المتقدمة', sub:'تقارير أداء المتجر والمبيعات' },
   calculator: { title:'حاسبة الأرباح الذكية', sub:'احسب هامش ربحك الحقيقي ونقطة التعادل' },
   language:   { title:'إدارة اللغة والمحتوى', sub:'تحكم في نصوص ومحتوى متجرك بالعربية والإنجليزية' },
@@ -2586,6 +2670,8 @@ function showSection(id) {
   if(id === 'tracking') renderTracking();
   if(id === 'products') renderProductImages();
   if(id === 'language') initLangSection();
+  if(id === 'settings') loadApiKeyUI();
+  if(id === 'affiliate') { renderAffiliatesTable(); calcAffCommission(); loadTaagerKeyUI(); }
 }
 
 // ============================================================
@@ -2900,7 +2986,7 @@ function saveManualOrder() {
   const pay = document.getElementById('ao-pay').value;
   const status = document.getElementById('ao-status').value;
   const subtotal = prod.price;
-  const shipping = subtotal>=300?0:29;
+  const shipping = subtotal>=199?0:19;
   const discount = pay==='card'?Math.round(subtotal*0.1):0;
   const total = subtotal+shipping-discount;
 
@@ -3781,22 +3867,22 @@ function setupSeoCounters() {
 function generateMockData() {
   const mock = [];
   for(let i=0;i<10;i++){
-    const name = SAUDI_NAMES[Math.floor(Math.random()*SAUDI_NAMES.length)];
-    const city = SAUDI_CITIES[Math.floor(Math.random()*SAUDI_CITIES.length)];
+    const name = UAE_NAMES[Math.floor(Math.random()*UAE_NAMES.length)];
+    const city = UAE_CITIES[Math.floor(Math.random()*UAE_CITIES.length)];
     const prodId = [1,2,3][Math.floor(Math.random()*3)];
     const prod = defaultProducts[prodId];
     const daysAgo = Math.floor(Math.random()*14);
     const date = new Date(); date.setDate(date.getDate()-daysAgo);
     const isCod = Math.random()>0.3;
     const subtotal = prod.price;
-    const shipping = subtotal>=300?0:29;
+    const shipping = subtotal>=199?0:19;
     const discount = isCod?0:Math.round(subtotal*0.1);
     const total = subtotal+shipping-discount;
     const statuses = ['pending','pending','shipped','delivered','delivered','delivered','cancelled'];
     mock.push({
       id:`AB-2026-${1000+Math.floor(Math.random()*9000)}`,
       name, phone:`05${Math.floor(10000000+Math.random()*89999999)}`,
-      city, address:`حي ${['العليا','الملقا','النرجس','الروضة','السليمانية'][Math.floor(Math.random()*5)]}`,
+      city, address:`حي ${['الجميرا','المرسى','ديرة','البرشاء','الراشدية'][Math.floor(Math.random()*5)]}`,
       paymentMethod: isCod?'الدفع عند الاستلام (COD)':'بطاقة مدى / ائتمانية',
       items:[{ name:prod.name, price:prod.price, quantity:1 }],
       subtotal, shipping, discount, total,
@@ -3821,6 +3907,110 @@ function clearAllData() {
 
 function saveShippingSettings() {
   alert('تم حفظ إعدادات الشحن.');
+}
+
+function changeAdminPassword() {
+  const currPass = document.getElementById('s-curr-pass').value;
+  const newPass = document.getElementById('s-new-pass').value;
+  const msgEl = document.getElementById('pass-msg');
+  
+  if (!currPass || !newPass) {
+    msgEl.style.color = 'var(--cancelled)';
+    msgEl.textContent = '❌ يرجى ملء الحقول المطلوبة!';
+    msgEl.style.display = 'block';
+    return;
+  }
+  
+  const actualCurr = localStorage.getItem('afghanbeauty_admin_pass') || 'admin123';
+  if (currPass !== actualCurr) {
+    msgEl.style.color = 'var(--cancelled)';
+    msgEl.textContent = '❌ كلمة المرور الحالية غير صحيحة!';
+    msgEl.style.display = 'block';
+    return;
+  }
+  
+  localStorage.setItem('afghanbeauty_admin_pass', newPass);
+  msgEl.style.color = 'var(--completed)';
+  msgEl.textContent = '✅ تم تحديث كلمة المرور بنجاح!';
+  msgEl.style.display = 'block';
+  
+  document.getElementById('s-curr-pass').value = '';
+  document.getElementById('s-new-pass').value = '';
+  
+  setTimeout(() => {
+    msgEl.style.display = 'none';
+  }, 3000);
+}
+
+// ============================================================
+// API KEY MANAGEMENT
+// ============================================================
+let _apiKeyVisible = false;
+
+function loadApiKeyUI() {
+  const key = getApiKey();
+  const displayEl = document.getElementById('api-key-display');
+  const urlEl = document.getElementById('api-url-display');
+  if (!displayEl || !urlEl) return;
+
+  _apiKeyVisible = false;
+  displayEl.textContent = maskApiKey(key);
+  const baseUrl = window.location.href.split('?')[0];
+  urlEl.textContent = baseUrl + '?key=' + key;
+  urlEl.title = baseUrl + '?key=' + key;
+}
+
+function maskApiKey(key) {
+  if (key.length <= 8) return '••••••••';
+  return key.substring(0, 5) + '•'.repeat(key.length - 9) + key.slice(-4);
+}
+
+function toggleApiKeyVisibility() {
+  const key = getApiKey();
+  const displayEl = document.getElementById('api-key-display');
+  if (!displayEl) return;
+  _apiKeyVisible = !_apiKeyVisible;
+  displayEl.textContent = _apiKeyVisible ? key : maskApiKey(key);
+}
+
+function copyApiUrl() {
+  const key = getApiKey();
+  const baseUrl = window.location.href.split('?')[0];
+  const url = baseUrl + '?key=' + key;
+  
+  navigator.clipboard.writeText(url).then(() => {
+    showApiMsg('✅ تم نسخ رابط الدخول!', 'success');
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showApiMsg('✅ تم نسخ رابط الدخول!', 'success');
+  });
+}
+
+function regenerateApiKey() {
+  if (!confirm('هل أنت متأكد؟ سيتوقف الرابط القديم عن العمل فوراً.')) return;
+  // Force generate new key
+  const newKey = 'AB-' + Array.from(crypto.getRandomValues(new Uint8Array(18)))
+    .map(b => b.toString(16).padStart(2,'0')).join('').toUpperCase();
+  localStorage.setItem(ADMIN_APIKEY_KEY, newKey);
+  loadApiKeyUI();
+  showApiMsg('🔄 تم تجديد المفتاح بنجاح! احفظ الرابط الجديد.', 'warning');
+}
+
+function showApiMsg(msg, type) {
+  const el = document.getElementById('api-key-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = type === 'success' ? 'var(--delivered-soft)' : 'var(--pending-soft)';
+  el.style.color = type === 'success' ? 'var(--delivered)' : 'var(--pending)';
+  el.style.border = type === 'success' ? '1px solid rgba(129,199,132,0.3)' : '1px solid rgba(255,183,77,0.3)';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
 // ============================================================
@@ -3883,6 +4073,16 @@ function saveTrackingSettings() {
     if(el) trackingSettings[id] = el.value;
   });
   localStorage.setItem('afghanbeauty_tracking', JSON.stringify(trackingSettings));
+  
+  // Mirror keys individually for the store script
+  localStorage.setItem('fb_pixel_id', trackingSettings['tk-fb-id'] || '');
+  localStorage.setItem('tt_pixel_id', trackingSettings['tk-tt-id'] || '');
+  localStorage.setItem('snap_pixel_id', trackingSettings['tk-snap-id'] || '');
+  localStorage.setItem('ga_pixel_id', trackingSettings['tk-ga-id'] || '');
+  localStorage.setItem('gtm_pixel_id', trackingSettings['tk-gtm-id'] || '');
+  localStorage.setItem('wa_phone_num', trackingSettings['tk-wa-num'] || '');
+  localStorage.setItem('wa_welcome_msg', trackingSettings['tk-wa-msg'] || '');
+
   showLangAlert('✅ تم حفظ إعدادات التتبع بنجاح!');
   updateAllTrackingStatuses();
 }
@@ -3928,8 +4128,8 @@ function copyPixelCode(type) {
   if(type === 'fb') {
     const events = [];
     if(document.getElementById('fb-ev-pageview')?.checked) events.push("fbq('track', 'PageView');");
-    if(document.getElementById('fb-ev-viewcontent')?.checked) events.push("// fbq('track', 'ViewContent', {content_name: 'Retinal Shot', content_ids: ['RET001'], content_type: 'product', value: 228, currency: 'AED'});");
-    if(document.getElementById('fb-ev-addtocart')?.checked) events.push("// fbq('track', 'AddToCart', {content_ids: ['RET001'], value: 228, currency: 'AED'});");
+    if(document.getElementById('fb-ev-viewcontent')?.checked) events.push("// fbq('track', 'ViewContent', {content_name: 'Golden Afghan Oil', content_ids: ['AFG001'], content_type: 'product', value: 228, currency: 'AED'});");
+    if(document.getElementById('fb-ev-addtocart')?.checked) events.push("// fbq('track', 'AddToCart', {content_ids: ['AFG001'], value: 228, currency: 'AED'});");
     if(document.getElementById('fb-ev-initcheckout')?.checked) events.push("// fbq('track', 'InitiateCheckout', {value: 228, currency: 'AED'});");
     if(document.getElementById('fb-ev-purchase')?.checked) events.push("// fbq('track', 'Purchase', {value: 228, currency: 'AED'});");
     code = `<!-- Meta Pixel Code -->
@@ -3977,7 +4177,7 @@ snaptr('track', 'PAGE_VIEW');
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
   gtag('config', '${pixelId}');
-  // لتتبع الشراء: gtag('event', 'purchase', { transaction_id: 'AB-2026-XXXX', value: 228, currency: 'AED', items: [{item_name: 'Retinal Shot', price: 228}] });
+  // لتتبع الشراء: gtag('event', 'purchase', { transaction_id: 'AB-2026-XXXX', value: 228, currency: 'AED', items: [{item_name: 'Golden Afghan Oil', price: 228}] });
 <\/script>
 <!-- End Google Analytics GA4 -->`;
   }
@@ -4069,9 +4269,87 @@ const _origShowSection = showSection;
 const _patchedShow = function(id) {
   _origShowSection(id);
   if(id === 'mkttracking') { loadTrackingForm(); }
-  if(id === 'affiliate') { renderAffiliatesTable(); calcAffCommission(); }
+  if(id === 'affiliate') { renderAffiliatesTable(); calcAffCommission(); loadTaagerKeyUI(); }
 };
 window.showSection = _patchedShow;
+
+// ============================================================
+// TAAGER API KEY
+// ============================================================
+const TAAGER_KEY_STORE = 'afghanbeauty_taager_api_key';
+
+function loadTaagerKeyUI() {
+  const saved = localStorage.getItem(TAAGER_KEY_STORE);
+  const input = document.getElementById('taager-api-input');
+  const badge = document.getElementById('taager-status-badge');
+  const clearBtn = document.getElementById('taager-clear-btn');
+  if (!input) return;
+  if (saved) {
+    input.value = saved;
+    input.type = 'password';
+    if (badge) badge.style.display = 'flex';
+    if (clearBtn) clearBtn.style.display = 'flex';
+  } else {
+    input.value = '';
+    if (badge) badge.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+  }
+}
+
+function taagerKeyChanged() {
+  // reset status when user edits
+  const badge = document.getElementById('taager-status-badge');
+  if (badge) badge.style.display = 'none';
+}
+
+function toggleTaagerKeyVisibility() {
+  const input = document.getElementById('taager-api-input');
+  if (!input) return;
+  const icon = document.getElementById('taager-eye-icon');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    input.type = 'password';
+    if (icon) icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+function saveTaagerKey() {
+  const input = document.getElementById('taager-api-input');
+  const val = input ? input.value.trim() : '';
+  if (!val) {
+    showTaagerMsg('⚠️ يرجى إدخال مفتاح API أولاً', 'warning');
+    return;
+  }
+  localStorage.setItem(TAAGER_KEY_STORE, val);
+  loadTaagerKeyUI();
+  showTaagerMsg('✅ تم حفظ مفتاح تاجر بنجاح!', 'success');
+}
+
+function clearTaagerKey() {
+  if (!confirm('هل تريد حذف مفتاح تاجر المحفوظ؟')) return;
+  localStorage.removeItem(TAAGER_KEY_STORE);
+  loadTaagerKeyUI();
+  showTaagerMsg('🗑️ تم حذف المفتاح', 'info');
+}
+
+function showTaagerMsg(msg, type) {
+  const el = document.getElementById('taager-msg');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = 'block';
+  const styles = {
+    success: ['var(--delivered-soft)', 'var(--delivered)', '1px solid rgba(129,199,132,0.3)'],
+    warning: ['var(--pending-soft)',   'var(--pending)',   '1px solid rgba(255,183,77,0.3)'],
+    info:    ['var(--surface)',        'var(--text-muted)','1px solid var(--border)'],
+  };
+  const [bg, color, border] = styles[type] || styles.info;
+  el.style.background = bg;
+  el.style.color = color;
+  el.style.border = border;
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
 
 // ============================================================
 // AFFILIATE MANAGEMENT
@@ -4136,7 +4414,7 @@ function shareWhatsApp() {
   const link = window._lastAffLink;
   const name = window._lastAffWaName || 'المسوّق';
   if(!link) return;
-  const msg = encodeURIComponent(`أهلاً ${name}! رابطك الخاص لمتجر كوريان بيوتي:\n${link}\n\nشاركيه مع متابعاتك وتحصلين على عمولتك مع كل طلب 💸`);
+  const msg = encodeURIComponent(`أهلاً ${name}! رابطك الخاص لمتجر أفغاني بيوتي:\n${link}\n\nشاركيه مع متابعاتك وتحصلين على عمولتك مع كل طلب 💸`);
   window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 
