@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <!-- Self-healing fallback for image assets pushed to the root instead of assets/ -->
+  <script>
+    document.addEventListener('error', function(e) {
+      if (!e.target) return;
+      if (e.target.tagName === 'IMG') {
+        var src = e.target.getAttribute('src') || '';
+        if (e.target.dataset.triedFallback) return;
+        if (src.indexOf('assets/') === 0 || src.indexOf('./assets/') === 0) {
+          e.target.dataset.triedFallback = 'true';
+          var cleanSrc = src.replace(/^(\.\/)?assets\//, '');
+          var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+          e.target.src = dir + cleanSrc;
+        }
+      } else if (e.target.tagName === 'LINK' && (e.target.rel || '').indexOf('icon') !== -1) {
+        var href = e.target.getAttribute('href') || '';
+        if (e.target.dataset.triedFallback) return;
+        if (href.indexOf('assets/') === 0 || href.indexOf('./assets/') === 0) {
+          e.target.dataset.triedFallback = 'true';
+          var cleanHref = href.replace(/^(\.\/)?assets\//, '');
+          var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+          e.target.href = dir + cleanHref;
+        }
+      }
+    }, true);
+  </script>
   <!-- ======== MARKETING PIXELS & TRACKING LOADER ======== -->
   <script>
     (function() {
