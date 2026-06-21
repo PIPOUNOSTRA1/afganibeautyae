@@ -6,13 +6,13 @@
 // Compute base path for GitHub Pages compatibility
 // On GitHub Pages the site lives at /repo-name/ so we need to prepend the base path
 const BASE_PATH = (function() {
-  // If there's a <base> tag, use it
   const baseEl = document.querySelector('base[href]');
   if (baseEl) return baseEl.href.replace(/\/$/, '') + '/';
-  // Otherwise detect from current page path
   const path = window.location.pathname;
-  // Get directory of current page (works for both root and subdirectory deployments)
-  const dir = path.substring(0, path.lastIndexOf('/') + 1);
+  var dir = path.substring(0, path.lastIndexOf('/') + 1);
+  if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+    dir = path + '/';
+  }
   return dir;
 })();
 

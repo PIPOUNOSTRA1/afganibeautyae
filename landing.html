@@ -11,8 +11,13 @@
         var idx = src.indexOf('assets/');
         if (idx !== -1) {
           e.target.dataset.triedFallback = 'true';
-          var cleanSrc = src.substring(idx);
-          var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+          // Strip 'assets/' to fallback to root of the repository
+          var cleanSrc = src.substring(idx + 7);
+          var path = window.location.pathname;
+          var dir = path.substring(0, path.lastIndexOf('/') + 1);
+          if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+            dir = path + '/';
+          }
           e.target.src = dir + cleanSrc;
         }
       } else if (e.target.tagName === 'LINK' && (e.target.rel || '').indexOf('icon') !== -1) {
@@ -21,8 +26,13 @@
         var idx = href.indexOf('assets/');
         if (idx !== -1) {
           e.target.dataset.triedFallback = 'true';
-          var cleanHref = href.substring(idx);
-          var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+          // Strip 'assets/' to fallback to root of the repository
+          var cleanHref = href.substring(idx + 7);
+          var path = window.location.pathname;
+          var dir = path.substring(0, path.lastIndexOf('/') + 1);
+          if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+            dir = path + '/';
+          }
           e.target.href = dir + cleanHref;
         }
       }
@@ -1889,7 +1899,11 @@
 <script>
   // Fix image paths for GitHub Pages subdirectory deployments
   (function() {
-    var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+    var path = window.location.pathname;
+    var dir = path.substring(0, path.lastIndexOf('/') + 1);
+    if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+      dir = path + '/';
+    }
     document.querySelectorAll('img[src^="assets/"]').forEach(function(img) {
       img.src = dir + img.getAttribute('src');
     });

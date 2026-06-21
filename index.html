@@ -6,7 +6,15 @@
   <title>أفغاني بيوتي | AFGHAN BEAUTY · زيت الأفغاني الأصلي الذهبي</title>
   <meta name="description" content="احصل على شعر كثيف وصحي مع زيت الأفغاني الأصلي الذهبي. علاج طبيعي فعال لتساقط الشعر وتعبئة الفراغات للرجال والنساء واللحية. شحن سريع لكافة الإمارات ودفع عند الاستلام مع ضمان ذهبي 30 يوماً.">
   <link rel="icon" type="image/png" href="assets/store-avatar.png">
-  <script>window.location.replace('landing.html');</script>
+  <script>
+    var path = window.location.pathname;
+    var dir = path.substring(0, path.lastIndexOf('/') + 1);
+    if (!dir) dir = '/';
+    if (!path.endsWith('/') && !path.split('/').pop().includes('.')) {
+      dir = path + '/';
+    }
+    window.location.replace(dir + 'landing.html');
+  </script>
 </head>
 <body></body>
 </html>
