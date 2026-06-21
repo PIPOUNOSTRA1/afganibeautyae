@@ -1459,6 +1459,74 @@
     }
     .micro-proof-dot { width: 6px; height: 6px; background: #16a34a; border-radius: 50%; animation: blink 1.5s infinite; }
 
+    /* ===== BEFORE & AFTER SECTION ===== */
+    .ba-gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .ba-gallery-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    .ba-gallery-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-4px);
+    }
+    .ba-gallery-img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      border-radius: 12px;
+      border: 1px solid var(--border2);
+      margin-bottom: 1.25rem;
+    }
+    .ba-gallery-title {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    .ba-gallery-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    @media (max-width: 768px) {
+      .ba-gallery-grid {
+        grid-template-columns: 1fr;
+      }
+      .ba-gallery-img {
+        height: 240px;
+      }
+    }
+
+    /* ===== REDESIGNED FAQ GRID ===== */
+    .faq-layout-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      margin-top: 3rem;
+    }
+    .faq-trust-wrap {
+      text-align: center;
+    }
+    .faq-trust-img {
+      width: 100%;
+      max-width: 420px;
+      height: auto;
+      border-radius: 24px;
+      box-shadow: var(--shadow-lg);
+      border: 2px solid var(--border);
+    }
+
     @media (max-width: 900px) {
       .fomo-popup { right: 10px; left: 10px; bottom: 80px; max-width: none; }
       .live-viewers { right: 10px; bottom: 10px; font-size: 0.65rem; }
@@ -1494,12 +1562,12 @@
       <div class="hero-badge">الأول في الخليج — زيت الأفغاني الأصلي المعتمد بموافقة معايير الجودة</div>
       <p class="hero-eyebrow">AFGHAN BEAUTY · GOLDEN AFGHAN OIL</p>
       <h1 class="hero-title">
-        تغلّبي على تساقط وجفاف الشعر الناتج عن 
-        <span class="highlight">مياه الإمارات الكلسية</span>
-        والرطوبة العالية!
+        غيرنا حياة الآلاف.. 
+        <span class="highlight">الزيت الأكثر فاعلية والأسرع في النتائج!</span> 
+        الزيت الأفغاني الأول في عالم العناية بالشعر
       </h1>
       <p class="hero-subtitle">
-        زيت الأفغاني الأصلي الذهبي هو السر لتغذية بصيلات الشعر التي أجهدتها مياه التحلية والحرارة. كورس علاجي متكامل يوقف التساقط فورياً وينبت الفراغات واللحية والشارب خلال 14 يوماً فقط بفضل تركيبة الـ 7 زيوت العشبية المعصورة على البارد. طبيعي 100% وخالٍ تماماً من المينوكسيديل والهرمونات مع ضمان ذهبي لاسترجاع الأموال لمدة 30 يوماً.
+        تركيبة فريدة آمنة وطبيعية 100% ومصرّحة رسمياً بموافقة معايير الجودة لإنبات الفراغات وتكثيف شعر الرأس واللحية ومنع التساقط فورياً. نضمن لك الفاعلية والنتائج السريعة بضمان ذهبي لاسترجاع الأموال لمدة 30 يوماً.
       </p>
 
       <!-- Stats -->
@@ -1624,7 +1692,7 @@
             
             <div class="modern-input-row">
               <select id="lp-city" class="modern-input" required>
-                <option value="" disabled selected>اختر الإمارة *</option>
+                <option value="" disabled selected>اختر المحافظة *</option>
                 <option value="دبي">دبي</option>
                 <option value="أبوظبي">أبوظبي</option>
                 <option value="الشارقة">الشارقة</option>
@@ -1670,14 +1738,14 @@
   <div class="section-inner">
     <div class="sec-tag">المشاكل اليومية للشعر</div>
     <h2 class="sec-title">هل تعاني من مشاكل الفراغات والتساقط؟</h2>
-    <p class="sec-desc">مياه الإمارات الكلسية (Hard Water)، الرطوبة العالية والحرارة تضعف بصيلات الشعر، مما يؤدي إلى تساقط فوري وتأخر في إنبات الفراغات لدى النساء والرجال.</p>
+    <p class="sec-desc">مياه الاستحمام القاسية والكلور (Hard Water)، الرطوبة العالية والحرارة تضعف بصيلات الشعر، مما يؤدي إلى تساقط فوري وتأخر في إنبات الفراغات لدى النساء والرجال.</p>
 
     <div class="problem-grid">
       <div class="problem-cards">
         <div class="problem-card">
           <div class="problem-icon">🚿</div>
           <div>
-            <div class="problem-card-title">تأثير مياه التحلية الكلسية القاسي</div>
+            <div class="problem-card-title">تأثير مياه التحلية والكلور المدمر</div>
             <div class="problem-card-desc">ترسب الكالسيوم والمعادن على فروة الرأس يسد مسام البصيلات، ويمنع تغذية الشعر مما يسبب تساقطه الشديد وتلفه.</div>
           </div>
         </div>
@@ -1704,7 +1772,7 @@
         </div>
       </div>
       <div>
-        <img src="assets/afghan-oil.png" alt="زيت الأفغاني الأصلي الذهبي لإنبات وتكثيف الشعر" class="transform-img" style="max-height:400px;object-fit:contain;">
+        <img src="assets/hair-damage-comparison.png" alt="مقارنة بين تلف الشعر بسبب المياه الكلسية والشعر الصحي المغذى بزيت الأفغاني" class="transform-img" style="max-height:400px;object-fit:cover;border-radius:20px;box-shadow:var(--shadow-lg);border:1px solid var(--border);">
       </div>
     </div>
   </div>
@@ -1715,13 +1783,13 @@
   <div class="section-inner">
     <div class="solution-grid">
       <div>
-        <img src="assets/afghan-oil.png" alt="زيت الأفغاني الذهبي الفعال" class="solution-img" style="max-height:450px;object-fit:contain">
+        <img src="assets/hair-science.png" alt="آلية عمل تغذية بصيلات الشعر بالزيت الأفغاني الأصلي" class="solution-img" style="max-height:450px;object-fit:cover;border-radius:20px;box-shadow:var(--shadow-lg);border:1px solid var(--border);">
       </div>
       <div>
         <div class="sec-tag">الحل المعتمد والآمن</div>
         <h2 class="sec-title">زيت الأفغاني الأصلي الذهبي — تغذية عميقة خالية من المينوكسيديل</h2>
         <p class="sec-desc">
-          السر يكمن في بذور نبتة القنب الأفغانية النقية المعصورة على البارد، مع توليفة من 7 زيوت طبيعية تعمل بانسجام لتطهير مسامات الفروة من ترسبات المياه الكلسية وتغذية البصيلات مباشرة لتسريع الطول والإنبات.
+          السر يكمن في بذور نبتة القنب الأفغانية النقية المعصورة على البارد، مع توليفة من 7 زيوت طبيعية تعمل بانسجام لتطهير مسامات الفروة من ترسبات الكلور والأملاح الضارة وتغذية البصيلات مباشرة لتسريع الطول والإنبات.
         </p>
 
         <div class="solution-badge">🇸🇦 مرخص ومطابق للمواصفات <span>|</span> 🌿 طبيعي 100%</div>
@@ -1744,7 +1812,7 @@
           <div class="solution-point">
             <div class="sp-icon">💧</div>
             <div>
-              <div class="sp-title">تطهير الفروة من الترسبات الكلسية</div>
+              <div class="sp-title">تطهير الفروة من ترسبات الكلور والأملاح</div>
               <div class="sp-desc">يعمل كمطهر طبيعي يزيل المعادن والقشرة المتراكمة، مما يسمح للفروة بالتنفس وامتصاص التغذية.</div>
             </div>
           </div>
@@ -1879,6 +1947,33 @@
   </div>
 </section>
 
+<!-- ===== BEFORE & AFTER SECTION ===== -->
+<section class="section" id="before-after-gallery" style="background: var(--bg2);">
+  <div class="section-inner">
+    <div class="sec-center">
+      <div class="sec-tag">نتائج حقيقية وموثقة</div>
+      <h2 class="sec-title">شاهد نتائج التحول قبل وبعد الاستخدام</h2>
+      <p class="sec-desc sec-center">صور واقعية لعملائنا بعد التزامهم بكورس العلاج لإنبات وتكثيف شعر الرأس واللحية في الإمارات</p>
+    </div>
+    
+    <div class="ba-gallery-grid">
+      <!-- Card 1: Hair density -->
+      <div class="ba-gallery-card">
+        <img src="assets/before-after.png" alt="نتائج إنبات فراغات وتكثيف شعر الرأس قبل وبعد" class="ba-gallery-img">
+        <h3 class="ba-gallery-title">إنبات الفراغات وتكثيف شعر الرأس</h3>
+        <p class="ba-gallery-desc">تعبئة وتنشيط كامل لبصيلات فروة الرأس بعد 6 أسابيع من الاستخدام المنتظم لزيت الأفغاني الأصلي الذهبي.</p>
+      </div>
+      
+      <!-- Card 2: Beard density -->
+      <div class="ba-gallery-card">
+        <img src="assets/beard-before-after.png" alt="نتائج تكثيف وتعبئة فراغات اللحية قبل وبعد" class="ba-gallery-img">
+        <h3 class="ba-gallery-title">تعبئة فراغات اللحية والشارب للرجال</h3>
+        <p class="ba-gallery-desc">نتائج ملء وتكثيف فراغات الذقن وتنشيط الشعر الخامل للحصول على لحية كاملة وجذابة خالية من العيوب.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ===== REVIEWS SECTION ===== -->
 <section class="section benefits-section" id="reviews">
   <div class="section-inner">
@@ -1891,7 +1986,7 @@
       <div class="review-card">
         <div class="review-stars">★★★★★</div>
         <div class="review-text">
-          "كنت أعاني من تساقط مخيف بسبب مياه التحلية الكلسية في شقتي بدبي. جربت زيت الأفغاني الأصلي الذهبي، وفي خلال 10 أيام توقف التساقط تماماً! والآن الفراغات بدأت تمتلي بالبيبي هير. الضمان الذهبي شجعني أشتري العرض وما ندمت أبداً."
+          "كنت أعاني من تساقط مخيف بسبب الكلور ومياه الاستحمام القاسية في شقتي بدبي. جربت زيت الأفغاني الأصلي الذهبي، وفي خلال 10 أيام توقف التساقط تماماً! والآن الفراغات بدأت تمتلي بالبيبي هير. الضمان الذهبي شجعني أشتري العرض وما ندمت أبداً."
         </div>
         <div class="review-author">
           <div class="review-avatar">👩</div>
@@ -2062,42 +2157,52 @@
     <div class="sec-center">
       <div class="sec-tag">أسئلة شائعة</div>
       <h2 class="sec-title">الأسئلة الشائعة حول زيت الأفغاني</h2>
+      <p class="sec-desc sec-center">كل ما تود معرفته عن طريقة الاستخدام، التوصيل، والضمان الذهبي</p>
     </div>
-    <div class="faq-list" id="faq-container">
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
-          هل زيت الأفغاني الأصلي مناسب للشعر واللحية معاً؟
-          <span class="faq-q-icon">+</span>
-        </button>
-        <div class="faq-a">نعم، زيت الأفغاني الأصلي الذهبي آمن وفعال 100% لفروة الرأس والشعر وكذلك لتكثيف شعر اللحية والشارب للرجال وتعبئة الفراغات بفضل تركيبته المغذية والمنشطة للبصيلات.</div>
+    
+    <div class="faq-layout-grid">
+      <!-- FAQ Accordions (Column 1) -->
+      <div class="faq-list" id="faq-container" style="margin-top: 0; width: 100%;">
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+            هل زيت الأفغاني الأصلي مناسب للشعر واللحية معاً؟
+            <span class="faq-q-icon">+</span>
+          </button>
+          <div class="faq-a">نعم، زيت الأفغاني الأصلي الذهبي آمن وفعال 100% لفروة الرأس والشعر وكذلك لتكثيف شعر اللحية والشارب للرجال وتعبئة الفراغات بفضل تركيبته المغذية والمنشطة للبصيلات.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+            متى تبدأ النتائج بالظهور بشكل واضح؟
+            <span class="faq-q-icon">+</span>
+          </button>
+          <div class="faq-a">تلاحظ توقف تساقط الشعر وزيادة النعومة خلال أول 10 إلى 14 يوماً من الاستخدام المنتظم. أما بالنسبة لإنبات الفراغات وظهور البيبي هير، فإنها تبدأ بالظهور بشكل ملحوظ خلال 3 إلى 6 أسابيع.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+            هل يتساقط الشعر بعد التوقف عن استخدام الزيت؟
+            <span class="faq-q-icon">+</span>
+          </button>
+          <div class="faq-a">لا، لأن زيت الأفغاني الأصلي الذهبي طبيعي 100% وخالٍ تماماً من المينوكسيديل أو الهرمونات. يغذي البصيلات ويقوي الجذور طبيعياً، لذا فإن النتائج مستقرة ومستمرة حتى بعد الوصول للنتيجة والتوقف.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+            ما هي تكلفة وتفاصيل التوصيل في الإمارات؟
+            <span class="faq-q-icon">+</span>
+          </button>
+          <div class="faq-a">التوصيل مبرد وسريع لجميع إمارات الدولة خلال 24-48 ساعة. تكلفة الشحن هي 19 درهم إماراتي، ويصبح الشحن مجانياً تماماً لأي طلب بقيمة تفوق 199 درهم إماراتي.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+            كيف يعمل الضمان الذهبي والاسترجاع؟
+            <span class="faq-q-icon">+</span>
+          </button>
+          <div class="faq-a">نقدم ضماناً ذهبياً لمدة 30 يوماً: إذا استخدمت الزيت بانتظام والتزمت بالخطوات ولم تلاحظ نتائج ملموسة، تواصل معنا عبر خدمة العملاء وسنعيد لك قيمة طلبك بالكامل دون أي تعقيدات.</div>
+        </div>
       </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
-          متى تبدأ النتائج بالظهور بشكل واضح؟
-          <span class="faq-q-icon">+</span>
-        </button>
-        <div class="faq-a">تلاحظ توقف تساقط الشعر وزيادة النعومة خلال أول 10 إلى 14 يوماً من الاستخدام المنتظم. أما بالنسبة لإنبات الفراغات وظهور البيبي هير، فإنها تبدأ بالظهور بشكل ملحوظ خلال 3 إلى 6 أسابيع.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
-          هل يتساقط الشعر بعد التوقف عن استخدام الزيت؟
-          <span class="faq-q-icon">+</span>
-        </button>
-        <div class="faq-a">لا، لأن زيت الأفغاني الأصلي الذهبي طبيعي 100% وخالٍ تماماً من المينوكسيديل أو الهرمونات. يغذي البصيلات ويقوي الجذور طبيعياً، لذا فإن النتائج مستقرة ومستمرة حتى بعد الوصول للنتيجة والتوقف.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
-          ما هي تكلفة وتفاصيل التوصيل في الإمارات؟
-          <span class="faq-q-icon">+</span>
-        </button>
-        <div class="faq-a">التوصيل مبرد وسريع لجميع إمارات الدولة خلال 24-48 ساعة. تكلفة الشحن هي 19 درهم إماراتي، ويصبح الشحن مجانياً تماماً لأي طلب بقيمة تفوق 199 درهم إماراتي.</div>
-      </div>
-      <div class="faq-item">
-        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
-          كيف يعمل الضمان الذهبي والاسترجاع؟
-          <span class="faq-q-icon">+</span>
-        </button>
-        <div class="faq-a">نقدم ضماناً ذهبياً لمدة 30 يوماً: إذا استخدمت الزيت بانتظام والتزمت بالخطوات ولم تلاحظ نتائج ملموسة، تواصل معنا عبر خدمة العملاء وسنعيد لك قيمة طلبك بالكامل دون أي تعقيدات.</div>
+      
+      <!-- FAQ Expressive Image (Column 2) -->
+      <div class="faq-trust-wrap">
+        <img src="assets/faq-trust.png" alt="الضمان الذهبي وخدمة العملاء في الإمارات" class="faq-trust-img">
       </div>
     </div>
   </div>
