@@ -19,6 +19,55 @@ const MIME_TYPES = {
 const server = http.createServer((req, res) => {
   // Normalize URL to prevent directory traversal
   let safeUrl = req.url.split('?')[0];
+  
+  // API endpoint for settings
+  if (safeUrl === '/api/settings') {
+    if (req.method === 'GET') {
+      const settingsPath = path.join(__dirname, 'settings.json');
+      fs.readFile(settingsPath, 'utf8', (err, data) => {
+        if (err) {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({}));
+        } else {
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(data);
+        }
+      });
+      return;
+    } else if (req.method === 'POST') {
+      let body = '';
+      req.on('data', chunk => { body += chunk; });
+      req.on('end', () => {
+        try {
+          const parsed = JSON.parse(body);
+          const settingsPath = path.join(__dirname, 'settings.json');
+          fs.writeFile(settingsPath, JSON.stringify(parsed, null, 2), 'utf8', err => {
+            if (err) {
+              res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+              res.end('Error writing settings.json');
+              return;
+            }
+            const jsContent = `window.STORE_SETTINGS = ${JSON.stringify(parsed, null, 2)};\n`;
+            const jsPath = path.join(__dirname, 'settings.js');
+            fs.writeFile(jsPath, jsContent, 'utf8', err2 => {
+              if (err2) {
+                res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+                res.end('Error writing settings.js');
+                return;
+              }
+              res.writeHead(200, { 'Content-Type': 'application/json' });
+              res.end(JSON.stringify({ success: true }));
+            });
+          });
+        } catch(e) {
+          res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('Invalid JSON payload');
+        }
+      });
+      return;
+    }
+  }
+
   let filePath = path.join(__dirname, safeUrl === '/' ? 'index.html' : safeUrl);
   
   // Prevent directory traversal

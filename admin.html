@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;900&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="settings.js"></script>
   <style>
     :root {
       --primary: #C5A85C;
@@ -4147,7 +4148,48 @@ function downloadCSV(headers, rows, filename) {
 let trackingSettings = {};
 
 function loadTrackingSettings() {
-  try { trackingSettings = JSON.parse(localStorage.getItem('afghanbeauty_tracking')) || {}; } catch(e){ trackingSettings = {}; }
+  const serverSettings = window.STORE_SETTINGS || {};
+  let localSettings = {};
+  try { localSettings = JSON.parse(localStorage.getItem('afghanbeauty_tracking')) || {}; } catch(e){ localSettings = {}; }
+
+  let needsMigration = false;
+  const serverToLocalMap = {
+    fb_pixel_id: 'tk-fb-id',
+    tt_pixel_id: 'tk-tt-id',
+    snap_pixel_id: 'tk-snap-id',
+    ga_pixel_id: 'tk-ga-id',
+    gtm_pixel_id: 'tk-gtm-id',
+    wa_phone_num: 'tk-wa-num',
+    wa_welcome_msg: 'tk-wa-msg'
+  };
+
+  trackingSettings = {};
+  
+  Object.entries(serverToLocalMap).forEach(([serverKey, localKey]) => {
+    const serverVal = serverSettings[serverKey];
+    const localVal = localSettings[localKey];
+    
+    if (serverVal) {
+      trackingSettings[localKey] = serverVal;
+    } else if (localVal) {
+      trackingSettings[localKey] = localVal;
+      needsMigration = true;
+    } else {
+      trackingSettings[localKey] = '';
+    }
+  });
+
+  if (localSettings['tk-fb-access-token']) {
+    trackingSettings['tk-fb-access-token'] = localSettings['tk-fb-access-token'];
+  }
+  if (localSettings['tk-tt-token']) {
+    trackingSettings['tk-tt-token'] = localSettings['tk-tt-token'];
+  }
+
+  if (needsMigration) {
+    console.log('Migrating local tracking settings to the server...');
+    setTimeout(saveTrackingSettingsToServer, 1500);
+  }
 }
 
 function saveTrackingSettings() {
@@ -4158,7 +4200,6 @@ function saveTrackingSettings() {
   });
   localStorage.setItem('afghanbeauty_tracking', JSON.stringify(trackingSettings));
   
-  // Mirror keys individually for the store script
   localStorage.setItem('fb_pixel_id', trackingSettings['tk-fb-id'] || '');
   localStorage.setItem('tt_pixel_id', trackingSettings['tk-tt-id'] || '');
   localStorage.setItem('snap_pixel_id', trackingSettings['tk-snap-id'] || '');
@@ -4167,8 +4208,38 @@ function saveTrackingSettings() {
   localStorage.setItem('wa_phone_num', trackingSettings['tk-wa-num'] || '');
   localStorage.setItem('wa_welcome_msg', trackingSettings['tk-wa-msg'] || '');
 
+  saveTrackingSettingsToServer();
+
   showLangAlert('✅ تم حفظ إعدادات التتبع بنجاح!');
   updateAllTrackingStatuses();
+}
+
+function saveTrackingSettingsToServer() {
+  const payload = {
+    fb_pixel_id: trackingSettings['tk-fb-id'] || '',
+    tt_pixel_id: trackingSettings['tk-tt-id'] || '',
+    snap_pixel_id: trackingSettings['tk-snap-id'] || '',
+    ga_pixel_id: trackingSettings['tk-ga-id'] || '',
+    gtm_pixel_id: trackingSettings['tk-gtm-id'] || '',
+    wa_phone_num: trackingSettings['tk-wa-num'] || '',
+    wa_welcome_msg: trackingSettings['tk-wa-msg'] || ''
+  };
+
+  fetch('/api/settings', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      console.log('Settings successfully saved to the server.');
+      window.STORE_SETTINGS = payload;
+    }
+  })
+  .catch(err => {
+    console.warn('Failed to save settings on server (running statically?):', err);
+  });
 }
 
 function loadTrackingForm() {

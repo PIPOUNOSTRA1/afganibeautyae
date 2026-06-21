@@ -38,10 +38,16 @@
     }, true);
   </script>
   <!-- ======== MARKETING PIXELS & TRACKING LOADER ======== -->
+  <script src="settings.js"></script>
   <script>
     (function() {
+      // Get settings with fallback to localStorage
+      const getSetting = (key, localKey) => {
+        return (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || localStorage.getItem(localKey) || '';
+      };
+
       // 1. Meta / Facebook Pixel
-      const fbId = localStorage.getItem('fb_pixel_id') || '';
+      const fbId = getSetting('fb_pixel_id', 'fb_pixel_id');
       if (fbId) {
         !function(f,b,e,v,n,t,s)
         {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -56,17 +62,17 @@
       }
 
       // 2. TikTok Pixel
-      const ttId = localStorage.getItem('tt_pixel_id') || '';
+      const ttId = getSetting('tt_pixel_id', 'tt_pixel_id');
       if (ttId) {
         !function (w, d, t) {
-          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var o="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=o,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var a=d.createElement("script");a.type="text/javascript",a.async=!0,a.src=o;var c=d.getElementsByTagName("script")[0];c.parentNode.insertBefore(a,c)};
+          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
           ttq.load(ttId);
           ttq.page();
         }(window, document, 'ttq');
       }
 
       // 3. Snapchat Pixel
-      const snapId = localStorage.getItem('snap_pixel_id') || '';
+      const snapId = getSetting('snap_pixel_id', 'snap_pixel_id');
       if (snapId) {
         (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
         {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
@@ -79,7 +85,7 @@
       }
 
       // 4. Google Analytics GA4
-      const gaId = localStorage.getItem('ga_pixel_id') || '';
+      const gaId = getSetting('ga_pixel_id', 'ga_pixel_id');
       if (gaId) {
         const s1 = document.createElement('script');
         s1.async = true;
@@ -94,7 +100,7 @@
       }
 
       // 5. Google Tag Manager GTM
-      const gtmId = localStorage.getItem('gtm_pixel_id') || '';
+      const gtmId = getSetting('gtm_pixel_id', 'gtm_pixel_id');
       if (gtmId) {
         (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
@@ -102,6 +108,58 @@
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
         })(window,document,'script','dataLayer',gtmId);
       }
+
+      // 6. Unified Pixel Event Tracker
+      window.trackPixelEvent = function(eventName, eventData) {
+        eventData = eventData || {};
+        
+        // Meta / Facebook
+        if (typeof fbq === 'function') {
+          fbq('track', eventName, eventData);
+        }
+        
+        // TikTok
+        if (typeof ttq === 'object' && typeof ttq.track === 'function') {
+          let ttEvent = eventName;
+          if (eventName === 'Purchase') ttEvent = 'CompletePayment';
+          ttq.track(ttEvent, eventData);
+        }
+        
+        // Snapchat
+        if (typeof snaptr === 'function') {
+          let snapEvent = eventName;
+          if (eventName === 'PageView') snapEvent = 'PAGE_VIEW';
+          else if (eventName === 'ViewContent') snapEvent = 'VIEW_CONTENT';
+          else if (eventName === 'AddToCart') snapEvent = 'ADD_CART';
+          else if (eventName === 'InitiateCheckout') snapEvent = 'START_CHECKOUT';
+          else if (eventName === 'Purchase') snapEvent = 'PURCHASE';
+          snaptr('track', snapEvent, eventData);
+        }
+        
+        // GA4
+        if (typeof gtag === 'function') {
+          let gaEvent = eventName;
+          if (eventName === 'PageView') return;
+          else if (eventName === 'ViewContent') gaEvent = 'view_item';
+          else if (eventName === 'AddToCart') gaEvent = 'add_to_cart';
+          else if (eventName === 'InitiateCheckout') gaEvent = 'begin_checkout';
+          else if (eventName === 'Purchase') gaEvent = 'purchase';
+          gtag('event', gaEvent, eventData);
+        }
+      };
+
+      // Firing ViewContent on load
+      setTimeout(function() {
+        if (typeof window.trackPixelEvent === 'function') {
+          window.trackPixelEvent('ViewContent', {
+            content_name: 'زيت الأفغاني الأصلي الذهبي',
+            content_type: 'product',
+            content_ids: ['AFG_OIL'],
+            value: 129,
+            currency: 'AED'
+          });
+        }
+      }, 1000);
     })();
   </script>
   <meta charset="UTF-8">
@@ -1144,6 +1202,18 @@
       if (typeof updateCartBadge === 'function') updateCartBadge();
       if (typeof renderCart === 'function') renderCart();
       if (typeof openCartDrawer === 'function') openCartDrawer();
+
+      // Firing AddToCart event
+      if (typeof window.trackPixelEvent === 'function') {
+        window.trackPixelEvent('AddToCart', {
+          value: bundle.price,
+          currency: 'AED',
+          content_name: bundle.name,
+          content_type: 'product',
+          content_ids: ['AFG_OIL_QTY_' + selectedBundle],
+          num_items: selectedBundle
+        });
+      }
     }
 
     function switchProductTab(event, tabId) {

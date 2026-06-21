@@ -618,6 +618,18 @@ function addProductToCart(prodId, quantity = 1) {
   saveCart();
   renderCart();
   openCartDrawer();
+
+  // Firing AddToCart event
+  if (typeof window.trackPixelEvent === 'function') {
+    window.trackPixelEvent('AddToCart', {
+      value: getUnitPrice(prodId, quantity) * quantity,
+      currency: 'AED',
+      content_name: p.name,
+      content_type: 'product',
+      content_ids: ['AFG_OIL_QTY_' + quantity],
+      num_items: quantity
+    });
+  }
 }
 
 // Quantity discount adder for product page
@@ -644,6 +656,18 @@ function addProductToCartWithQtyDiscount(prodId, qty) {
   saveCart();
   renderCart();
   openCartDrawer();
+
+  // Firing AddToCart event
+  if (typeof window.trackPixelEvent === 'function') {
+    window.trackPixelEvent('AddToCart', {
+      value: getUnitPrice(prodId, qty) * qty,
+      currency: 'AED',
+      content_name: p.name,
+      content_type: 'product',
+      content_ids: ['AFG_OIL_QTY_' + qty],
+      num_items: qty
+    });
+  }
 }
 
 function removeFromCart(index) {
@@ -786,6 +810,18 @@ let currentPaymentMethod = 'cod';
 function openCheckout() {
   if (cart.length === 0) return;
   closeCartDrawer();
+
+  // Firing InitiateCheckout event
+  if (typeof window.trackPixelEvent === 'function') {
+    const totalVal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    window.trackPixelEvent('InitiateCheckout', {
+      value: totalVal,
+      currency: 'AED',
+      content_ids: cart.map(item => 'AFG_OIL_QTY_' + item.quantity),
+      num_items: cart.reduce((sum, item) => sum + item.quantity, 0)
+    });
+  }
+
   window.location.href = 'landing.html';
 }
 
@@ -1016,6 +1052,16 @@ function handleLpOrder(event) {
     total
   });
 
+  // Firing Purchase event
+  if (typeof window.trackPixelEvent === 'function') {
+    window.trackPixelEvent('Purchase', {
+      value: total,
+      currency: 'AED',
+      content_ids: orderItems.map(item => 'AFG_OIL_QTY_' + item.quantity),
+      num_items: orderItems.reduce((sum, item) => sum + item.quantity, 0)
+    });
+  }
+
   const successOrderId = document.getElementById('lpSuccessOrderId');
   if (successOrderId) successOrderId.textContent = `#${order.id}`;
   const successTotal = document.getElementById('lpSuccessTotal');
@@ -1082,6 +1128,16 @@ function handlePlaceOrder(event) {
     discount,
     total
   });
+
+  // Firing Purchase event
+  if (typeof window.trackPixelEvent === 'function') {
+    window.trackPixelEvent('Purchase', {
+      value: total,
+      currency: 'AED',
+      content_ids: orderItems.map(item => 'AFG_OIL_QTY_' + item.quantity),
+      num_items: orderItems.reduce((sum, item) => sum + item.quantity, 0)
+    });
+  }
 
   const successOrderId = document.getElementById('successOrderId');
   if (successOrderId) successOrderId.textContent = `#${order.id}`;
