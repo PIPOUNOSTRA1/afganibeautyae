@@ -33,15 +33,31 @@ function getProductImage(productId) {
   return defaults[productId] || PRODUCT_IMG;
 }
 
-// Resolve relative image paths to work on GitHub Pages subdirectory deployments
+// Resolve relative image paths to work on GitHub Pages subdirectory deployments and local servers
 function resolveImagePath(imgPath) {
   if (!imgPath) return PRODUCT_IMG;
+  // Clean Windows paths or absolute system paths
+  if (imgPath.includes(':\\') || imgPath.includes(':/') || imgPath.startsWith('file:///')) {
+    // Extract relative part after 'assets/'
+    const match = imgPath.match(/assets[/\\][^/\\]+$/);
+    if (match) {
+      imgPath = match[0];
+    } else {
+      // If assets not found, extract filename
+      const parts = imgPath.split(/[/\\]/);
+      const filename = parts[parts.length - 1];
+      imgPath = 'assets/' + filename;
+    }
+  }
+  // Replace backslashes with forward slashes
+  imgPath = imgPath.replace(/\\/g, '/');
+  
   // Already absolute URL (http/https/data URI) — leave as-is
   if (/^(https?:\/\/|data:)/.test(imgPath)) return imgPath;
   // Already starts with BASE_PATH — leave as-is
-  if (imgPath.startsWith(BASE_PATH)) return imgPath;
-  // Strip leading "./" if present
-  imgPath = imgPath.replace(/^\.\//, '');
+  if (BASE_PATH && imgPath.startsWith(BASE_PATH)) return imgPath;
+  // Strip leading "./" or "/" if present
+  imgPath = imgPath.replace(/^\.?\//, '');
   return BASE_PATH + imgPath;
 }
 
@@ -81,7 +97,10 @@ const defaultProducts = {
     faq_5_a: 'للشعر: توضع قطرات مناسبة على الفروة مع التدليك لمدة 5 دقائق، ويترك من 2 إلى 3 ساعات ثم يغسل بشامبو الأفغاني الأصلي. يستخدم 3 مرات أسبوعياً. للحية: توضع قطرات بسيطة يومياً على الفراغات مع تدليك خفيف مساءً ولا داعي لغسله فوراً لسرعة امتصاصه الفائقة.',
     gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
-    gallery_formula: ''
+    gallery_formula: '',
+    guide_step_1: 'assets/guide-step-1.png',
+    guide_step_2: 'assets/guide-step-2.png',
+    guide_step_3: 'assets/guide-step-3.png'
   },
   2: {
     id: 2,
@@ -168,6 +187,32 @@ function initProductsCatalog() {
       if (!products[1] || !products[1].name.includes('الأفغاني') || !products[2] || !products[2].name.includes('شامبو')) {
         products = JSON.parse(JSON.stringify(defaultProducts));
         localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
+      } else if (!products[1].guide_step_1) {
+        // Self-healing database migration for step images
+        products[1].guide_step_1 = 'assets/guide-step-1.png';
+        products[1].guide_step_2 = 'assets/guide-step-2.png';
+        products[1].guide_step_3 = 'assets/guide-step-3.png';
+        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
+      }
+
+      // Self-healing: Sanitize absolute paths stored in localStorage config
+      let needsSave = false;
+      Object.keys(products).forEach(id => {
+        ['image', 'gallery_tube', 'gallery_texture', 'gallery_formula', 'guide_step_1', 'guide_step_2', 'guide_step_3'].forEach(key => {
+          if (products[id][key] && (products[id][key].includes(':\\') || products[id][key].includes(':/') || products[id][key].startsWith('file:///'))) {
+            const match = products[id][key].match(/assets[/\\][^/\\]+$/);
+            if (match) {
+              products[id][key] = match[0].replace(/\\/g, '/');
+            } else {
+              const parts = products[id][key].split(/[/\\]/);
+              products[id][key] = 'assets/' + parts[parts.length - 1];
+            }
+            needsSave = true;
+          }
+        });
+      });
+      if (needsSave) {
+        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
       }
     } else {
       products = JSON.parse(JSON.stringify(defaultProducts));
@@ -209,7 +254,7 @@ function renderCatalogGrid() {
     
     card.innerHTML = `
       ${p.id == 2 ? '<span class="bundle-popular-badge">الأكثر طلباً وتوفيراً</span>' : ''}
-      <div class="bundle-visual-container" style="display:flex;justify-content:center;margin-bottom:1.25rem;background:radial-gradient(circle at 50% 30%,#f5fae0,#ecf7b0);border-radius:20px;padding:2rem 1.5rem;height:240px;align-items:center;justify-content:center;overflow:hidden;">
+      <div class="bundle-visual-container" style="display:flex;justify-content:center;margin-bottom:1.25rem;background:radial-gradient(circle at 50% 30%,#faf6eb,#ebdcb9);border-radius:20px;padding:2rem 1.5rem;height:240px;align-items:center;justify-content:center;overflow:hidden;">
         <div style="position:relative;height:200px;display:flex;align-items:center;justify-content:center;width:100%;">
           ${visualHTML}
         </div>
@@ -298,6 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Fix all static image paths in HTML for GitHub Pages compatibility
   fixStaticImagePaths();
   applyDynamicLogo();
+  applyDynamicGuideSteps();
   initAnnouncementBar();
   initMobileMenu();
   renderCart();
@@ -313,6 +359,56 @@ function fixStaticImagePaths() {
   document.querySelectorAll('img[src^="assets/"]').forEach(img => {
     img.src = resolveImagePath(img.getAttribute('src'));
   });
+}
+
+// Load dynamic guide steps and images from admin settings
+function applyDynamicGuideSteps() {
+  try {
+    initProductsCatalog();
+    const p = products[1]; // Product 1 is the main product
+    if (!p) return;
+    
+    // Select the steps grid
+    const stepsGrid = document.querySelector('.guide-steps-grid');
+    if (!stepsGrid) return;
+    
+    // We have 3 steps
+    const cards = stepsGrid.querySelectorAll('.guide-step-card');
+    if (cards.length >= 3) {
+      for (let i = 1; i <= 3; i++) {
+        const card = cards[i - 1];
+        
+        // Update image
+        const img = card.querySelector('.guide-step-img');
+        const customImg = p[`guide_step_${i}`];
+        if (img && customImg) {
+          img.src = resolveImagePath(customImg);
+        }
+        
+        // Update title
+        const title = card.querySelector('.guide-step-card-title');
+        const customTitle = p[`howto_${i}_title`];
+        if (title && customTitle) {
+          title.textContent = customTitle;
+        }
+        
+        // Update description
+        const desc = card.querySelector('.guide-step-card-desc');
+        const customDesc = p[`howto_${i}_desc`];
+        if (desc && customDesc) {
+          if (customDesc.includes('<strong>') || customDesc.includes('<b>')) {
+            desc.innerHTML = customDesc;
+          } else {
+            let formattedDesc = customDesc;
+            formattedDesc = formattedDesc.replace(/(للشعر:|للهاتف:|للحية:)/g, '<strong>$1</strong>');
+            desc.innerHTML = formattedDesc;
+          }
+        }
+      }
+    }
+  } catch(e) {
+    console.warn('applyDynamicGuideSteps error:', e);
+  }
 }
 
 // Apply dynamic store logo if customized in admin panel
@@ -757,7 +853,7 @@ function renderLpCartCards() {
     return `
       <div class="offer-card best" style="display: flex; flex-direction: column; justify-content: space-between; padding: 1.5rem; border:1px solid var(--border); border-radius:16px;">
         <div style="display: flex; align-items: center; gap: 1.25rem; margin-bottom: 1rem; text-align: right; width:100%;">
-          <div style="width: 70px; height: 90px; background: radial-gradient(circle at 50% 30%,#f5fae0,#ecf7b0); border-radius: 12px; padding: 0.25rem; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
+          <div style="width: 70px; height: 90px; background: radial-gradient(circle at 50% 30%,#faf6eb,#ebdcb9); border-radius: 12px; padding: 0.25rem; display: flex; align-items: center; justify-content: center; flex-shrink:0;">
             ${visualHTML}
           </div>
           <div style="flex: 1; min-width: 0;">
@@ -1153,3 +1249,59 @@ function loadProductDetails() {
     addProductToCartWithQtyDiscount(productId, selectedBundle);
   };
 }
+
+// =====================================================
+// HERO SECTION SLIDER LOGIC
+// =====================================================
+let currentHeroSlide = 0;
+let heroSliderInterval = null;
+
+function setHeroSlide(index) {
+  const slides = document.querySelectorAll('.hero-slide');
+  const dots = document.querySelectorAll('.slider-dot');
+  if (slides.length === 0) return;
+  
+  currentHeroSlide = index;
+  
+  slides.forEach((slide, i) => {
+    if (i === index) {
+      slide.classList.add('active');
+    } else {
+      slide.classList.remove('active');
+    }
+  });
+  
+  dots.forEach((dot, i) => {
+    if (i === index) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+  
+  // Reset auto-play interval
+  resetHeroSliderInterval();
+}
+
+function nextHeroSlide() {
+  const slides = document.querySelectorAll('.hero-slide');
+  if (slides.length === 0) return;
+  let next = (currentHeroSlide + 1) % slides.length;
+  setHeroSlide(next);
+}
+
+function resetHeroSliderInterval() {
+  if (heroSliderInterval) clearInterval(heroSliderInterval);
+  heroSliderInterval = setInterval(nextHeroSlide, 5000);
+}
+
+// Make setHeroSlide globally accessible for HTML onclick attributes
+window.setHeroSlide = setHeroSlide;
+
+// Auto initialize when the DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  const slides = document.querySelectorAll('.hero-slide');
+  if (slides.length > 0) {
+    resetHeroSliderInterval();
+  }
+});

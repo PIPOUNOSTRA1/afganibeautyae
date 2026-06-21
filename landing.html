@@ -8,18 +8,20 @@
       if (e.target.tagName === 'IMG') {
         var src = e.target.getAttribute('src') || '';
         if (e.target.dataset.triedFallback) return;
-        if (src.indexOf('assets/') === 0 || src.indexOf('./assets/') === 0) {
+        var idx = src.indexOf('assets/');
+        if (idx !== -1) {
           e.target.dataset.triedFallback = 'true';
-          var cleanSrc = src.replace(/^(\.\/)?assets\//, '');
+          var cleanSrc = src.substring(idx);
           var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
           e.target.src = dir + cleanSrc;
         }
       } else if (e.target.tagName === 'LINK' && (e.target.rel || '').indexOf('icon') !== -1) {
         var href = e.target.getAttribute('href') || '';
         if (e.target.dataset.triedFallback) return;
-        if (href.indexOf('assets/') === 0 || href.indexOf('./assets/') === 0) {
+        var idx = href.indexOf('assets/');
+        if (idx !== -1) {
           e.target.dataset.triedFallback = 'true';
-          var cleanHref = href.replace(/^(\.\/)?assets\//, '');
+          var cleanHref = href.substring(idx);
           var dir = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
           e.target.href = dir + cleanHref;
         }
@@ -105,29 +107,29 @@
   <style>
     /* ===== VARIABLES ===== */
     :root {
-      --primary: #C5A85C;       /* Elegant Gold */
-      --primary-dark: #A88D44;  /* Dark gold */
-      --primary-glow: rgba(197, 168, 92, 0.25);
-      --bg: #0c120e;            /* Very dark forest green/black */
-      --bg2: #141f17;           /* Dark forest green */
-      --surface: #1b2a1f;       /* Forest green surface */
-      --surface2: #24382a;      /* Lighter forest green surface */
-      --border: rgba(197, 168, 92, 0.2);
-      --border2: rgba(255, 255, 255, 0.06);
-      --text: #f4f7f5;          /* Soft white */
-      --text-muted: rgba(244, 247, 245, 0.6);
-      --text-dim: rgba(244, 247, 245, 0.4);
-      --gold: #C5A85C;
-      --gold-light: #E0C88F;
-      --red: #ef4444;
-      --green: #2ecc71;
+      --primary: #9B7B3A;       /* Rich Gold (high contrast on light) */
+      --primary-dark: #7D6230;  /* Deeper gold */
+      --primary-glow: rgba(155, 123, 58, 0.12);
+      --bg: #FEFCF8;            /* Warm cream white */
+      --bg2: #F7F1E8;           /* Light warm cream */
+      --surface: #FFFFFF;       /* Pure white surface */
+      --surface2: #FBF7F0;      /* Soft off-white */
+      --border: rgba(155, 123, 58, 0.2);
+      --border2: rgba(0, 0, 0, 0.07);
+      --text: #2C1810;          /* Rich dark brown text */
+      --text-muted: rgba(44, 24, 16, 0.55);
+      --text-dim: rgba(44, 24, 16, 0.35);
+      --gold: #9B7B3A;
+      --gold-light: #C5A85C;
+      --red: #dc2626;
+      --green: #16a34a;
       --font-ar: 'Tajawal', sans-serif;
       --font-en: 'Inter', sans-serif;
       --radius: 20px;
       --radius-sm: 12px;
-      --shadow: 0 8px 32px rgba(0,0,0,0.5);
-      --shadow-lg: 0 24px 64px rgba(0,0,0,0.7);
-      --glow: 0 0 40px rgba(197, 168, 92, 0.15);
+      --shadow: 0 4px 24px rgba(0,0,0,0.06);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,0.08);
+      --glow: 0 0 30px rgba(155, 123, 58, 0.1);
     }
 
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -157,7 +159,7 @@
 
     /* ===== NAV ===== */
     .lp-nav {
-      background: rgba(12, 18, 14, 0.95);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
       padding: 0.9rem 1.5rem;
@@ -187,8 +189,8 @@
     .hero {
       position: relative;
       overflow: hidden;
-      background: radial-gradient(ellipse at 60% 0%, rgba(197, 168, 92, 0.08) 0%, transparent 60%),
-                  radial-gradient(ellipse at 10% 100%, rgba(197, 168, 92, 0.05) 0%, transparent 50%),
+      background: radial-gradient(ellipse at 60% 0%, rgba(155, 123, 58, 0.06) 0%, transparent 60%),
+                  radial-gradient(ellipse at 10% 100%, rgba(155, 123, 58, 0.04) 0%, transparent 50%),
                   var(--bg);
       min-height: 100svh;
       display: flex;
@@ -209,7 +211,7 @@
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(197, 168, 92, 0.08);
+      background: rgba(155, 123, 58, 0.08);
       border: 1px solid var(--primary);
       color: var(--primary);
       padding: 0.45rem 1rem;
@@ -234,7 +236,7 @@
     }
     .hero-title span.highlight {
       color: var(--primary);
-      background: linear-gradient(120deg, rgba(197,168,92,0.1) 0%, rgba(197,168,92,0.2) 100%);
+      background: linear-gradient(120deg, rgba(155,123,58,0.1) 0%, rgba(155,123,58,0.2) 100%);
       padding: 0 0.5rem;
       border-radius: 8px;
     }
@@ -269,11 +271,11 @@
       cursor: pointer;
       text-align: center;
       text-decoration: none;
-      box-shadow: 0 8px 24px rgba(197,168,92,0.3);
+      box-shadow: 0 8px 24px rgba(155,123,58,0.3);
       transition: all 0.3s;
       display: inline-block;
     }
-    .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(197,168,92,0.5); }
+    .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 16px 48px rgba(155,123,58,0.5); }
     .btn-hero-sub { font-size: 0.82rem; font-weight: 700; color: var(--primary); opacity: 0.8; text-align: center; }
 
     .hero-trust-row {
@@ -297,39 +299,180 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      width: 100%;
+      height: 480px;
     }
-    .hero-img-glow {
+    
+    /* Hero Slider Styles */
+    .hero-slider-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      background: radial-gradient(circle at 50% 50%, var(--surface) 0%, var(--bg2) 100%);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .hero-slides {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .hero-slide {
       position: absolute;
-      width: 400px;
-      height: 400px;
-      background: radial-gradient(circle, rgba(197,168,92,0.15) 0%, transparent 70%);
-      border-radius: 50%;
+      inset: 0;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      z-index: 1;
     }
+
+    .hero-slide.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 2;
+    }
+
+    .slide-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Slide 1: Tube Visual */
     .hero-img {
       width: 100%;
-      max-width: 440px;
+      max-width: 320px;
       height: auto;
-      max-height: 540px;
       object-fit: contain;
+      filter: drop-shadow(0 10px 25px rgba(0,0,0,0.15));
+    }
+
+    /* Slide 2: Woman & Hair Result */
+    .woman-slide-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       position: relative;
-      z-index: 1;
-      filter: drop-shadow(0 15px 35px rgba(0,0,0,0.6));
     }
-    .hero-product-badge {
+
+    .woman-img-hero {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 16px;
+      transform: scale(1.1) translateX(30px);
+      opacity: 0;
+      transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.2s ease;
+    }
+
+    .active .woman-img-hero {
+      transform: scale(1) translateX(0);
+      opacity: 1;
+    }
+
+    .product-overlay-hero {
       position: absolute;
-      bottom: 2rem;
-      right: -1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 1rem 1.25rem;
-      z-index: 2;
-      box-shadow: var(--shadow);
-      min-width: 200px;
+      bottom: 15px;
+      left: 15px;
+      width: 90px;
+      height: auto;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.2));
+      transform: translateY(30px) rotate(-10deg);
+      opacity: 0;
+      transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s, opacity 1.2s ease 0.3s;
+      z-index: 5;
     }
-    .hero-product-badge-stars { color: var(--gold); font-size: 0.8rem; margin-bottom: 0.3rem; }
-    .hero-product-badge-text { font-size: 0.8rem; font-weight: 700; margin-bottom: 0.2rem; }
-    .hero-product-badge-sub { font-size: 0.7rem; color: var(--text-muted); }
+
+    .active .product-overlay-hero {
+      transform: translateY(0) rotate(-15deg);
+      opacity: 1;
+    }
+
+    /* Slide 3: Before & After */
+    .ba-slide-wrap {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .ba-img-hero {
+      max-width: 95%;
+      max-height: 80%;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid var(--primary);
+      transform: scale(0.9);
+      opacity: 0;
+      transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s ease;
+    }
+
+    .active .ba-img-hero {
+      transform: scale(1);
+      opacity: 1;
+    }
+
+    .ba-label-hero {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 0.3rem 1rem;
+      border-radius: 50px;
+      transform: translateY(15px);
+      opacity: 0;
+      transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1) 0.2s, opacity 1s ease 0.2s;
+    }
+
+    .active .ba-label-hero {
+      transform: translateY(0);
+      opacity: 1;
+    }
+
+    /* Slider Controls */
+    .slider-dots {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 10;
+    }
+
+    .slider-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(155, 123, 58, 0.3);
+      border: 1px solid rgba(155, 123, 58, 0.5);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .slider-dot.active {
+      background: var(--primary);
+      width: 20px;
+      border-radius: 8px;
+    }
 
     /* ===== SOCIAL PROOF BAR ===== */
     .social-bar {
@@ -351,7 +494,7 @@
     .section-inner { max-width: 1100px; margin: 0 auto; }
     .sec-tag {
       display: inline-block;
-      background: rgba(197, 168, 92, 0.1);
+      background: rgba(155, 123, 58, 0.1);
       border: 1px solid var(--primary);
       color: var(--primary);
       font-size: 0.72rem;
@@ -412,13 +555,13 @@
     .solution-img {
       width: 100%;
       border-radius: var(--radius);
-      box-shadow: 0 0 60px rgba(197,168,92,0.12), var(--shadow-lg);
+      box-shadow: 0 0 40px rgba(155,123,58,0.08), var(--shadow-lg);
     }
     .solution-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(197,168,92,0.08);
+      background: rgba(155,123,58,0.08);
       border: 1px solid var(--primary);
       border-radius: 10px;
       padding: 0.6rem 1rem;
@@ -476,16 +619,16 @@
       content: '';
       position: absolute;
       inset: 0;
-      background: radial-gradient(circle at 50% 0%, rgba(197,168,92,0.06) 0%, transparent 60%);
+      background: radial-gradient(circle at 50% 0%, rgba(155,123,58,0.06) 0%, transparent 60%);
       opacity: 0;
       transition: opacity 0.3s;
     }
-    .benefit-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(197,168,92,0.1); }
+    .benefit-card:hover { border-color: var(--primary); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(155,123,58,0.1); }
     .benefit-card:hover::before { opacity: 1; }
     .benefit-icon {
       width: 52px;
       height: 52px;
-      background: rgba(197,168,92,0.08);
+      background: rgba(155,123,58,0.08);
       border: 1px solid var(--border);
       border-radius: 14px;
       display: flex;
@@ -533,6 +676,7 @@
       transition: all 0.3s;
     }
     .step-card:hover { border-color: var(--primary); box-shadow: var(--glow); }
+    .step-card:hover .guide-step-img { transform: scale(1.06); }
     .step-num {
       width: 52px;
       height: 52px;
@@ -546,14 +690,14 @@
       justify-content: center;
       margin: 0 auto 1.25rem;
       font-family: var(--font-en);
-      box-shadow: 0 0 24px rgba(197,168,92,0.4);
+      box-shadow: 0 0 16px rgba(155,123,58,0.2);
     }
     .step-title { font-weight: 800; font-size: 1rem; margin-bottom: 0.65rem; }
     .step-desc { font-size: 0.83rem; color: var(--text-muted); line-height: 1.7; }
     .step-timing {
       display: inline-block;
       margin-top: 0.75rem;
-      background: rgba(197,168,92,0.08);
+      background: rgba(155,123,58,0.08);
       border: 1px solid var(--border);
       color: var(--primary);
       font-size: 0.72rem;
@@ -665,7 +809,7 @@
       align-items: center;
       justify-content: center;
       margin: -5.5rem auto 1.5rem;
-      box-shadow: 0 0 30px var(--primary-glow);
+      box-shadow: 0 0 20px var(--primary-glow);
     }
     .guarantee-title { font-size: 1.5rem; font-weight: 900; margin-bottom: 0.5rem; }
     .guarantee-subtitle { color: var(--primary); font-weight: 800; font-size: 1rem; margin-bottom: 1.25rem; }
@@ -733,7 +877,7 @@
       height: 160px;
       object-fit: contain;
       margin-bottom: 1.25rem;
-      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+      filter: drop-shadow(0 6px 12px rgba(0,0,0,0.12));
     }
     .bundle-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.6; margin-bottom: 1.25rem; height: 3.2rem; overflow: hidden; }
     .bundle-price-row { display: flex; align-items: baseline; gap: 0.25rem; margin-bottom: 0.5rem; }
@@ -788,7 +932,7 @@
     .form-group { margin-bottom: 1rem; }
     .lp-input {
       width: 100%;
-      background: rgba(0,0,0,0.2);
+      background: rgba(0,0,0,0.03);
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       padding: 0.95rem 1.15rem;
@@ -815,7 +959,7 @@
     .pay-option input { display: none; }
     .pay-option.selected { border-color: var(--primary); background: var(--primary-glow); }
 
-    .card-details { display: none; background: rgba(0,0,0,0.15); border-radius: var(--radius-sm); padding: 1rem; border: 1px solid var(--border2); margin-bottom: 1.25rem; }
+    .card-details { display: none; background: rgba(0,0,0,0.02); border-radius: var(--radius-sm); padding: 1rem; border: 1px solid var(--border2); margin-bottom: 1.25rem; }
     .card-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 0.75rem; }
 
     .btn-submit {
@@ -877,7 +1021,7 @@
     .success-page {
       position: fixed;
       inset: 0;
-      background: rgba(12, 18, 14, 0.98);
+      background: rgba(255, 255, 255, 0.98);
       z-index: 1000;
       display: none;
       flex-direction: column;
@@ -908,7 +1052,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      background: rgba(27, 42, 31, 0.95);
+      background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(15px);
       border-top: 1px solid var(--border);
       padding: 0.85rem 5vw;
@@ -959,6 +1103,90 @@
       .trust-badges-grid { grid-template-columns: 1fr 1fr; }
       .timeline-item { grid-template-columns: 1fr; text-align: center; gap: 1rem; }
     }
+
+    /* ===== FOMO LIVE NOTIFICATION POPUP ===== */
+    .fomo-popup {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      z-index: 85;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      max-width: 340px;
+    }
+    .fomo-popup.show { transform: translateX(0); opacity: 1; }
+    .fomo-popup-icon {
+      width: 42px; height: 42px;
+      background: rgba(46,204,113,0.1);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; flex-shrink: 0;
+    }
+    .fomo-popup-name { font-weight: 800; font-size: 0.82rem; color: var(--text); }
+    .fomo-popup-action { font-size: 0.75rem; color: var(--text-muted); }
+    .fomo-popup-time { font-size: 0.68rem; color: var(--primary); font-weight: 700; margin-top: 0.15rem; }
+
+    /* ===== FLOATING WHATSAPP ===== */
+    .whatsapp-float {
+      position: fixed; bottom: 90px; left: 20px;
+      width: 56px; height: 56px; background: #25D366;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.4);
+      z-index: 88; text-decoration: none; transition: all 0.3s;
+      animation: wa-pulse 2s infinite;
+    }
+    .whatsapp-float:hover { transform: scale(1.1); }
+    .whatsapp-float svg { width: 28px; height: 28px; fill: white; }
+    @keyframes wa-pulse {
+      0%,100% { box-shadow: 0 4px 16px rgba(37,211,102,0.4); }
+      50% { box-shadow: 0 4px 24px rgba(37,211,102,0.7), 0 0 0 8px rgba(37,211,102,0.1); }
+    }
+
+    /* ===== LIVE VIEWERS ===== */
+    .live-viewers {
+      position: fixed; bottom: 20px; right: 20px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 50px; padding: 0.45rem 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+      font-size: 0.72rem; font-weight: 700; color: var(--text-muted);
+      z-index: 82; box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .live-dot { width: 8px; height: 8px; background: #ef4444; border-radius: 50%; animation: blink 1.5s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    /* ===== CTA PULSE ===== */
+    @keyframes cta-pulse {
+      0%,100% { box-shadow: 0 8px 24px rgba(155,123,58,0.3); }
+      50% { box-shadow: 0 8px 32px rgba(155,123,58,0.5), 0 0 0 6px rgba(155,123,58,0.1); }
+    }
+    .btn-hero { animation: cta-pulse 2.5s infinite; }
+    .btn-order:not(.btn-order-outline) { animation: cta-pulse 2.5s infinite; }
+
+    /* ===== MICRO PROOF BADGE ===== */
+    .micro-proof {
+      display: flex; align-items: center; gap: 0.5rem;
+      background: rgba(46,204,113,0.08); border: 1px solid rgba(46,204,113,0.2);
+      border-radius: 50px; padding: 0.35rem 0.85rem;
+      font-size: 0.72rem; font-weight: 700; color: #16a34a;
+      margin-top: 0.75rem; width: fit-content;
+    }
+    .micro-proof-dot { width: 6px; height: 6px; background: #16a34a; border-radius: 50%; animation: blink 1.5s infinite; }
+
+    @media (max-width: 900px) {
+      .fomo-popup { right: 10px; left: 10px; bottom: 80px; max-width: none; }
+      .live-viewers { right: 10px; bottom: 10px; font-size: 0.65rem; }
+      .whatsapp-float { bottom: 80px; left: 10px; width: 48px; height: 48px; }
+      .whatsapp-float svg { width: 24px; height: 24px; }
+    }
   </style>
 </head>
 <body>
@@ -985,15 +1213,15 @@
 <section class="hero" id="top">
   <div class="hero-inner">
     <div>
-      <div class="hero-badge">الأول في الخليج — زيت الأفغاني الأصلي المعتمد</div>
+      <div class="hero-badge">الأول في الخليج — زيت الأفغاني الأصلي المعتمد بموافقة معايير الجودة</div>
       <p class="hero-eyebrow">AFGHAN BEAUTY · GOLDEN AFGHAN OIL</p>
       <h1 class="hero-title">
-        شعر أكثر كثافة،
-        <span class="highlight">فراغات ممتلئة</span>
-        ولمعان مذهل!
+        تغلّبي على تساقط وجفاف الشعر الناتج عن 
+        <span class="highlight">مياه الإمارات الكلسية</span>
+        والرطوبة العالية!
       </h1>
       <p class="hero-subtitle">
-        زيت الأفغاني الأصلي الذهبي — التركيبة التقليدية المدعمة بـ 7 زيوت عشبية مركزة لتنشيط البصيلات الخاملة، إيقاف التساقط نهائياً، وتكثيف الفراغات واللحية والشارب للرجال والنساء في 14 يوماً. خالي تماماً من المينوكسيديل.
+        زيت الأفغاني الأصلي الذهبي هو السر لتغذية بصيلات الشعر التي أجهدتها مياه التحلية والحرارة. كورس علاجي متكامل يوقف التساقط فورياً وينبت الفراغات واللحية والشارب خلال 14 يوماً فقط بفضل تركيبة الـ 7 زيوت العشبية المعصورة على البارد. طبيعي 100% وخالٍ تماماً من المينوكسيديل والهرمونات مع ضمان ذهبي لاسترجاع الأموال لمدة 30 يوماً.
       </p>
 
       <!-- Stats -->
@@ -1034,17 +1262,44 @@
             طبيعي 100%
           </span>
         </div>
+        <div class="micro-proof">
+          <span class="micro-proof-dot"></span>
+          <span>🛒 <strong id="liveBuyerCount">23</strong> شخص يتسوقون الآن في الإمارات</span>
+        </div>
       </div>
     </div>
 
-    <!-- Image -->
+    <!-- Image Slider -->
     <div class="hero-img-wrap">
-      <div class="hero-img-glow"></div>
-      <img src="assets/afghan-oil.png" alt="زيت الأفغاني الأصلي الذهبي" class="hero-img" loading="eager">
-      <div class="hero-product-badge">
-        <div class="hero-product-badge-stars">★★★★★</div>
-        <div class="hero-product-badge-text">الأكثر مبيعاً وتفضيلاً</div>
-        <div class="hero-product-badge-sub">🔥 متبقي 12 عبوة فقط بسعر العرض!</div>
+      <div class="hero-slider-container">
+        <div class="hero-slides">
+          <!-- Slide 1: Product Bottle -->
+          <div class="hero-slide active">
+            <div class="slide-content">
+              <img src="assets/afghan-oil.png" alt="زيت الأفغاني الأصلي الذهبي" class="hero-img" loading="eager">
+            </div>
+          </div>
+          <!-- Slide 2: Woman & Hair Result -->
+          <div class="hero-slide">
+            <div class="slide-content woman-slide-wrap">
+              <img src="assets/woman-hair.png" alt="شعر ملس وكثيف" class="woman-img-hero">
+              <img src="assets/afghan-oil.png" alt="زيت الأفغاني الأصلي الذهبي" class="product-overlay-hero">
+            </div>
+          </div>
+          <!-- Slide 3: Before & After -->
+          <div class="hero-slide">
+            <div class="slide-content ba-slide-wrap">
+              <img src="assets/before-after.png" alt="مقارنة النتائج قبل وبعد" class="ba-img-hero">
+              <span class="ba-label-hero">نتائج حقيقية في 14 يوماً فقط</span>
+            </div>
+          </div>
+        </div>
+        <!-- Dots navigation -->
+        <div class="slider-dots">
+          <span class="slider-dot active" onclick="setHeroSlide(0)"></span>
+          <span class="slider-dot" onclick="setHeroSlide(1)"></span>
+          <span class="slider-dot" onclick="setHeroSlide(2)"></span>
+        </div>
       </div>
     </div>
   </div>
@@ -1205,19 +1460,28 @@
     </div>
     <div class="steps-grid">
       <div class="step-card">
-        <div class="step-num">١</div>
+        <div class="step-img-wrap" style="position: relative; width: 100%; height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 1.25rem; background: var(--bg2); border: 1px solid var(--border2);">
+          <img src="assets/guide-step-1.png" alt="توزيع الزيت على الفروة" class="guide-step-img" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+          <div class="step-num-overlay" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; background: var(--primary); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; font-family: var(--font-en); box-shadow: 0 4px 12px rgba(0,0,0,0.4);">١</div>
+        </div>
         <div class="step-title">توزيع الزيت على الفروة والذقن</div>
         <div class="step-desc">ضعي قطرات كافية من زيت الأفغاني مباشرة على فروة رأس جافة أو رطبة، أو على ذقنك مع التركيز على الفراغات.</div>
         <span class="step-timing">3 مرات أسبوعياً للشعر</span>
       </div>
       <div class="step-card">
-        <div class="step-num">٢</div>
+        <div class="step-img-wrap" style="position: relative; width: 100%; height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 1.25rem; background: var(--bg2); border: 1px solid var(--border2);">
+          <img src="assets/guide-step-2.png" alt="التدليك اللطيف" class="guide-step-img" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+          <div class="step-num-overlay" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; background: var(--primary); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; font-family: var(--font-en); box-shadow: 0 4px 12px rgba(0,0,0,0.4);">٢</div>
+        </div>
         <div class="step-title">التدليك اللطيف بأطراف الأصابع</div>
         <div class="step-desc">دلكي الفروة أو بشرة الذقن بلطف بحركات دائرية لمدة 5 دقائق كاملة لتنشيط الدورة الدموية ومساعدة الجلد على الامتصاص.</div>
         <span class="step-timing">التدليك مهم جداً ⏱</span>
       </div>
       <div class="step-card">
-        <div class="step-num">٣</div>
+        <div class="step-img-wrap" style="position: relative; width: 100%; height: 180px; border-radius: 16px; overflow: hidden; margin-bottom: 1.25rem; background: var(--bg2); border: 1px solid var(--border2);">
+          <img src="assets/guide-step-3.png" alt="الترك والغسيل" class="guide-step-img" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+          <div class="step-num-overlay" style="position: absolute; top: 12px; right: 12px; width: 36px; height: 36px; background: var(--primary); color: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1rem; font-family: var(--font-en); box-shadow: 0 4px 12px rgba(0,0,0,0.4);">٣</div>
+        </div>
         <div class="step-title">الترك والغسيل بالشامبو</div>
         <div class="step-desc">للشعر: يُترك من 2 إلى 3 ساعات ثم يُغسل جيداً بالشامبو المبرد. للحية: يُترك الزيت ولا داعي لغسله لسرعة امتصاصه العالية.</div>
         <span class="step-timing">يغسل بماء فاتر ❄️</span>
@@ -1397,7 +1661,7 @@
       <div class="bundle-card featured">
         <div style="margin-top:1.5rem;font-size:0.72rem;color:var(--text-dim);font-weight:700;margin-bottom:0.25rem;">العرض الأكثر طلباً وتوفيراً</div>
         <div class="bundle-name">عبوتين + ١ مجاناً (3 عبوات)</div>
-        <img src="assets/afghan-oil.png" alt="عبوتين زيت الأفغاني الأصلي" class="bundle-img">
+        <img src="assets/afghan-oil-2.png" alt="عبوتين زيت الأفغاني الأصلي" class="bundle-img">
         <div class="bundle-desc">كورسات الإنبات الكاملة تحتاج عبوتين على الأقل. تضمن بقاء الزيت معك طوال فترة تنشيط البصيلات.</div>
         <div class="bundle-price-row">
           <span class="bundle-price">189</span>
@@ -1418,7 +1682,7 @@
       <div class="bundle-card">
         <div style="font-size:0.72rem;color:var(--text-dim);font-weight:700;margin-bottom:0.25rem;">عرض العائلة والإنبات الشامل</div>
         <div class="bundle-name">٣ عبوات + ١ مجاناً (4 عبوات)</div>
-        <img src="assets/afghan-oil.png" alt="3 عبوات زيت الأفغاني الأصلي" class="bundle-img">
+        <img src="assets/afghan-oil-3.png" alt="3 عبوات زيت الأفغاني الأصلي" class="bundle-img">
         <div class="bundle-desc">مثالي للمشاركة مع العائلة أو الاستخدام طويل الأمد لتكثيف الشعر واللحية والشارب معاً.</div>
         <div class="bundle-price-row">
           <span class="bundle-price">237</span>
@@ -1467,7 +1731,7 @@
 
           <!-- طريقة الدفع: COD فقط -->
           <input type="hidden" name="lpPayment" value="cod">
-          <div style="display:flex;align-items:center;gap:0.85rem;background:rgba(197,168,92,0.12);border:2px solid var(--primary);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;gap:0.85rem;background:rgba(155,123,58,0.1);border:2px solid var(--primary);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
             <span style="font-size:1.75rem;">💵</span>
             <div>
               <div style="font-weight:800;font-size:0.92rem;color:var(--primary);"> الدفع عند الاستلام (COD)</div>
@@ -1585,6 +1849,27 @@
     العودة للمتجر 🛍️
   </a>
 </div>
+
+<!-- ===== FOMO NOTIFICATION POPUP ===== -->
+<div class="fomo-popup" id="fomoPopup">
+  <div class="fomo-popup-icon">✅</div>
+  <div>
+    <div class="fomo-popup-name" id="fomoName">أحمد من دبي</div>
+    <div class="fomo-popup-action" id="fomoAction">اشترى كورس الإنبات المزدوج (3 عبوات)</div>
+    <div class="fomo-popup-time" id="fomoTime">منذ 3 دقائق</div>
+  </div>
+</div>
+
+<!-- ===== LIVE VIEWERS COUNTER ===== -->
+<div class="live-viewers">
+  <span class="live-dot"></span>
+  <span>👁 <strong id="liveViewerCount">47</strong> شخص يشاهدون هذه الصفحة الآن</span>
+</div>
+
+<!-- ===== WHATSAPP FLOAT BUTTON ===== -->
+<a href="https://wa.me/97141234567?text=مرحباً، أريد الاستفسار عن زيت الأفغاني الأصلي الذهبي" target="_blank" class="whatsapp-float" aria-label="تواصل واتساب">
+  <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
 
 <!-- ===== FOOTER ===== -->
 <footer class="lp-footer">
@@ -1744,7 +2029,7 @@
       id: orderId, name, phone, city,
       address: district + '، ' + address,
       paymentMethod: 'الدفع عند الاستلام (COD)',
-      items: [{ name: pname, price, quantity: qty }],
+      items: [{ name: pname, price: price, quantity: 1 }],
       subtotal: price, shipping, discount: disc, total,
       date: new Date().toISOString(), status: 'pending'
     };
@@ -1776,6 +2061,146 @@
 
   // Init
   updateSummaryUI();
+
+  // ===== HERO SLIDER =====
+  let currentHeroSlide = 0;
+  let heroSliderInterval = null;
+
+  function setHeroSlide(index) {
+    const slides = document.querySelectorAll('.hero-slide');
+    const dots = document.querySelectorAll('.slider-dot');
+    if (slides.length === 0) return;
+    
+    currentHeroSlide = index;
+    
+    slides.forEach((slide, i) => {
+      if (i === index) {
+        slide.classList.add('active');
+      } else {
+        slide.classList.remove('active');
+      }
+    });
+    
+    dots.forEach((dot, i) => {
+      if (i === index) {
+        dot.classList.add('active');
+      } else {
+        dot.classList.remove('active');
+      }
+    });
+    
+    resetHeroSliderInterval();
+  }
+
+  function nextHeroSlide() {
+    const slides = document.querySelectorAll('.hero-slide');
+    if (slides.length === 0) return;
+    let next = (currentHeroSlide + 1) % slides.length;
+    setHeroSlide(next);
+  }
+
+  function resetHeroSliderInterval() {
+    if (heroSliderInterval) clearInterval(heroSliderInterval);
+    heroSliderInterval = setInterval(nextHeroSlide, 5000);
+  }
+
+  window.setHeroSlide = setHeroSlide;
+
+  // Initialize Slider on load
+  const slides = document.querySelectorAll('.hero-slide');
+  if (slides.length > 0) {
+    resetHeroSliderInterval();
+  }
+
+  // ===== FOMO LIVE NOTIFICATIONS & COUNTERS =====
+  (function() {
+    // 1. Live Viewers Count logic
+    const viewerEl = document.getElementById('liveViewerCount');
+    if (viewerEl) {
+      setInterval(() => {
+        const currentVal = parseInt(viewerEl.textContent) || 47;
+        const diff = Math.floor(Math.random() * 9) - 4; // -4 to +4 change
+        let newVal = currentVal + diff;
+        if (newVal < 35) newVal = 35;
+        if (newVal > 95) newVal = 95;
+        viewerEl.textContent = newVal;
+      }, 7000);
+    }
+
+    // 2. Live Buyer Count logic (Hero Section)
+    const buyerEl = document.getElementById('liveBuyerCount');
+    if (buyerEl) {
+      setInterval(() => {
+        const currentVal = parseInt(buyerEl.textContent) || 23;
+        const diff = Math.floor(Math.random() * 5) - 2; // -2 to +2 change
+        let newVal = currentVal + diff;
+        if (newVal < 15) newVal = 15;
+        if (newVal > 38) newVal = 38;
+        buyerEl.textContent = newVal;
+      }, 11000);
+    }
+
+    // 3. FOMO Popups Cycle logic
+    const fomoPopup = document.getElementById('fomoPopup');
+    const fomoName = document.getElementById('fomoName');
+    const fomoAction = document.getElementById('fomoAction');
+    const fomoTime = document.getElementById('fomoTime');
+
+    if (fomoPopup && fomoName && fomoAction && fomoTime) {
+      const fomoNames = [
+        "فاطمة من دبي",
+        "سلطان من أبوظبي",
+        "شيخة من الشارقة",
+        "محمد من العين",
+        "مريم من عجمان",
+        "عبدالله من رأس الخيمة",
+        "ريم من الفجيرة",
+        "حمد من دبي",
+        "خلود من أبوظبي",
+        "راشد من الشارقة",
+        "منى من العين",
+        "خالد من دبي"
+      ];
+      const fomoActions = [
+        "اشترى كورس الإنبات المكثف (عبوتين + عبوة مجانية) 🔥",
+        "اشترت كورس العائلة والإنبات الشامل (٣ عبوات + عبوة مجانية) 💎",
+        "اشترى كورس التجربة (عبوة واحدة) 👍",
+        "استفاد من العرض الذهبي (عبوتين + عبوة مجانية) 🎁",
+        "اشترت كورس الإنبات المكثف (عبوتين + عبوة مجانية) 🔥"
+      ];
+      const fomoTimes = [
+        "منذ دقيقة واحدة",
+        "منذ دقيقتين",
+        "منذ 3 دقائق",
+        "منذ 5 دقائق",
+        "منذ 7 دقائق",
+        "قبل قليل"
+      ];
+
+      function triggerFomo() {
+        const name = fomoNames[Math.floor(Math.random() * fomoNames.length)];
+        const action = fomoActions[Math.floor(Math.random() * fomoActions.length)];
+        const time = fomoTimes[Math.floor(Math.random() * fomoTimes.length)];
+
+        fomoName.textContent = name;
+        fomoAction.textContent = action;
+        fomoTime.textContent = time;
+
+        fomoPopup.classList.add('show');
+
+        // Hide after 5 seconds
+        setTimeout(() => {
+          fomoPopup.classList.remove('show');
+        }, 5000);
+      }
+
+      // Trigger first FOMO popup after 4 seconds
+      setTimeout(triggerFomo, 4000);
+
+      // Repeat every 14 seconds (5s showing + 9s hidden)
+      setInterval(triggerFomo, 14000);
+    }
+  })();
 </script>
 
 </body>

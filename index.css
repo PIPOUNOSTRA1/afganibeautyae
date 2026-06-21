@@ -1,25 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;900&family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* K-Beauty Design System Variables */
+/* Luxurious Gold & Amber-Brown Design System Variables */
 :root {
   --primary: #C5A85C;       /* Elegant Gold */
-  --primary-soft: #FAF8F2;  /* Soft golden cream tint */
+  --primary-soft: #FAF7F0;  /* Soft golden cream tint */
   --primary-hover: #A88D44; /* Dark gold */
-  --secondary: #1F3825;     /* Dark luxurious forest green */
-  --secondary-soft: #EBF0EC;/* Soft green-white */
-  --secondary-hover: #16291B;
-  --background: #F7F9F7;    /* Warm pale off-white */
+  --secondary: #2D1E12;     /* Dark luxurious amber brown (Afghan Oil bottle color) */
+  --secondary-soft: #F5EFEB;/* Soft warm beige */
+  --secondary-hover: #1F120A;
+  --background: #FAF8F5;    /* Warm luxury silk off-white */
   --surface: #ffffff;
-  --surface-lime: #F2F5F2;  /* Pale green tinted surface */
-  --border: #E1E8E2;        /* Soft green-gray border */
-  --text-main: #0B190F;     /* Deep forest green charcoal */
-  --text-muted: #4B5A4E;    /* Muted forest charcoal */
+  --surface-lime: #F8F5F0;  /* Warm tinted surface cream */
+  --border: #E8E2DC;        /* Warm sand border */
+  --text-main: #1F130B;     /* Deep amber-charcoal */
+  --text-muted: #5C4E43;    /* Muted warm charcoal */
   --text-light: #ffffff;
   --success: #2e7d32;
   --success-soft: #e8f5e9;
-  --shadow-sm: 0 2px 8px rgba(11, 25, 15, 0.04);
-  --shadow-md: 0 8px 24px rgba(11, 25, 15, 0.06);
-  --shadow-lg: 0 16px 48px rgba(11, 25, 15, 0.1);
+  --shadow-sm: 0 2px 8px rgba(31, 19, 11, 0.04);
+  --shadow-md: 0 8px 24px rgba(31, 19, 11, 0.06);
+  --shadow-lg: 0 16px 48px rgba(31, 19, 11, 0.1);
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --font-arabic: 'Readex Pro', 'Tajawal', sans-serif;
   --font-latin: 'Inter', sans-serif;
@@ -79,7 +79,7 @@ body {
 .badge-primary {
   background-color: var(--primary-soft);
   color: var(--text-main);
-  border: 1px solid rgba(185, 215, 10, 0.3);
+  border: 1px solid rgba(197, 168, 92, 0.3);
 }
 
 .badge-secondary {
@@ -108,7 +108,7 @@ body {
 .btn-primary {
   background-color: var(--text-main); /* High contrast dark charcoal button */
   color: var(--text-light);
-  box-shadow: 0 8px 20px rgba(24, 28, 18, 0.15);
+  box-shadow: 0 8px 20px rgba(31, 19, 11, 0.15);
 }
 
 .btn-primary:hover {
@@ -118,15 +118,15 @@ body {
 }
 
 .btn-accent {
-  background-color: var(--primary); /* Bright lime button */
+  background-color: var(--primary); /* Bright gold button */
   color: var(--text-main);
-  box-shadow: 0 8px 20px rgba(185, 215, 10, 0.2);
+  box-shadow: 0 8px 20px rgba(197, 168, 92, 0.2);
 }
 
 .btn-accent:hover {
   background-color: var(--primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 12px 24px rgba(185, 215, 10, 0.3);
+  box-shadow: 0 12px 24px rgba(197, 168, 92, 0.3);
 }
 
 .btn-secondary {
@@ -148,8 +148,8 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 15px rgba(185, 215, 10, 0.15); }
-  50% { box-shadow: 0 0 25px rgba(185, 215, 10, 0.35); }
+  0%, 100% { box-shadow: 0 0 15px rgba(197, 168, 92, 0.15); }
+  50% { box-shadow: 0 0 25px rgba(197, 168, 92, 0.35); }
 }
 
 @keyframes slideIn {
@@ -468,6 +468,179 @@ nav {
   justify-content: center;
   align-items: center;
   height: 480px;
+  width: 100%;
+}
+
+/* Hero Slider Styles */
+.hero-slider-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  border-radius: 32px;
+  background: radial-gradient(circle at 50% 50%, var(--primary-soft) 0%, var(--surface-lime) 100%);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+}
+
+.hero-slides {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.hero-slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  z-index: 1;
+}
+
+.hero-slide.active {
+  opacity: 1;
+  visibility: visible;
+  z-index: 2;
+}
+
+.slide-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Slide 1: Tube Visual */
+.hero-slide:nth-child(1) .tube-visual-container {
+  transform: scale(1.1) rotate(-15deg);
+  transition: transform 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.hero-slide:nth-child(1).active .tube-visual-container {
+  transform: scale(1.1) rotate(-15deg);
+}
+
+/* Slide 2: Woman & Hair Result */
+.woman-slide-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.woman-img-hero {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  transform: scale(1.1) translateX(30px);
+  opacity: 0;
+  transition: transform 1.2s cubic-bezier(0.25, 1, 0.5, 1), opacity 1.2s ease;
+}
+
+.active .woman-img-hero {
+  transform: scale(1) translateX(0);
+  opacity: 1;
+}
+
+.product-overlay-hero {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 120px;
+  height: auto;
+  filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+  transform: translateY(50px) rotate(-10deg);
+  opacity: 0;
+  transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s, opacity 1.2s ease 0.3s;
+  z-index: 5;
+}
+
+.active .product-overlay-hero {
+  transform: translateY(0) rotate(-15deg);
+  opacity: 1;
+}
+
+/* Slide 3: Before & After */
+.ba-slide-wrap {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.ba-img-hero {
+  max-width: 90%;
+  max-height: 80%;
+  object-fit: contain;
+  border-radius: 16px;
+  box-shadow: var(--shadow-md);
+  border: 2px solid var(--primary);
+  transform: scale(0.9);
+  opacity: 0;
+  transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s ease;
+}
+
+.active .ba-img-hero {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.ba-label-hero {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.4rem 1.2rem;
+  border-radius: 50px;
+  box-shadow: var(--shadow-sm);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1) 0.2s, opacity 1s ease 0.2s;
+}
+
+.active .ba-label-hero {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Slider Controls */
+.slider-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.6rem;
+  z-index: 10;
+}
+
+.slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(197, 168, 92, 0.3);
+  border: 1px solid rgba(197, 168, 92, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slider-dot.active {
+  background: var(--primary);
+  width: 24px;
+  border-radius: 10px;
 }
 
 /* ----------------------------------------------------
@@ -516,7 +689,7 @@ nav {
 .tube-label-block {
   width: 90%;
   height: 120px;
-  background-color: #112415; /* Luxury dark green label */
+  background-color: #2D1E12; /* Luxury dark amber label */
   margin-top: 15px;
   border: 1.5px solid #C5A85C; /* Gold border label */
   display: flex;
@@ -582,7 +755,7 @@ nav {
   left: 20px;
   width: 22px;
   height: 38px;
-  background: linear-gradient(135deg, #1f3825 0%, #2e5437 40%, #111f14 100%); /* Forest green dropper cap */
+  background: linear-gradient(135deg, #2c1a0e 0%, #4f2e18 40%, #1f120a 100%); /* Amber brown dropper cap */
   border-radius: 4px;
   box-shadow: -5px 8px 12px rgba(12, 25, 15, 0.15);
   transform: rotate(55deg);

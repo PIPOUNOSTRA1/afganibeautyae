@@ -795,7 +795,7 @@ function attemptLogin() {
         <div class="metric-grid">
           <div class="metric-card">
             <div class="metric-label">إجمالي المبيعات</div>
-            <div class="metric-val" id="m-sales">0<span>ر.س</span></div>
+            <div class="metric-val" id="m-sales">0<span>د.إ</span></div>
             <div class="metric-sub">من الطلبات المشحونة والمسلمة</div>
             <div class="metric-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           </div>
@@ -825,7 +825,7 @@ function attemptLogin() {
           </div>
           <div class="metric-card">
             <div class="metric-label">متوسط قيمة الطلب</div>
-            <div class="metric-val" id="m-aov">0<span>ر.س</span></div>
+            <div class="metric-val" id="m-aov">0<span>د.إ</span></div>
             <div class="metric-sub">AOV</div>
             <div class="metric-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           </div>
@@ -991,7 +991,7 @@ function attemptLogin() {
             <div class="chg up" id="c-repeat-pct">0%</div>
           </div>
           <div class="analytics-metric">
-            <div class="val" id="c-clv">0<small style="font-size:1rem;color:var(--text-muted)"> ر.س</small></div>
+            <div class="val" id="c-clv">0<small style="font-size:1rem;color:var(--text-muted)"> د.إ</small></div>
             <div class="lbl">متوسط القيمة الشاملة (CLV)</div>
           </div>
         </div>
@@ -1126,7 +1126,7 @@ function attemptLogin() {
         <!-- Key Metrics -->
         <div class="grid-3" style="margin-bottom:1.5rem">
           <div class="analytics-metric">
-            <div class="val" id="an-revenue">0<small style="font-size:1rem;color:var(--text-muted)"> ر.س</small></div>
+            <div class="val" id="an-revenue">0<small style="font-size:1rem;color:var(--text-muted)"> د.إ</small></div>
             <div class="lbl">إجمالي الإيرادات</div>
             <div class="chg up" id="an-revenue-chg">↑ +0%</div>
           </div>
@@ -1136,7 +1136,7 @@ function attemptLogin() {
             <div class="chg up" id="an-orders-chg">↑ +0%</div>
           </div>
           <div class="analytics-metric">
-            <div class="val" id="an-aov">0<small style="font-size:1rem;color:var(--text-muted)"> ر.س</small></div>
+            <div class="val" id="an-aov">0<small style="font-size:1rem;color:var(--text-muted)"> د.إ</small></div>
             <div class="lbl">متوسط قيمة الطلب</div>
             <div class="chg neutral" id="an-aov-chg">—</div>
           </div>
@@ -1201,7 +1201,7 @@ function attemptLogin() {
 
         <!-- Profit Highlight -->
         <div class="highlight-box" id="calcHighlight">
-          <div class="big-num" id="calcNetProfit">0 ر.س</div>
+          <div class="big-num" id="calcNetProfit">0 د.إ</div>
           <div class="big-lbl">صافي الربح لكل طلب</div>
         </div>
 
@@ -1215,23 +1215,23 @@ function attemptLogin() {
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label class="form-label">سعر البيع (ر.س)</label>
+                  <label class="form-label">سعر البيع (د.إ)</label>
                   <input type="number" class="form-input" id="calc-price" value="338" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">تكلفة المنتج (ر.س)</label>
+                  <label class="form-label">تكلفة المنتج (د.إ)</label>
                   <input type="number" class="form-input" id="calc-cost" value="80" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">تكلفة الشحن (ر.س)</label>
+                  <label class="form-label">تكلفة الشحن (د.إ)</label>
                   <input type="number" class="form-input" id="calc-shipping" value="25" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">رسوم COD (ر.س)</label>
+                  <label class="form-label">رسوم COD (د.إ)</label>
                   <input type="number" class="form-input" id="calc-cod" value="12" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">رسوم البوابة (ر.س)</label>
+                  <label class="form-label">رسوم البوابة (د.إ)</label>
                   <input type="number" class="form-input" id="calc-gateway" value="0" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
@@ -1248,11 +1248,11 @@ function attemptLogin() {
               </div>
               <div class="form-grid-2">
                 <div class="form-group">
-                  <label class="form-label">الميزانية اليومية (ر.س)</label>
+                  <label class="form-label">الميزانية اليومية (د.إ)</label>
                   <input type="number" class="form-input" id="calc-ad-daily" value="300" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
-                  <label class="form-label">تكلفة النقرة CPC (ر.س)</label>
+                  <label class="form-label">تكلفة النقرة CPC (د.إ)</label>
                   <input type="number" class="form-input" id="calc-cpc" value="2.5" step="0.1" oninput="updateCalc()">
                 </div>
                 <div class="form-group">
@@ -1272,7 +1272,7 @@ function attemptLogin() {
             <div style="font-size:0.9rem;font-weight:800;margin-bottom:1rem;color:var(--text)">📊 النتائج اللحظية</div>
             <div class="calc-result-item">
               <span class="calc-result-label">صافي الربح / طلب</span>
-              <span class="calc-result-val" id="r-net-profit">0 ر.س</span>
+              <span class="calc-result-val" id="r-net-profit">0 د.إ</span>
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">هامش الربح %</span>
@@ -1280,15 +1280,15 @@ function attemptLogin() {
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">إجمالي التكاليف</span>
-              <span class="calc-result-val neutral" id="r-total-cost">0 ر.س</span>
+              <span class="calc-result-val neutral" id="r-total-cost">0 د.إ</span>
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">تكلفة الاستحواذ CPA</span>
-              <span class="calc-result-val neutral" id="r-cpa">0 ر.س</span>
+              <span class="calc-result-val neutral" id="r-cpa">0 د.إ</span>
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">نقطة التعادل CPA</span>
-              <span class="calc-result-val warn" id="r-breakeven-cpa">0 ر.س</span>
+              <span class="calc-result-val warn" id="r-breakeven-cpa">0 د.إ</span>
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">ROAS المطلوب</span>
@@ -1300,11 +1300,11 @@ function attemptLogin() {
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">الربح اليومي المتوقع</span>
-              <span class="calc-result-val" id="r-daily-profit">0 ر.س</span>
+              <span class="calc-result-val" id="r-daily-profit">0 د.إ</span>
             </div>
             <div class="calc-result-item">
               <span class="calc-result-label">الربح الشهري المتوقع</span>
-              <span class="calc-result-val" id="r-monthly-profit">0 ر.س</span>
+              <span class="calc-result-val" id="r-monthly-profit">0 د.إ</span>
             </div>
             <div style="margin-top:1.25rem;background:var(--primary-soft);border:1px solid var(--primary-glow);border-radius:var(--radius-sm);padding:1rem;">
               <div style="font-size:0.78rem;font-weight:800;color:var(--primary);margin-bottom:0.4rem">💡 توصية ذكاء اصطناعي</div>
@@ -1625,7 +1625,7 @@ function attemptLogin() {
             <div class="lbl">إجمالي النقرات</div>
           </div>
           <div class="analytics-metric">
-            <div class="val" id="aff-total-commissions">0<small style="font-size:1rem;color:var(--text-muted)"> ر.س</small></div>
+            <div class="val" id="aff-total-commissions">0<small style="font-size:1rem;color:var(--text-muted)"> د.إ</small></div>
             <div class="lbl">إجمالي العمولات</div>
           </div>
         </div>
@@ -1691,7 +1691,7 @@ function attemptLogin() {
             </div>
             <div class="form-grid-2">
               <div class="form-group">
-                <label class="form-label">سعر البيع (ر.س)</label>
+                <label class="form-label">سعر البيع (د.إ)</label>
                 <input type="number" class="form-input" id="aff-calc-price" value="338" oninput="calcAffCommission()">
               </div>
               <div class="form-group">
@@ -1710,19 +1710,19 @@ function attemptLogin() {
             <div class="calc-results" style="padding:1rem">
               <div class="calc-result-item">
                 <span class="calc-result-label">سعر بعد الخصم</span>
-                <span class="calc-result-val" id="aff-r-price">0 ر.س</span>
+                <span class="calc-result-val" id="aff-r-price">0 د.إ</span>
               </div>
               <div class="calc-result-item">
                 <span class="calc-result-label">عمولة لكل طلب</span>
-                <span class="calc-result-val" id="aff-r-per-order">0 ر.س</span>
+                <span class="calc-result-val" id="aff-r-per-order">0 د.إ</span>
               </div>
               <div class="calc-result-item">
                 <span class="calc-result-label">عمولة شهرية متوقعة</span>
-                <span class="calc-result-val" id="aff-r-monthly">0 ر.س</span>
+                <span class="calc-result-val" id="aff-r-monthly">0 د.إ</span>
               </div>
               <div class="calc-result-item">
                 <span class="calc-result-label">صافي ربحك بعد العمولة</span>
-                <span class="calc-result-val" id="aff-r-net">0 ر.س</span>
+                <span class="calc-result-val" id="aff-r-net">0 د.إ</span>
               </div>
             </div>
             <div id="affCalcTip" style="margin-top:1rem;background:var(--primary-soft);border:1px solid var(--primary-glow);border-radius:var(--radius-sm);padding:0.75rem;font-size:0.78rem;color:var(--text-muted)"></div>
@@ -2258,11 +2258,11 @@ function attemptLogin() {
           <p>ضبط قيم الشحن والتوصيل</p>
           <div class="form-grid-2">
             <div class="form-group">
-              <label class="form-label">تكلفة الشحن الافتراضية (ر.س)</label>
+              <label class="form-label">تكلفة الشحن الافتراضية (د.إ)</label>
               <input type="number" class="form-input" value="29" id="s-shipping-cost">
             </div>
             <div class="form-group">
-              <label class="form-label">حد الشحن المجاني (ر.س)</label>
+              <label class="form-label">حد الشحن المجاني (د.إ)</label>
               <input type="number" class="form-input" value="300" id="s-free-shipping">
             </div>
           </div>
@@ -2342,9 +2342,9 @@ function attemptLogin() {
         <div class="form-group">
           <label class="form-label">المنتج</label>
           <select class="form-select" id="ao-product">
-            <option value="1">عبوة واحدة — 199 ر.س</option>
-            <option value="2" selected>عبوتين — 338 ر.س</option>
-            <option value="3">3 عبوات — 447 ر.س</option>
+            <option value="1">عبوة واحدة — 129 د.إ</option>
+            <option value="2" selected>عبوتين — 189 د.إ</option>
+            <option value="3">3 عبوات — 237 د.إ</option>
           </select>
         </div>
         <div class="form-group">
@@ -2448,6 +2448,51 @@ function attemptLogin() {
             <input type="text" class="form-input" placeholder="أو رابط URL" id="pm-url-gallery-formula" style="font-size:0.7rem;padding:0.4rem;margin-top:0.5rem" oninput="applyProductModalImageUrl('gallery_formula')">
           </div>
         </div>
+
+        <h4 style="color:var(--primary);margin-top:1.5rem;margin-bottom:0.75rem;border-bottom:1px solid var(--border-light);padding-bottom:0.25rem">صور خطوات دليل الاستخدام</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem">
+          <!-- Guide Step 1 -->
+          <div style="background:var(--surface);border:1px solid var(--border-light);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-weight:700;font-size:0.8rem;margin-bottom:0.5rem">صورة الخطوة 1 (التوزيع)</div>
+            <div style="position:relative;display:inline-block;margin-bottom:0.5rem">
+              <img id="pm-preview-guide-step-1" src="" style="width:90px;height:90px;object-fit:contain;border-radius:8px;border:1px solid var(--border-light);display:none">
+              <div id="pm-no-preview-guide-step-1" style="width:90px;height:90px;border-radius:8px;border:1px dashed var(--border-light);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-dim)">الشكل الافتراضي</div>
+            </div>
+            <label style="cursor:pointer;display:block;margin-top:0.5rem">
+              <input type="file" accept="image/*" style="display:none" onchange="uploadProductModalImage(event,'guide_step_1')">
+              <span class="btn sm primary" style="padding:0.3rem 0.6rem;font-size:0.7rem">رفع صورة</span>
+            </label>
+            <input type="text" class="form-input" placeholder="أو رابط URL" id="pm-url-guide-step-1" style="font-size:0.7rem;padding:0.4rem;margin-top:0.5rem" oninput="applyProductModalImageUrl('guide_step_1')">
+          </div>
+
+          <!-- Guide Step 2 -->
+          <div style="background:var(--surface);border:1px solid var(--border-light);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-weight:700;font-size:0.8rem;margin-bottom:0.5rem">صورة الخطوة 2 (التدليك)</div>
+            <div style="position:relative;display:inline-block;margin-bottom:0.5rem">
+              <img id="pm-preview-guide-step-2" src="" style="width:90px;height:90px;object-fit:contain;border-radius:8px;border:1px solid var(--border-light);display:none">
+              <div id="pm-no-preview-guide-step-2" style="width:90px;height:90px;border-radius:8px;border:1px dashed var(--border-light);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-dim)">الشكل الافتراضي</div>
+            </div>
+            <label style="cursor:pointer;display:block;margin-top:0.5rem">
+              <input type="file" accept="image/*" style="display:none" onchange="uploadProductModalImage(event,'guide_step_2')">
+              <span class="btn sm primary" style="padding:0.3rem 0.6rem;font-size:0.7rem">رفع صورة</span>
+            </label>
+            <input type="text" class="form-input" placeholder="أو رابط URL" id="pm-url-guide-step-2" style="font-size:0.7rem;padding:0.4rem;margin-top:0.5rem" oninput="applyProductModalImageUrl('guide_step_2')">
+          </div>
+
+          <!-- Guide Step 3 -->
+          <div style="background:var(--surface);border:1px solid var(--border-light);border-radius:12px;padding:1rem;text-align:center">
+            <div style="font-weight:700;font-size:0.8rem;margin-bottom:0.5rem">صورة الخطوة 3 (الغسيل)</div>
+            <div style="position:relative;display:inline-block;margin-bottom:0.5rem">
+              <img id="pm-preview-guide-step-3" src="" style="width:90px;height:90px;object-fit:contain;border-radius:8px;border:1px solid var(--border-light);display:none">
+              <div id="pm-no-preview-guide-step-3" style="width:90px;height:90px;border-radius:8px;border:1px dashed var(--border-light);display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:var(--text-dim)">الشكل الافتراضي</div>
+            </div>
+            <label style="cursor:pointer;display:block;margin-top:0.5rem">
+              <input type="file" accept="image/*" style="display:none" onchange="uploadProductModalImage(event,'guide_step_3')">
+              <span class="btn sm primary" style="padding:0.3rem 0.6rem;font-size:0.7rem">رفع صورة</span>
+            </label>
+            <input type="text" class="form-input" placeholder="أو رابط URL" id="pm-url-guide-step-3" style="font-size:0.7rem;padding:0.4rem;margin-top:0.5rem" oninput="applyProductModalImageUrl('guide_step_3')">
+          </div>
+        </div>
       </div>
 
     </div>
@@ -2500,7 +2545,10 @@ const defaultProducts = {
     faq_5_a: 'للشعر: توضع قطرات مناسبة على الفروة مع التدليك لمدة 5 دقائق، ويترك من 2 إلى 3 ساعات ثم يغسل بشامبو الأفغاني الأصلي. يستخدم 3 مرات أسبوعياً. للحية: توضع قطرات بسيطة يومياً على الفراغات مع تدليك خفيف مساءً ولا داعي لغسله فوراً لسرعة امتصاصه الفائقة.',
     gallery_tube: 'assets/afghan-oil.png',
     gallery_texture: '',
-    gallery_formula: ''
+    gallery_formula: '',
+    guide_step_1: 'assets/guide-step-1.png',
+    guide_step_2: 'assets/guide-step-2.png',
+    guide_step_3: 'assets/guide-step-3.png'
   },
   2: {
     id: 2,
@@ -2608,6 +2656,12 @@ function loadData() {
       if (!products[1] || !products[1].name.includes('الأفغاني') || !products[2] || !products[2].name.includes('شامبو')) {
         products = JSON.parse(JSON.stringify(defaultProducts));
         localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
+      } else if (!products[1].guide_step_1) {
+        // Self-healing database migration for step images
+        products[1].guide_step_1 = 'assets/guide-step-1.png';
+        products[1].guide_step_2 = 'assets/guide-step-2.png';
+        products[1].guide_step_3 = 'assets/guide-step-3.png';
+        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
       }
     } else {
       products = JSON.parse(JSON.stringify(defaultProducts));
@@ -2689,12 +2743,12 @@ function renderMetrics() {
   const codPct = orders.length ? Math.round(codOrders.length/orders.length*100) : 0;
   const deliveryRate = orders.length ? Math.round(delivered.length/orders.length*100) : 0;
 
-  setText('m-sales', formatNum(totalSales) + '<span>ر.س</span>');
+  setText('m-sales', formatNum(totalSales) + '<span>د.إ</span>');
   setText('m-orders', orders.length);
   setText('m-delivered', delivered.length);
   setText('m-pending', pending.length);
   setText('m-cancelled', cancelled.length);
-  setText('m-aov', aov + '<span>ر.س</span>');
+  setText('m-aov', aov + '<span>د.إ</span>');
   setText('m-cod', codPct + '<span>%</span>');
   setText('m-delivery-rate', deliveryRate + '<span>%</span>');
 
@@ -2769,7 +2823,7 @@ function renderRevenueChart() {
     },
     options: {
       responsive:true, maintainAspectRatio:false,
-      plugins: { legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>`${ctx.parsed.y} ر.س` } } },
+      plugins: { legend:{display:false}, tooltip:{ callbacks:{ label:ctx=>`${ctx.parsed.y} د.إ` } } },
       scales: {
         x: { grid:{color:c.grid}, ticks:{color:c.text,font:{size:10,family:'Readex Pro'}} },
         y: { grid:{color:c.grid}, ticks:{color:c.text,font:{size:10,family:'Outlet'}}, beginAtZero:true }
@@ -2821,7 +2875,7 @@ function renderRecentOrders() {
     <tr style="cursor:pointer" onclick="openOrderDetail('${o.id}')">
       <td style="font-family:var(--font-en);color:var(--primary);font-weight:700">#${o.id}</td>
       <td style="font-weight:600">${o.name}</td>
-      <td style="font-family:var(--font-en);font-weight:700">${o.total} <span style="color:var(--text-muted);font-size:0.7rem">ر.س</span></td>
+      <td style="font-family:var(--font-en);font-weight:700">${o.total} <span style="color:var(--text-muted);font-size:0.7rem">د.إ</span></td>
       <td><span class="badge ${o.status}">${STATUS_LABELS[o.status]||o.status}</span></td>
     </tr>`).join('');
 }
@@ -2863,7 +2917,7 @@ function renderTopProducts() {
           <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(rev/maxRev*100)}%"></div></div>
         </div>
       </div>
-      <div class="product-revenue">${formatNum(rev)} <small style="font-size:0.7rem;color:var(--text-muted)">ر.س</small></div>
+      <div class="product-revenue">${formatNum(rev)} <small style="font-size:0.7rem;color:var(--text-muted)">د.إ</small></div>
     </div>`).join('');
 }
 
@@ -2898,7 +2952,7 @@ function renderOrders() {
       <td style="font-weight:700">${o.name}</td>
       <td>${o.city}</td>
       <td style="font-size:0.78rem;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${o.items?.map(i=>`${i.name} (×${i.quantity})`).join(', ') || ''}">${o.items?.map(i=>`${i.name} (×${i.quantity})`).join(', ') || '—'}</td>
-      <td style="font-family:var(--font-en);font-weight:800">${o.total} <span style="color:var(--text-muted);font-size:0.7rem">ر.س</span></td>
+      <td style="font-family:var(--font-en);font-weight:800">${o.total} <span style="color:var(--text-muted);font-size:0.7rem">د.إ</span></td>
       <td><span class="badge ${o.paymentMethod.includes('الاستلام')?'cod':'card'}">${o.paymentMethod.includes('الاستلام')?'COD':'بطاقة'}</span></td>
       <td>
         <select onchange="updateOrderStatus('${o.id}',this.value)" style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:0.3rem 0.5rem;color:var(--text);font-family:var(--font-ar);font-size:0.75rem;cursor:pointer">
@@ -2947,13 +3001,13 @@ function openOrderDetail(id) {
       ${(o.items || [{name: 'منتج', quantity: 1}]).map(item => `
         <div style="font-weight:700;margin-bottom:0.75rem;display:flex;justify-content:space-between">
           <span>${item.name} × ${item.quantity || 1}</span>
-          <span>${(item.price || 0) * (item.quantity || 1)} ر.س</span>
+          <span>${(item.price || 0) * (item.quantity || 1)} د.إ</span>
         </div>
       `).join('')}
-      <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-muted);padding:0.4rem 0;border-bottom:1px solid var(--border)"><span>المجموع الفرعي</span><span>${o.subtotal} ر.س</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-muted);padding:0.4rem 0;border-bottom:1px solid var(--border)"><span>الشحن</span><span>${o.shipping===0?'مجاني ❄️':o.shipping+' ر.س'}</span></div>
-      ${o.discount>0?`<div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--delivered);padding:0.4rem 0;border-bottom:1px solid var(--border)"><span>خصم البطاقة (10%)</span><span>-${o.discount} ر.س</span></div>`:''}
-      <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:900;padding:0.6rem 0;color:var(--primary)"><span>الإجمالي</span><span>${o.total} ر.س</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-muted);padding:0.4rem 0;border-bottom:1px solid var(--border)"><span>المجموع الفرعي</span><span>${o.subtotal} د.إ</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--text-muted);padding:0.4rem 0;border-bottom:1px solid var(--border)"><span>الشحن</span><span>${o.shipping===0?'مجاني ❄️':o.shipping+' د.إ'}</span></div>
+      ${o.discount>0?`<div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--delivered);padding:0.4rem 0;border-bottom:1px solid var(--border)"><span>خصم البطاقة (10%)</span><span>-${o.discount} د.إ</span></div>`:''}
+      <div style="display:flex;justify-content:space-between;font-size:1rem;font-weight:900;padding:0.6rem 0;color:var(--primary)"><span>الإجمالي</span><span>${o.total} د.إ</span></div>
     </div>
 
     <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.75rem">تحديث الحالة:</div>
@@ -3054,7 +3108,7 @@ function renderCustomers() {
       <td style="font-family:var(--font-en)">${c.phone}</td>
       <td>${c.city}</td>
       <td style="font-family:var(--font-en);font-weight:700;text-align:center">${c.orders.length}</td>
-      <td style="font-family:var(--font-en);font-weight:800;color:var(--primary)">${formatNum(c.total)} <span style="color:var(--text-muted);font-size:0.7rem">ر.س</span></td>
+      <td style="font-family:var(--font-en);font-weight:800;color:var(--primary)">${formatNum(c.total)} <span style="color:var(--text-muted);font-size:0.7rem">د.إ</span></td>
       <td style="font-size:0.78rem;color:var(--text-muted)">${formatDate(lastOrder.date)}</td>
       <td><span class="badge ${isRepeat?'active':'draft'}">${isRepeat?'متكررة':'جديدة'}</span></td>
     </tr>`;
@@ -3158,8 +3212,8 @@ function renderProducts() {
         </div>
         <div style="display:flex;align-items:baseline;gap:0.5rem;flex-wrap:wrap;margin-left:1.5rem">
           <span style="font-family:var(--font-en);font-size:1.8rem;font-weight:900;color:var(--primary)">${p.price}</span>
-          <span style="font-size:0.85rem;color:var(--primary)">ر.س</span>
-          ${p.oldPrice?`<span style="font-size:0.8rem;color:var(--text-muted);text-decoration:line-through">${p.oldPrice} ر.س</span><span style="background:var(--primary);color:var(--bg-dark);font-size:0.6rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:50px">خصم ${savePct}%</span>`:''}
+          <span style="font-size:0.85rem;color:var(--primary)">د.إ</span>
+          ${p.oldPrice?`<span style="font-size:0.8rem;color:var(--text-muted);text-decoration:line-through">${p.oldPrice} د.إ</span><span style="background:var(--primary);color:var(--bg-dark);font-size:0.6rem;font-weight:900;padding:0.15rem 0.5rem;border-radius:50px">خصم ${savePct}%</span>`:''}
         </div>
         <div class="icon-btns" style="margin-right:auto;display:flex;gap:0.5rem;align-items:center">
           <button class="icon-btn edit" onclick="openEditProductModal(${p.id})" title="تعديل"><svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
@@ -3186,7 +3240,7 @@ function switchModalTab(event, tabId) {
   document.getElementById(tabId).style.display = 'block';
 }
 
-let pmImages = { main: '', gallery_tube: '', gallery_texture: '', gallery_formula: '' };
+let pmImages = { main: '', gallery_tube: '', gallery_texture: '', gallery_formula: '', guide_step_1: '', guide_step_2: '', guide_step_3: '' };
 
 function uploadProductModalImage(event, type) {
   const file = event.target.files[0];
@@ -3201,14 +3255,16 @@ function uploadProductModalImage(event, type) {
 }
 
 function applyProductModalImageUrl(type) {
-  const url = document.getElementById(`pm-url-${type === 'main' ? 'main-img' : type}`)?.value?.trim() || '';
+  const cleanType = (type === 'main' ? 'main-img' : type).replace(/_/g, '-');
+  const url = document.getElementById(`pm-url-${cleanType}`)?.value?.trim() || '';
   pmImages[type] = url;
   updateProductModalImagePreview(type, url);
 }
 
 function updateProductModalImagePreview(type, src) {
-  const imgEl = document.getElementById(`pm-preview-${type === 'main' ? 'main-img' : type}`);
-  const noPreviewEl = document.getElementById(`pm-no-preview-${type === 'main' ? 'main-img' : type}`);
+  const cleanType = (type === 'main' ? 'main-img' : type).replace(/_/g, '-');
+  const imgEl = document.getElementById(`pm-preview-${cleanType}`);
+  const noPreviewEl = document.getElementById(`pm-no-preview-${cleanType}`);
   
   if (src) {
     if (imgEl) { imgEl.src = src; imgEl.style.display = 'inline-block'; }
@@ -3220,7 +3276,7 @@ function updateProductModalImagePreview(type, src) {
 }
 
 function openAddProductModal() {
-  pmImages = { main: '', gallery_tube: '', gallery_texture: '', gallery_formula: '' };
+  pmImages = { main: '', gallery_tube: '', gallery_texture: '', gallery_formula: '', guide_step_1: '', guide_step_2: '', guide_step_3: '' };
   
   document.getElementById('pm-id').value = '';
   document.getElementById('pm-name').value = '';
@@ -3245,10 +3301,11 @@ function openAddProductModal() {
     document.getElementById(`pm-faq-${i}-a`).value = '';
   }
   
-  const imageTypes = ['main', 'gallery_tube', 'gallery_texture', 'gallery_formula'];
+  const imageTypes = ['main', 'gallery_tube', 'gallery_texture', 'gallery_formula', 'guide_step_1', 'guide_step_2', 'guide_step_3'];
   imageTypes.forEach(type => {
     updateProductModalImagePreview(type, '');
-    const urlInput = document.getElementById(`pm-url-${type === 'main' ? 'main-img' : type}`);
+    const cleanType = (type === 'main' ? 'main-img' : type).replace(/_/g, '-');
+    const urlInput = document.getElementById(`pm-url-${cleanType}`);
     if (urlInput) urlInput.value = '';
   });
   
@@ -3267,7 +3324,10 @@ function openEditProductModal(id) {
     main: p.image || '',
     gallery_tube: p.gallery_tube || '',
     gallery_texture: p.gallery_texture || '',
-    gallery_formula: p.gallery_formula || ''
+    gallery_formula: p.gallery_formula || '',
+    guide_step_1: p.guide_step_1 || '',
+    guide_step_2: p.guide_step_2 || '',
+    guide_step_3: p.guide_step_3 || ''
   };
   
   document.getElementById('pm-id').value = id;
@@ -3293,10 +3353,11 @@ function openEditProductModal(id) {
     document.getElementById(`pm-faq-${i}-a`).value = p[`faq_${i}_a`] || '';
   }
   
-  const imageTypes = ['main', 'gallery_tube', 'gallery_texture', 'gallery_formula'];
+  const imageTypes = ['main', 'gallery_tube', 'gallery_texture', 'gallery_formula', 'guide_step_1', 'guide_step_2', 'guide_step_3'];
   imageTypes.forEach(type => {
     updateProductModalImagePreview(type, pmImages[type]);
-    const urlInput = document.getElementById(`pm-url-${type === 'main' ? 'main-img' : type}`);
+    const cleanType = (type === 'main' ? 'main-img' : type).replace(/_/g, '-');
+    const urlInput = document.getElementById(`pm-url-${cleanType}`);
     if (urlInput) urlInput.value = pmImages[type].startsWith('http') ? pmImages[type] : '';
   });
   
@@ -3331,6 +3392,9 @@ function saveProduct() {
     gallery_tube: pmImages.gallery_tube || '',
     gallery_texture: pmImages.gallery_texture || '',
     gallery_formula: pmImages.gallery_formula || '',
+    guide_step_1: pmImages.guide_step_1 || '',
+    guide_step_2: pmImages.guide_step_2 || '',
+    guide_step_3: pmImages.guide_step_3 || '',
     freeShipping: price >= 300
   };
   
@@ -3389,7 +3453,7 @@ function renderAnalytics() {
   const cityEl = document.getElementById('cityPerformanceList');
   if(cityEl) cityEl.innerHTML = cities.slice(0,6).map(([city,rev])=>`
     <div>
-      <div class="progress-label"><span>${city}</span><span style="font-family:var(--font-en)">${formatNum(rev)} ر.س</span></div>
+      <div class="progress-label"><span>${city}</span><span style="font-family:var(--font-en)">${formatNum(rev)} د.إ</span></div>
       <div class="progress-bar"><div class="progress-fill" style="width:${Math.round(rev/maxCity*100)}%"></div></div>
     </div>`).join('');
 
@@ -3416,7 +3480,7 @@ function renderAnalytics() {
   if(tbody) tbody.innerHTML = prodArr.map(([name,d])=>`<tr>
     <td style="font-weight:600;font-size:0.82rem">${name}</td>
     <td style="text-align:center;font-family:var(--font-en);font-weight:700">${d.count}</td>
-    <td style="font-family:var(--font-en);font-weight:800;color:var(--primary)">${formatNum(d.rev)} ر.س</td>
+    <td style="font-family:var(--font-en);font-weight:800;color:var(--primary)">${formatNum(d.rev)} د.إ</td>
     <td>
       <div class="progress-bar" style="width:120px"><div class="progress-fill" style="width:${Math.round(d.rev/totalRev*100)}%"></div></div>
       <span style="font-size:0.72rem;color:var(--text-muted)">${Math.round(d.rev/totalRev*100)}%</span>
@@ -3526,7 +3590,7 @@ function updateCalc() {
   const dailyProfit = dailyOrders*netProfit - adDaily;
   const monthlyProfit = dailyProfit*30;
 
-  const fmt = n => (n>=0?'':'') + Math.round(n).toLocaleString('ar-SA') + ' ر.س';
+  const fmt = n => (n>=0?'':'') + Math.round(n).toLocaleString('ar-SA') + ' د.إ';
   const pct = n => Math.round(n*10)/10+'%';
 
   setText('r-net-profit', fmt(netProfit));
@@ -4465,7 +4529,7 @@ function renderAffiliatesTable() {
 function updateAffStats() {
   setText('aff-total-affiliates', affiliates.length);
   setText('aff-total-clicks', affiliates.reduce((s,a)=>s+(a.clicks||0),0));
-  setText('aff-total-commissions', formatNum(affiliates.reduce((s,a)=>s+(a.orders||0)*((a.comm/100)*338),0)) + ' ر.س');
+  setText('aff-total-commissions', formatNum(affiliates.reduce((s,a)=>s+(a.orders||0)*((a.comm/100)*338),0)) + ' د.إ');
 }
 
 function calcAffCommission() {
@@ -4480,16 +4544,16 @@ function calcAffCommission() {
   const netPerOrder = priceAfterDisc - perOrder;
   const netMonthly = netPerOrder * sales;
 
-  setText('aff-r-price', Math.round(priceAfterDisc) + ' ر.س');
-  setText('aff-r-per-order', Math.round(perOrder) + ' ر.س');
-  setText('aff-r-monthly', formatNum(Math.round(monthly)) + ' ر.س');
-  setText('aff-r-net', formatNum(Math.round(netMonthly)) + ' ر.س');
+  setText('aff-r-price', Math.round(priceAfterDisc) + ' د.إ');
+  setText('aff-r-per-order', Math.round(perOrder) + ' د.إ');
+  setText('aff-r-monthly', formatNum(Math.round(monthly)) + ' د.إ');
+  setText('aff-r-net', formatNum(Math.round(netMonthly)) + ' د.إ');
 
   const tip = document.getElementById('affCalcTip');
   if(tip) {
     if(comm > 20) tip.textContent = `⚠️ عمولة ${comm}% مرتفعة. تأكد من هامش ربحك الصافي.`;
     else if(comm < 10) tip.textContent = `💡 عمولة ${comm}% منخفضة. يُنصح بـ 10-15% لجذب المؤثرين الجيدين.`;
-    else tip.textContent = `✅ عمولة ${comm}% معقولة. ربحك الصافي ${Math.round(netPerOrder)} ر.س لكل طلب.`;
+    else tip.textContent = `✅ عمولة ${comm}% معقولة. ربحك الصافي ${Math.round(netPerOrder)} د.إ لكل طلب.`;
   }
 }
 
