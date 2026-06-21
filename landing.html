@@ -124,14 +124,37 @@
         
         // Meta / Facebook
         if (typeof fbq === 'function') {
+          // Meta Purchase expects value and currency in the first-level of params
           fbq('track', eventName, eventData);
         }
         
         // TikTok
         if (typeof ttq === 'object' && typeof ttq.track === 'function') {
           let ttEvent = eventName;
-          if (eventName === 'Purchase') ttEvent = 'CompletePayment';
-          ttq.track(ttEvent, eventData);
+          if (eventName === 'Purchase') {
+            ttEvent = 'CompletePayment';
+          }
+          
+          // Construct official standard properties for TikTok
+          const ttData = {
+            value: eventData.value || 0,
+            currency: eventData.currency || 'AED',
+            content_type: 'product',
+            contents: eventData.contents || []
+          };
+          
+          // Self-fill contents if missing but list is available
+          if (ttData.contents.length === 0) {
+            ttData.contents.push({
+              content_id: eventData.content_id || (eventData.content_ids && eventData.content_ids[0]) || 'AFG_OIL',
+              content_name: eventData.content_name || 'زيت الأفغاني الأصلي الذهبي',
+              content_type: 'product',
+              quantity: eventData.num_items || 1,
+              price: eventData.value || 0
+            });
+          }
+          
+          ttq.track(ttEvent, ttData);
         }
         
         // Snapchat
@@ -352,22 +375,222 @@
     .hero-img-wrap {
       position: relative;
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
+      gap: 1.5rem;
       width: 100%;
-      height: 480px;
     }
     
     /* Hero Slider Styles */
     .hero-slider-container {
       width: 100%;
-      height: 100%;
+      height: 480px;
       position: relative;
       overflow: hidden;
       border-radius: 24px;
       background: radial-gradient(circle at 50% 50%, var(--surface) 0%, var(--bg2) 100%);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
+    }
+
+    /* Modern Checkout Card Under Slider */
+    .hero-checkout-card {
+      background: var(--surface);
+      border: 2px solid var(--border);
+      border-radius: 24px;
+      padding: 1.75rem;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      text-align: right;
+      position: relative;
+      z-index: 10;
+    }
+    .hero-checkout-card-title {
+      font-size: 1.25rem;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .hero-checkout-card-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    /* Offer Selector inside Form */
+    .form-offer-selector {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .offer-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      border: 1px solid var(--border2);
+      border-radius: 16px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: var(--surface2);
+      position: relative;
+      user-select: none;
+    }
+    .offer-option:hover {
+      border-color: var(--primary);
+    }
+    .offer-option.selected {
+      border-color: var(--primary);
+      background: rgba(155, 123, 58, 0.08);
+      box-shadow: 0 0 15px rgba(155, 123, 58, 0.1);
+    }
+    .offer-option input[type="radio"] {
+      accent-color: var(--primary);
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .offer-details {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      text-align: right;
+    }
+    .offer-badge {
+      position: absolute;
+      top: -10px;
+      left: 15px;
+      background: var(--primary);
+      color: var(--bg);
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 0.2rem 0.6rem;
+      border-radius: 50px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .offer-title {
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: var(--text);
+    }
+    .offer-price {
+      font-weight: 900;
+      font-size: 1.15rem;
+      color: var(--primary);
+      margin-top: 0.15rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .offer-old {
+      text-decoration: line-through;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+      font-weight: 400;
+    }
+
+    /* Inputs and Select Styling */
+    .checkout-form-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .modern-input-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+    @media (max-width: 500px) {
+      .modern-input-row {
+        grid-template-columns: 1fr;
+      }
+    }
+    .modern-input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 0.95rem 1.25rem;
+      color: var(--text);
+      font-family: var(--font-ar);
+      font-size: 0.88rem;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .modern-input:focus {
+      border-color: var(--primary);
+      background: var(--surface);
+      box-shadow: 0 0 0 3px rgba(155, 123, 58, 0.15);
+    }
+    select.modern-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239B7B3A' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: left 1.25rem center;
+      background-size: 1.1rem;
+      cursor: pointer;
+    }
+    
+    /* COD Info and Button */
+    .cod-info-box {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      background: rgba(155, 123, 58, 0.06);
+      border: 1.5px dashed var(--primary);
+      border-radius: 12px;
+      padding: 0.85rem 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .cod-info-icon {
+      font-size: 1.6rem;
+    }
+    .cod-info-text-title {
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: var(--primary);
+    }
+    .cod-info-text-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    .modern-btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: var(--bg);
+      border: none;
+      border-radius: 12px;
+      font-family: var(--font-ar);
+      font-weight: 900;
+      font-size: 1.15rem;
+      padding: 1.1rem 2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      box-shadow: 0 6px 20px rgba(155, 123, 58, 0.25);
+      transition: all 0.3s ease;
+    }
+    .modern-btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 30px rgba(155, 123, 58, 0.45);
+    }
+    .modern-btn-submit:active {
+      transform: translateY(0);
+    }
+    
+    .form-trust-text {
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
     }
 
     .hero-slides {
@@ -1324,7 +1547,7 @@
       </div>
     </div>
 
-    <!-- Image Slider -->
+    <!-- Image Slider & Checkout Form -->
     <div class="hero-img-wrap">
       <div class="hero-slider-container">
         <div class="hero-slides">
@@ -1355,6 +1578,80 @@
           <span class="slider-dot" onclick="setHeroSlide(1)"></span>
           <span class="slider-dot" onclick="setHeroSlide(2)"></span>
         </div>
+      </div>
+
+      <!-- Modern Checkout Card -->
+      <div class="hero-checkout-card" id="checkout">
+        <h3 class="hero-checkout-card-title">
+          <span>🛒</span> اطلب الآن - الدفع عند الاستلام
+        </h3>
+        <p class="hero-checkout-card-sub">أدخل بياناتك أدناه وسنتواصل معك للتسليم خلال 24-48 ساعة</p>
+        
+        <form id="checkoutForm" onsubmit="handleOrder(event)">
+          <!-- 1. Package Selector (Built-in) -->
+          <div class="form-offer-selector">
+            <label class="offer-option selected">
+              <input type="radio" name="bundle_selection" value="2" checked onclick="selectBundleAndScroll(2, 189)">
+              <div class="offer-details">
+                <span class="offer-badge">الأكثر طلباً 🔥</span>
+                <span class="offer-title">عبوتين + 1 مجاناً (3 عبوات)</span>
+                <span class="offer-price">189 د.إ <span class="offer-old">387 د.إ</span></span>
+              </div>
+            </label>
+            <label class="offer-option">
+              <input type="radio" name="bundle_selection" value="1" onclick="selectBundleAndScroll(1, 129)">
+              <div class="offer-details">
+                <span class="offer-title">عبوة واحدة (عرض التجربة)</span>
+                <span class="offer-price">129 د.إ <span class="offer-old">199 د.إ</span></span>
+              </div>
+            </label>
+            <label class="offer-option">
+              <input type="radio" name="bundle_selection" value="3" onclick="selectBundleAndScroll(3, 237)">
+              <div class="offer-details">
+                <span class="offer-badge">توفير العائلة 💎</span>
+                <span class="offer-title">3 عبوات + 1 مجاناً (4 عبوات)</span>
+                <span class="offer-price">237 د.إ <span class="offer-old">516 د.إ</span></span>
+              </div>
+            </label>
+          </div>
+
+          <!-- 2. Form Inputs -->
+          <div class="checkout-form-fields">
+            <div class="modern-input-row">
+              <input type="text" class="modern-input" placeholder="الاسم الكامل *" id="lp-name" required>
+              <input type="tel" class="modern-input" placeholder="رقم الهاتف (05xxxxxxxx) *" id="lp-phone" required>
+            </div>
+            
+            <div class="modern-input-row">
+              <select id="lp-city" class="modern-input" required>
+                <option value="" disabled selected>اختر الإمارة *</option>
+                <option value="دبي">دبي</option>
+                <option value="أبوظبي">أبوظبي</option>
+                <option value="الشارقة">الشارقة</option>
+                <option value="عجمان">عجمان</option>
+                <option value="رأس الخيمة">رأس الخيمة</option>
+                <option value="الفجيرة">الفجيرة</option>
+                <option value="أم القيوين">أم القيوين</option>
+              </select>
+              <input type="text" class="modern-input" placeholder="العنوان الكامل (المنطقة، الشارع، اسم المبنى) *" id="lp-address" required>
+            </div>
+          </div>
+
+          <!-- 3. COD Info Banner -->
+          <div class="cod-info-box">
+            <span class="cod-info-icon">💵</span>
+            <div style="text-align: right;">
+              <div class="cod-info-text-title">الدفع عند الاستلام (COD)</div>
+              <div class="cod-info-text-desc">ادفع نقداً لمندوب التوصيل عند باب منزلك · لا حاجة لبطاقة بنكية</div>
+            </div>
+          </div>
+
+          <!-- 4. Submit CTA Button -->
+          <button type="submit" class="modern-btn-submit">
+            🛡️ تأكيد الطلب الآن بالدفع عند الاستلام — <span id="lp-submit-price">189 د.إ</span>
+          </button>
+          <p class="form-secure" style="text-align:center;margin-top:0.75rem;font-size:0.72rem;color:var(--text-muted);">🔒 اتمام الطلب آمن بنسبة 100% · توصيل مبرد سريع</p>
+        </form>
       </div>
     </div>
   </div>
@@ -1757,90 +2054,7 @@
   </div>
 </section>
 
-<!-- ===== CHECKOUT FORM ===== -->
-<section class="section checkout-section" id="checkout">
-  <div class="section-inner">
-    <div class="sec-center" style="margin-bottom:0;">
-      <div class="sec-tag">اتمام الطلب الآمن</div>
-      <h2 class="sec-title">أدخل بياناتك لتأكيد الطلب</h2>
-      <p class="sec-desc sec-center">أدخل بيانات التوصيل أدناه وسيتواصل معك مندوبنا للتسليم خلال 24-48 ساعة</p>
-    </div>
-    <div class="checkout-grid">
-      <!-- Form -->
-      <div class="checkout-form-card">
-        <h3 class="checkout-form-title">بيانات الشحن والتسليم</h3>
-        <p class="checkout-form-sub">🔒 طلبك آمن ومشفر بالكامل بموجب معايير الحماية</p>
 
-        <form id="checkoutForm" onsubmit="handleOrder(event)">
-          <div class="form-row">
-            <input type="text" class="lp-input" placeholder="الاسم الكامل *" id="lp-name" required>
-            <input type="tel" class="lp-input" placeholder="رقم الجوال الإماراتي (05xxxxxxxx) *" id="lp-phone" required>
-          </div>
-          <div class="form-row">
-            <input type="text" class="lp-input" placeholder="المدينة / الإمارة *" id="lp-city" required>
-            <input type="text" class="lp-input" placeholder="الحي / المنطقة *" id="lp-district" required>
-          </div>
-          <div class="form-group">
-            <input type="text" class="lp-input" placeholder="العنوان التفصيلي (الشارع، اسم المبنى) *" id="lp-address" required>
-          </div>
-
-          <!-- طريقة الدفع: COD فقط -->
-          <input type="hidden" name="lpPayment" value="cod">
-          <div style="display:flex;align-items:center;gap:0.85rem;background:rgba(155,123,58,0.1);border:2px solid var(--primary);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.25rem;">
-            <span style="font-size:1.75rem;">💵</span>
-            <div>
-              <div style="font-weight:800;font-size:0.92rem;color:var(--primary);"> الدفع عند الاستلام (COD)</div>
-              <div style="font-size:0.78rem;color:var(--text-muted);‏">ادفع نقداً لمندوب التوصيل عند باب منزلك · لا حاجة لبطاقة بنكية</div>
-            </div>
-          </div>
-
-          <button type="submit" class="btn-submit">
-            🛡️ تأكيد الطلب الآن بالدفع عند الاستلام — <span id="lp-submit-price">189 د.إ</span>
-          </button>
-          <p class="form-secure">🔒 اتمام الطلب آمن بنسبة 100% · توصيل سريع مبرد</p>
-        </form>
-      </div>
-
-      <!-- Summary -->
-      <div class="order-summary-card">
-        <h4 class="summary-title">ملخص طلبك</h4>
-        <div class="summary-products" id="summary-product-area">
-          <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border2);">
-            <img src="assets/afghan-oil.png" style="width:65px;height:80px;object-fit:contain;border-radius:10px;background:var(--bg);border:1px solid var(--border);">
-            <div>
-              <div style="font-weight:800;font-size:0.9rem;" id="summary-product-name">عبوتين + عبوة مجانية — زيت الأفغاني الأصلي</div>
-              <div style="font-size:0.75rem;color:var(--text-muted);" id="summary-product-desc">كورس الإنبات وتكثيف الفراغات · 250 مل × 3</div>
-              <div style="font-size:0.75rem;color:var(--green);font-weight:700;margin-top:0.25rem;">✔ متوفر في المخزون (جاهز للشحن)</div>
-            </div>
-          </div>
-        </div>
-        <div class="summary-row">
-          <span>المجموع الفرعي</span>
-          <span id="lp-summary-subtotal">189 د.إ</span>
-        </div>
-        <div class="summary-row">
-          <span>الشحن والتوصيل</span>
-          <span id="lp-summary-shipping">19 د.إ</span>
-        </div>
-        <div class="summary-row" id="lp-card-disc-row" style="display:none;">
-          <span>خصم الدفع بالبطاقة (10%)</span>
-          <span id="lp-card-disc-val">-0 د.إ</span>
-        </div>
-        <div class="summary-total">
-          <span>الإجمالي الكلي</span>
-          <span id="lp-summary-total">208 د.إ</span>
-        </div>
-
-        <div class="trust-badges-grid">
-          <div class="trust-badge-item"><span>🛡️</span><span>ضمان 30 يوماً</span></div>
-          <div class="trust-badge-item"><span>💵</span><span>الدفع عند الاستلام</span></div>
-          <div class="trust-badge-item"><span>🚚</span><span>توصيل مبرد سريع</span></div>
-          <div class="trust-badge-item"><span>🇸🇦</span><span>مرخص في الخليج</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ===== FAQ ===== -->
 <section class="section" id="faq" style="background:var(--bg2);">
@@ -2003,11 +2217,33 @@
       3: '٣ عبوات + عبوة مجانية'
     };
     selectedOffer = { qty, price, name: names[qty] };
+    
+    // Sync the radio option inside the form
+    const radioBtn = document.querySelector(`input[name="bundle_selection"][value="${qty}"]`);
+    if (radioBtn) {
+      radioBtn.checked = true;
+    }
+    
+    // Update selected class on parent elements
+    document.querySelectorAll('.offer-option').forEach(option => {
+      const radio = option.querySelector('input[name="bundle_selection"]');
+      if (radio && radio.checked) {
+        option.classList.add('selected');
+      } else {
+        option.classList.remove('selected');
+      }
+    });
+
     const stickyLabel = document.getElementById('stickyLabel');
     if (stickyLabel) stickyLabel.textContent = labels[qty];
     
     updateSummaryUI();
-    document.getElementById('checkout').scrollIntoView({ behavior: 'smooth' });
+    
+    // Scroll to the checkout card
+    const checkoutEl = document.getElementById('checkout');
+    if (checkoutEl) {
+      checkoutEl.scrollIntoView({ behavior: 'smooth' });
+    }
 
     // Firing InitiateCheckout event
     if (typeof window.trackPixelEvent === 'function') {
@@ -2078,7 +2314,8 @@
     const name = document.getElementById('lp-name').value.trim();
     const phone = document.getElementById('lp-phone').value.trim();
     const city = document.getElementById('lp-city').value.trim();
-    const district = document.getElementById('lp-district').value.trim();
+    const districtEl = document.getElementById('lp-district');
+    const district = districtEl ? districtEl.value.trim() : '';
     const address = document.getElementById('lp-address').value.trim();
 
     if (!/^(05|5)\d{8}$|^\+971/.test(phone.replace(/\s/g,''))) {
@@ -2098,7 +2335,7 @@
     const orderId = 'AB-' + Date.now().toString().slice(-6);
     const order = {
       id: orderId, name, phone, city,
-      address: district + '، ' + address,
+      address: district ? (district + '، ' + address) : address,
       paymentMethod: 'الدفع عند الاستلام (COD)',
       items: [{ name: pname, price: price, quantity: 1 }],
       subtotal: price, shipping, discount: disc, total,

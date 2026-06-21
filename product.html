@@ -115,14 +115,37 @@
         
         // Meta / Facebook
         if (typeof fbq === 'function') {
+          // Meta Purchase expects value and currency in the first-level of params
           fbq('track', eventName, eventData);
         }
         
         // TikTok
         if (typeof ttq === 'object' && typeof ttq.track === 'function') {
           let ttEvent = eventName;
-          if (eventName === 'Purchase') ttEvent = 'CompletePayment';
-          ttq.track(ttEvent, eventData);
+          if (eventName === 'Purchase') {
+            ttEvent = 'CompletePayment';
+          }
+          
+          // Construct official standard properties for TikTok
+          const ttData = {
+            value: eventData.value || 0,
+            currency: eventData.currency || 'AED',
+            content_type: 'product',
+            contents: eventData.contents || []
+          };
+          
+          // Self-fill contents if missing but list is available
+          if (ttData.contents.length === 0) {
+            ttData.contents.push({
+              content_id: eventData.content_id || (eventData.content_ids && eventData.content_ids[0]) || 'AFG_OIL',
+              content_name: eventData.content_name || 'زيت الأفغاني الأصلي الذهبي',
+              content_type: 'product',
+              quantity: eventData.num_items || 1,
+              price: eventData.value || 0
+            });
+          }
+          
+          ttq.track(ttEvent, ttData);
         }
         
         // Snapchat
