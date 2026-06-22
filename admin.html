@@ -623,6 +623,27 @@
 </div>
 
 <script>
+if (window.location.protocol === 'file:') {
+  // Warn the user but also fallback fetch to localhost:8080 to allow functionality
+  alert('تنبيه هام:\nلقد قمت بفتح صفحة لوحة التحكم كملف محلي (file:///) بدلاً من تشغيلها عبر الخادم.\n\nلتجنب خطأ الاتصال بالخادم والتمكن من تسجيل الدخول واستخدام كافة الميزات، يرجى نسخ الرابط التالي وفتحه في المتصفح:\nhttp://localhost:8080/admin.html');
+}
+
+// Redirect API requests based on settings or protocol fallback
+(function() {
+  const getSetting = (key) => (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || '';
+  const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
+  
+  if (apiBase) {
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+      if (typeof input === 'string' && input.startsWith('/api/')) {
+        input = apiBase.replace(/\/$/, '') + input;
+      }
+      return originalFetch(input, init);
+    };
+  }
+})();
+
 // ============================================================
 // Admin Auth System — Password + API Key (URL)
 // ============================================================
@@ -1545,6 +1566,21 @@ async function attemptLogin() {
 ُسيتم شحن طلبك خلال 24 ساعة. شكراً لثقتكِ بأفغاني بيوتي 💚</textarea>
             </div>
             <button class="btn sm" style="border-color:#25D366;color:#25D366" onclick="copyWhatsAppLink()">📋 نسخ رابط WhatsApp</button>
+          </div>
+        </div>
+
+        <!-- Live API Server Configuration -->
+        <div class="card">
+          <div class="card-title">
+            <svg viewBox="0 0 24 24" style="color:var(--primary)"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+            إعدادات خادم الـ API (خادم الإنترنت Live Server)
+          </div>
+          <div class="form-group">
+            <label class="form-label">رابط خادم الـ API الخارجي (مثال: https://anabeauty-api.onrender.com)</label>
+            <input type="text" class="form-input" id="tk-api-base-url" placeholder="اتركه فارغاً للاعتماد على خادم الـ Localhost" style="direction:ltr;text-align:left;">
+            <small style="font-size:0.75rem;color:var(--text-muted);display:block;margin-top:0.25rem;">
+              عند رفع مشروع الخادم لبيئة سحابية (مثل Render أو Railway أو VPS)، أدخل الرابط الخارجي هنا لكي تتمكن صفحات المتجر المفتوحة محلياً أو على استضافة أخرى (مثل GitHub Pages) من إرسال الطلبات وحفظها بنجاح.
+            </small>
           </div>
         </div>
 
@@ -4290,6 +4326,7 @@ function loadTrackingSettings() {
 
   let needsMigration = false;
   const serverToLocalMap = {
+    api_base_url: 'tk-api-base-url',
     fb_pixel_id: 'tk-fb-id',
     tt_pixel_id: 'tk-tt-id',
     snap_pixel_id: 'tk-snap-id',
@@ -4329,7 +4366,7 @@ function loadTrackingSettings() {
 }
 
 function saveTrackingSettings() {
-  const fields = ['tk-fb-id','tk-fb-access-token','tk-tt-id','tk-tt-token','tk-snap-id','tk-ga-id','tk-gtm-id','tk-wa-num','tk-wa-msg'];
+  const fields = ['tk-fb-id','tk-fb-access-token','tk-tt-id','tk-tt-token','tk-snap-id','tk-ga-id','tk-gtm-id','tk-wa-num','tk-wa-msg','tk-api-base-url'];
   fields.forEach(id => {
     const el = document.getElementById(id);
     if(el) trackingSettings[id] = el.value;
@@ -4352,6 +4389,7 @@ function saveTrackingSettings() {
 
 function saveTrackingSettingsToServer() {
   const payload = {
+    api_base_url: trackingSettings['tk-api-base-url'] || '',
     fb_pixel_id: trackingSettings['tk-fb-id'] || '',
     tt_pixel_id: trackingSettings['tk-tt-id'] || '',
     snap_pixel_id: trackingSettings['tk-snap-id'] || '',
