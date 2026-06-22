@@ -2447,10 +2447,28 @@
       date: new Date().toISOString(), status: 'pending'
     };
 
-    let orders = [];
-    try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(e) {}
-    orders.unshift(order);
-    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+    // Save locally as fallback
+    try {
+      let orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || [];
+      orders.unshift(order);
+      localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+    } catch(e) {}
+
+    // Save on backend server
+    fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        console.log("Order saved on server:", data.order);
+      }
+    })
+    .catch(err => {
+      console.warn("Failed to save order to server, using local fallback:", err);
+    });
 
     // Firing Purchase event
     if (typeof window.trackPixelEvent === 'function') {

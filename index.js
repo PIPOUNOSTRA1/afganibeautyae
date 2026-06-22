@@ -178,7 +178,20 @@ const defaultProducts = {
 
 let products = {};
 
+async function loadProductsFromServer() {
+  try {
+    const res = await fetch('/api/products');
+    if (res.ok) {
+      products = await res.json();
+      return;
+    }
+  } catch (e) {
+    console.warn("Failed to load products from server, falling back:", e);
+  }
+}
+
 function initProductsCatalog() {
+  if (Object.keys(products).length > 0) return;
   try {
     const stored = localStorage.getItem('afghanbeauty_products_config');
     if (stored) {
@@ -192,26 +205,6 @@ function initProductsCatalog() {
         products[1].guide_step_1 = 'assets/guide-step-1.png';
         products[1].guide_step_2 = 'assets/guide-step-2.png';
         products[1].guide_step_3 = 'assets/guide-step-3.png';
-        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
-      }
-
-      // Self-healing: Sanitize absolute paths stored in localStorage config
-      let needsSave = false;
-      Object.keys(products).forEach(id => {
-        ['image', 'gallery_tube', 'gallery_texture', 'gallery_formula', 'guide_step_1', 'guide_step_2', 'guide_step_3'].forEach(key => {
-          if (products[id][key] && (products[id][key].includes(':\\') || products[id][key].includes(':/') || products[id][key].startsWith('file:///'))) {
-            const match = products[id][key].match(/assets[/\\][^/\\]+$/);
-            if (match) {
-              products[id][key] = match[0].replace(/\\/g, '/');
-            } else {
-              const parts = products[id][key].split(/[/\\]/);
-              products[id][key] = 'assets/' + parts[parts.length - 1];
-            }
-            needsSave = true;
-          }
-        });
-      });
-      if (needsSave) {
         localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
       }
     } else {
@@ -323,7 +316,10 @@ if (localStorage.getItem('afghanbeauty_cart')) {
 // UI Logic & Setup
 // ----------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Pre-load products from server
+  await loadProductsFromServer();
+
   // Migrate store name in localStorage if it has the old name
   try {
     const langKey = 'afghanbeauty_lang_content';
@@ -832,7 +828,8 @@ function closeCheckout() {
 }
 
 // Global Helper to create and save orders to localStorage
-function createAndSaveOrder({ name, phone, city, address, paymentMethod, items, subtotal, shipping, discount, total }) {
+// Global Helper to create and save orders to localStorage and backend API
+async function createAndSaveOrder({ name, phone, city, address, paymentMethod, items, subtotal, shipping, discount, total }) {
   const orderId = `AB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
   const order = {
     id: orderId,
@@ -850,14 +847,28 @@ function createAndSaveOrder({ name, phone, city, address, paymentMethod, items, 
     status: 'pending'
   };
 
-  let orders = [];
+  // Save locally as fallback
   try {
-    orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || [];
+    let orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || [];
+    orders.unshift(order);
+    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+  } catch (e) {}
+
+  // Save on server
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+    const data = await res.json();
+    if (data.success) {
+      return data.order;
+    }
   } catch (e) {
-    orders = [];
+    console.warn("Failed to save order to server, using local fallback:", e);
   }
-  orders.unshift(order);
-  localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+
   return order;
 }
 
@@ -1007,7 +1018,7 @@ function loadLandingPageCheckout() {
   };
 }
 
-function handleLpOrder(event) {
+async function handleLpOrder(event) {
   event.preventDefault();
   
   if (cart.length === 0) return;
@@ -1039,7 +1050,7 @@ function handleLpOrder(event) {
     quantity: item.quantity
   }));
 
-  const order = createAndSaveOrder({
+  const order = await createAndSaveOrder({
     name,
     phone,
     city,
@@ -1085,7 +1096,7 @@ function handleLpOrder(event) {
   if (document.getElementById('lp-cvv')) document.getElementById('lp-cvv').value = '';
 }
 
-function handlePlaceOrder(event) {
+async function handlePlaceOrder(event) {
   event.preventDefault();
   
   if (cart.length === 0) return;
@@ -1116,7 +1127,7 @@ function handlePlaceOrder(event) {
     quantity: item.quantity
   }));
 
-  const order = createAndSaveOrder({
+  const order = await createAndSaveOrder({
     name,
     phone,
     city,

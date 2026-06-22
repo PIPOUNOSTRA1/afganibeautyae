@@ -651,14 +651,29 @@ function grantAccess() {
 }
 
 // ── 1. Check URL ?key= param ──────────────────────────────────
-(function checkUrlKey() {
+(async function checkUrlKey() {
   const params = new URLSearchParams(window.location.search);
   const urlKey = params.get('key');
-  if (urlKey && urlKey === getApiKey()) {
-    // Remove key from URL for security (replace state)
-    const cleanUrl = window.location.pathname;
-    history.replaceState({}, document.title, cleanUrl);
-    grantAccess();
+  if (urlKey) {
+    try {
+      const res = await fetch('/api/admin/verify-key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: urlKey })
+      });
+      const data = await res.json();
+      if (data.success) {
+        sessionStorage.setItem('admin_token', data.token);
+        sessionStorage.setItem(ADMIN_SESSION_KEY, 'true');
+        const cleanUrl = window.location.pathname;
+        history.replaceState({}, document.title, cleanUrl);
+        document.getElementById('loginScreen').style.display = 'none';
+        await loadData();
+        loadStoreLogo();
+      }
+    } catch(e) {
+      console.error("Failed to verify bookmark key:", e);
+    }
   }
 })();
 
@@ -671,16 +686,30 @@ if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
 }
 
 // ── 3. Password login ─────────────────────────────────────────
-function attemptLogin() {
+async function attemptLogin() {
   const input = document.getElementById('loginPassword').value.trim();
   const errEl = document.getElementById('loginError');
-  if (input === getAdminPassword()) {
-    grantAccess();
-    errEl.style.display = 'none';
-  } else {
-    errEl.style.display = 'block';
-    document.getElementById('loginPassword').value = '';
-    document.getElementById('loginPassword').focus();
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: input })
+    });
+    const data = await res.json();
+    if (data.success) {
+      sessionStorage.setItem('admin_token', data.token);
+      grantAccess();
+      errEl.style.display = 'none';
+      await loadData();
+      loadStoreLogo();
+    } else {
+      errEl.style.display = 'block';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginPassword').focus();
+    }
+  } catch(e) {
+    console.error(e);
+    alert('حدث خطأ في الاتصال بالخادم.');
   }
 }
 </script>
@@ -2637,66 +2666,77 @@ let revenueChartInst, statusChartInst, analyticsRevenueInst, analyticsProductIns
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  loadData();
+  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === 'true') {
+    loadData().then(() => {
+      loadStoreLogo();
+    });
+  }
   updateTimeBadge();
   setInterval(updateTimeBadge, 60000);
+});
+
+async function loadData() {
+  try {
+    const res = await fetch('/api/orders', {
+      headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      document.getElementById('loginScreen').style.display = 'flex';
+      return;
+    }
+    orders = await res.json();
+  } catch(e) {
+    console.error("Failed to load orders, using local fallback:", e);
+    try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(err) { orders = []; }
+  }
+
+  try {
+    const res = await fetch('/api/products');
+    products = await res.json();
+  } catch(e) {
+    console.error("Failed to load products, using local fallback:", e);
+    try {
+      const s = localStorage.getItem('afghanbeauty_products_config');
+      products = s ? JSON.parse(s) : JSON.parse(JSON.stringify(defaultProducts));
+    } catch(err) {
+      products = JSON.parse(JSON.stringify(defaultProducts));
+    }
+  }
+
   renderAll();
   updateCalc();
   renderProducts();
-  loadStoreLogo();
-});
+}
 
-function loadData() {
-  try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(e){ orders=[]; }
+async function saveOrdersData() {
+  // Saved via direct REST APIs, but we keep local storage updated as fallback
   try {
-    const s = localStorage.getItem('afghanbeauty_products_config');
-    if (s) {
-      products = JSON.parse(s);
-      // Migration check: reset old bundle structure OR if default products have no images yet
-      const noImages = products[1] && !products[1].image && products[2] && !products[2].image;
-      if (!products[1] || !products[1].name.includes('الأفغاني') || !products[2] || !products[2].name.includes('شامبو')) {
-        products = JSON.parse(JSON.stringify(defaultProducts));
-        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
-      } else if (!products[1].guide_step_1) {
-        // Self-healing database migration for step images
-        products[1].guide_step_1 = 'assets/guide-step-1.png';
-        products[1].guide_step_2 = 'assets/guide-step-2.png';
-        products[1].guide_step_3 = 'assets/guide-step-3.png';
-        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
-      }
+    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+  } catch(e) {}
+}
 
-      // Self-healing: Sanitize absolute paths stored in localStorage config
-      let needsSave = false;
-      Object.keys(products).forEach(id => {
-        ['image', 'gallery_tube', 'gallery_texture', 'gallery_formula', 'guide_step_1', 'guide_step_2', 'guide_step_3'].forEach(key => {
-          if (products[id][key] && (products[id][key].includes(':\\') || products[id][key].includes(':/') || products[id][key].startsWith('file:///'))) {
-            const match = products[id][key].match(/assets[/\\][^/\\]+$/);
-            if (match) {
-              products[id][key] = match[0].replace(/\\/g, '/');
-            } else {
-              const parts = products[id][key].split(/[/\\]/);
-              products[id][key] = 'assets/' + parts[parts.length - 1];
-            }
-            needsSave = true;
-          }
-        });
-      });
-      if (needsSave) {
-        localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
-      }
-    } else {
-      products = JSON.parse(JSON.stringify(defaultProducts));
-      localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
+async function saveProductsData() {
+  try {
+    localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
+    const res = await fetch('/api/products', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
+      body: JSON.stringify(products)
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Reload products to get finalized public URLs instead of base64
+      const productsRes = await fetch('/api/products');
+      products = await productsRes.json();
+      renderProducts();
     }
-  } catch(e){ products = JSON.parse(JSON.stringify(defaultProducts)); }
-}
-
-function saveOrdersData() {
-  localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
-}
-
-function saveProductsData() {
-  localStorage.setItem('afghanbeauty_products_config', JSON.stringify(products));
+  } catch(e) {
+    console.error("Failed to save products to server:", e);
+  }
 }
 
 function renderAll() {
@@ -2989,18 +3029,54 @@ function renderOrders() {
     </tr>`).join('');
 }
 
-function updateOrderStatus(id, newStatus) {
+async function updateOrderStatus(id, newStatus) {
   const idx = orders.findIndex(o=>o.id===id);
   if(idx===-1) return;
   orders[idx].status = newStatus;
   saveOrdersData();
+  
+  try {
+    const res = await fetch('/api/orders/update', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
+      body: JSON.stringify({ id, status: newStatus })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      console.warn("Failed to update status on server:", data.error);
+    }
+  } catch(e) {
+    console.error("Error updating status on server:", e);
+  }
+  
   renderAll();
 }
 
-function deleteOrder(id) {
+async function deleteOrder(id) {
   if(!confirm('هل أنت متأكد من حذف هذا الطلب؟')) return;
   orders = orders.filter(o=>o.id!==id);
   saveOrdersData();
+  
+  try {
+    const res = await fetch('/api/orders/delete', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
+      body: JSON.stringify({ id })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      console.warn("Failed to delete order on server:", data.error);
+    }
+  } catch(e) {
+    console.error("Error deleting order on server:", e);
+  }
+  
   renderAll();
 }
 
@@ -3050,7 +3126,7 @@ function openAddOrderModal() {
   openModal('addOrderModal');
 }
 
-function saveManualOrder() {
+async function saveManualOrder() {
   const name = document.getElementById('ao-name').value.trim();
   const phone = document.getElementById('ao-phone').value.trim();
   const city = document.getElementById('ao-city').value.trim();
@@ -3078,6 +3154,21 @@ function saveManualOrder() {
 
   orders.unshift(order);
   saveOrdersData();
+  
+  try {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+    const data = await res.json();
+    if (!data.success) {
+      console.warn("Failed to save manual order on server:", data.error);
+    }
+  } catch(e) {
+    console.error("Error saving manual order to server:", e);
+  }
+  
   closeModal('addOrderModal');
   renderAll();
 }
@@ -3451,7 +3542,6 @@ function confirmResetProducts() {
 // ANALYTICS
 // ============================================================
 function renderAnalytics() {
-  loadData();
   const range = parseInt(document.getElementById('analyticsRange')?.value||7);
   const cutoff = new Date();
   if(range!==Infinity) cutoff.setDate(cutoff.getDate()-range);
@@ -3774,10 +3864,28 @@ function uploadStoreLogo(event) {
   if(!file) return;
   if(file.size > 3*1024*1024) { alert('حجم الصورة كبير! الحد الأقصى 3MB'); return; }
   const reader = new FileReader();
-  reader.onload = e => {
-    localStorage.setItem('afghanbeauty_store_logo', e.target.result);
-    loadStoreLogo();
-    showLangAlert('تم تحديث شعار المتجر بنجاح!');
+  reader.onload = async e => {
+    try {
+      const res = await fetch('/api/admin/upload-logo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({ logoData: e.target.result })
+      });
+      const data = await res.json();
+      if (data.success) {
+        localStorage.setItem('afghanbeauty_store_logo', data.url);
+        loadStoreLogo();
+        showLangAlert('تم تحديث شعار المتجر بنجاح!');
+      } else {
+        alert('فشل رفع الشعار: ' + data.error);
+      }
+    } catch(err) {
+      console.error(err);
+      alert('خطأ في الاتصال بالخادم عند رفع الشعار');
+    }
   };
   reader.readAsDataURL(file);
 }
@@ -3994,7 +4102,7 @@ function saveShippingSettings() {
   alert('تم حفظ إعدادات الشحن.');
 }
 
-function changeAdminPassword() {
+async function changeAdminPassword() {
   const currPass = document.getElementById('s-curr-pass').value;
   const newPass = document.getElementById('s-new-pass').value;
   const msgEl = document.getElementById('pass-msg');
@@ -4006,21 +4114,35 @@ function changeAdminPassword() {
     return;
   }
   
-  const actualCurr = localStorage.getItem('afghanbeauty_admin_pass') || 'admin123';
-  if (currPass !== actualCurr) {
+  try {
+    const res = await fetch('/api/admin/change-password', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
+      body: JSON.stringify({ oldPassword: currPass, newPassword: newPass })
+    });
+    const data = await res.json();
+    if (data.success) {
+      // Also update local storage fallback
+      localStorage.setItem('afghanbeauty_admin_pass', newPass);
+      msgEl.style.color = 'var(--completed)';
+      msgEl.textContent = '✅ تم تحديث كلمة المرور بنجاح!';
+      msgEl.style.display = 'block';
+      document.getElementById('s-curr-pass').value = '';
+      document.getElementById('s-new-pass').value = '';
+    } else {
+      msgEl.style.color = 'var(--cancelled)';
+      msgEl.textContent = '❌ ' + (data.error || 'فشلت عملية التحديث');
+      msgEl.style.display = 'block';
+    }
+  } catch(e) {
+    console.error(e);
     msgEl.style.color = 'var(--cancelled)';
-    msgEl.textContent = '❌ كلمة المرور الحالية غير صحيحة!';
+    msgEl.textContent = '❌ خطأ في الاتصال بالخادم';
     msgEl.style.display = 'block';
-    return;
   }
-  
-  localStorage.setItem('afghanbeauty_admin_pass', newPass);
-  msgEl.style.color = 'var(--completed)';
-  msgEl.textContent = '✅ تم تحديث كلمة المرور بنجاح!';
-  msgEl.style.display = 'block';
-  
-  document.getElementById('s-curr-pass').value = '';
-  document.getElementById('s-new-pass').value = '';
   
   setTimeout(() => {
     msgEl.style.display = 'none';
@@ -4031,27 +4153,41 @@ function changeAdminPassword() {
 // API KEY MANAGEMENT
 // ============================================================
 let _apiKeyVisible = false;
+let serverApiKey = '';
 
-function loadApiKeyUI() {
-  const key = getApiKey();
+async function loadApiKeyUI() {
   const displayEl = document.getElementById('api-key-display');
   const urlEl = document.getElementById('api-url-display');
   if (!displayEl || !urlEl) return;
 
+  try {
+    const res = await fetch('/api/admin/config', {
+      headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
+    });
+    const data = await res.json();
+    if (data.api_key) {
+      serverApiKey = data.api_key;
+    }
+  } catch(e) {
+    console.error("Failed to load API key from server:", e);
+    serverApiKey = getApiKey(); // local fallback
+  }
+
   _apiKeyVisible = false;
-  displayEl.textContent = maskApiKey(key);
+  displayEl.textContent = maskApiKey(serverApiKey);
   const baseUrl = window.location.href.split('?')[0];
-  urlEl.textContent = baseUrl + '?key=' + key;
-  urlEl.title = baseUrl + '?key=' + key;
+  urlEl.textContent = baseUrl + '?key=' + serverApiKey;
+  urlEl.title = baseUrl + '?key=' + serverApiKey;
 }
 
 function maskApiKey(key) {
+  if (!key) return '••••••••';
   if (key.length <= 8) return '••••••••';
   return key.substring(0, 5) + '•'.repeat(key.length - 9) + key.slice(-4);
 }
 
 function toggleApiKeyVisibility() {
-  const key = getApiKey();
+  const key = serverApiKey || getApiKey();
   const displayEl = document.getElementById('api-key-display');
   if (!displayEl) return;
   _apiKeyVisible = !_apiKeyVisible;
@@ -4059,7 +4195,7 @@ function toggleApiKeyVisibility() {
 }
 
 function copyApiUrl() {
-  const key = getApiKey();
+  const key = serverApiKey || getApiKey();
   const baseUrl = window.location.href.split('?')[0];
   const url = baseUrl + '?key=' + key;
   
