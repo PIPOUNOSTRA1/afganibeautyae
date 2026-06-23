@@ -510,8 +510,10 @@
 
     <!-- Thank you Card -->
     <div class="thankyou-card">
-      <div class="gold-glow-badge">
-        <span></span> تم الحفظ تلقائياً في السيرفر
+      <!-- Store logo / Brand badge inside the card -->
+      <div style="display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(197, 168, 92, 0.08); border: 1.5px solid rgba(197, 168, 92, 0.25); padding: 0.5rem 1.25rem; border-radius: 50px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+        <img src="assets/store-avatar.png" style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--primary); object-fit: cover;" alt="شعار المتجر">
+        <span style="font-size: 0.8rem; color: #ffffff; font-weight: 800; font-family: var(--font-ar); letter-spacing: 0.5px;">أفغاني بيوتي | AFGHAN BEAUTY</span>
       </div>
 
       <!-- Pulse checkmark seal -->
@@ -528,8 +530,17 @@
       <div class="order-number" id="displayOrderId">#AB-2026-XXXX</div>
 
       <p class="success-desc">
-        شكراً لثقتكِ بـ <strong>أفغاني بيوتي</strong>. قمنا بتسجيل طلبكِ في قاعدة البيانات، وسيقوم فريق الشحن والتنسيق بالتواصل معكِ هاتفياً لتأكيد الشحن المبرد والتسليم حتى باب بيتكِ.
+        شكراً لثقتكِ بـ <strong>أفغاني بيوتي</strong>! طلبكِ المميّز قيد التجهيز الآن بكل حب وعناية. سيتواصل معكِ فريق الشحن والتنسيق هاتفياً في أقرب وقت لتأكيد طلبكِ، لنقوم بشحن وتوصيل طلبكِ في أسرع وقت مباشرةً إلى باب منزلكِ لتتألقي بجمالٍ شرقي ساحر.
       </p>
+
+      <!-- Product Display Showcase -->
+      <div style="background: rgba(255, 255, 255, 0.03); border: 1.5px solid rgba(197, 168, 92, 0.2); border-radius: 20px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; gap: 1.5rem; text-align: right; backdrop-filter: blur(10px); position: relative; overflow: hidden; box-shadow: inset 0 0 15px rgba(197, 168, 92, 0.05);">
+        <img src="assets/afghan-oil.png" style="width: 70px; height: 95px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5)); transform: rotate(-2deg); transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.08) rotate(1deg)'" onmouseout="this.style.transform='scale(1) rotate(-2deg)'" alt="زيت الأفغاني الأصلي الذهبي">
+        <div style="flex: 1;">
+          <h3 style="color: var(--primary); font-size: 1.05rem; font-weight: 800; margin-bottom: 0.4rem; font-family: var(--font-ar);">زيت الأفغاني الأصلي الذهبي</h3>
+          <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.6;">سر الكثافة والنعومة الشرقية الفاخرة، تركيبتنا الأصلية لتغذية الشعر بعمق من الجذور حتى الأطراف.</p>
+        </div>
+      </div>
 
       <!-- Luxury Invoice -->
       <div class="invoice-card">
