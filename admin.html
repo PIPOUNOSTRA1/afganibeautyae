@@ -2727,7 +2727,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function loadData() {
   try {
     // 1. Primary: load from SheetDB
-    const res = await fetch('https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ');
+    const res = await fetch('https://sheetdb.io/api/v1/jdtyoe213ydzm');
     const sheetRows = await res.json();
     
     if (Array.isArray(sheetRows)) {
@@ -3124,7 +3124,7 @@ async function updateOrderStatus(id, newStatus) {
   
   try {
     // 1. Primary: Update in SheetDB
-    const res = await fetch(`https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ/id/${id}`, {
+    const res = await fetch(`https://sheetdb.io/api/v1/jdtyoe213ydzm/id/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: { status: newStatus } })
@@ -3157,7 +3157,7 @@ async function deleteOrder(id) {
   
   try {
     // 1. Primary: Delete in SheetDB
-    const res = await fetch(`https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ/id/${id}`, {
+    const res = await fetch(`https://sheetdb.io/api/v1/jdtyoe213ydzm/id/${id}`, {
       method: 'DELETE'
     });
     const data = await res.json();

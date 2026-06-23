@@ -888,7 +888,7 @@ async function createAndSaveOrder({ name, phone, city, address, paymentMethod, i
       status: order.status
     };
 
-    const res = await fetch('https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ', {
+    const res = await fetch('https://sheetdb.io/api/v1/jdtyoe213ydzm', {
       method: 'POST',
       headers: {
         'Accept': 'application/json',
