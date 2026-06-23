@@ -870,19 +870,38 @@ async function createAndSaveOrder({ name, phone, city, address, paymentMethod, i
     localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
   } catch (e) {}
 
-  // Save on server
+  // Save to Google Sheets via SheetDB API
   try {
-    const res = await fetch('/api/orders', {
+    const sheetData = {
+      id: orderId,
+      date: new Date().toLocaleString('ar-AE', { timeZone: 'Asia/Dubai' }),
+      name: order.name,
+      phone: order.phone,
+      city: order.city,
+      address: order.address,
+      products: items.map(item => `${item.name} (×${item.quantity})`).join(', '),
+      subtotal: order.subtotal,
+      shipping: order.shipping,
+      discount: order.discount,
+      total: order.total,
+      paymentMethod: order.paymentMethod,
+      status: order.status
+    };
+
+    const res = await fetch('https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(order)
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ data: [sheetData] })
     });
     const data = await res.json();
-    if (data.success) {
-      return data.order;
+    if (data.created) {
+      console.log("Order saved to Google Sheets successfully:", data);
     }
   } catch (e) {
-    console.warn("Failed to save order to server, using local fallback:", e);
+    console.warn("Failed to save order to Google Sheets:", e);
   }
 
   return order;

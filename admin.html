@@ -723,14 +723,27 @@ async function attemptLogin() {
       errEl.style.display = 'none';
       await loadData();
       loadStoreLogo();
+      return;
+    } else {
+      errEl.style.display = 'block';
+      document.getElementById('loginPassword').value = '';
+      document.getElementById('loginPassword').focus();
+      return;
+    }
+  } catch(e) {
+    console.warn("Server login failed, trying static login fallback:", e);
+    // Static fallback login: default password is 'admin123'
+    if (input === 'admin123' || input === localStorage.getItem(ADMIN_PASS_KEY)) {
+      sessionStorage.setItem('admin_token', 'static_session');
+      grantAccess();
+      errEl.style.display = 'none';
+      await loadData();
+      loadStoreLogo();
     } else {
       errEl.style.display = 'block';
       document.getElementById('loginPassword').value = '';
       document.getElementById('loginPassword').focus();
     }
-  } catch(e) {
-    console.error(e);
-    alert('حدث خطأ في الاتصال بالخادم.');
   }
 }
 </script>
@@ -2713,18 +2726,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadData() {
   try {
-    const res = await fetch('/api/orders', {
-      headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
-    });
-    if (res.status === 401) {
-      sessionStorage.removeItem(ADMIN_SESSION_KEY);
-      document.getElementById('loginScreen').style.display = 'flex';
-      return;
+    // 1. Primary: load from SheetDB
+    const res = await fetch('https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ');
+    const sheetRows = await res.json();
+    
+    if (Array.isArray(sheetRows)) {
+      orders = sheetRows.map(row => {
+        // Reconstruct items structure from products text
+        const items = [{
+          name: row.products || 'زيت الأفغاني الأصلي الذهبي',
+          quantity: 1,
+          price: Number(row.subtotal || row.total || 0)
+        }];
+
+        return {
+          id: row.id,
+          date: row.date || new Date().toISOString(),
+          name: row.name || 'عميل',
+          phone: row.phone || '',
+          city: row.city || '',
+          address: row.address || '—',
+          items: items,
+          subtotal: Number(row.subtotal || 0),
+          shipping: Number(row.shipping || 0),
+          discount: Number(row.discount || 0),
+          total: Number(row.total || 0),
+          paymentMethod: row.paymentMethod || 'الدفع عند الاستلام (COD)',
+          status: row.status || 'pending'
+        };
+      });
+      // Save locally to keep localStorage in sync
+      localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+    } else {
+      throw new Error("Invalid response from SheetDB");
     }
-    orders = await res.json();
   } catch(e) {
-    console.error("Failed to load orders, using local fallback:", e);
-    try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(err) { orders = []; }
+    console.warn("Failed to load orders from SheetDB, trying backend server:", e);
+    try {
+      const res = await fetch('/api/orders', {
+        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
+      });
+      if (res.status === 401) {
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        document.getElementById('loginScreen').style.display = 'flex';
+        return;
+      }
+      orders = await res.json();
+    } catch(err) {
+      console.error("Failed to load orders from server, using local fallback:", err);
+      try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(e2) { orders = []; }
+    }
   }
 
   try {
@@ -3072,20 +3123,28 @@ async function updateOrderStatus(id, newStatus) {
   saveOrdersData();
   
   try {
-    const res = await fetch('/api/orders/update', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
-      },
-      body: JSON.stringify({ id, status: newStatus })
+    // 1. Primary: Update in SheetDB
+    const res = await fetch(`https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ/id/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: { status: newStatus } })
     });
     const data = await res.json();
-    if (!data.success) {
-      console.warn("Failed to update status on server:", data.error);
-    }
+    console.log("Status updated in Google Sheets:", data);
   } catch(e) {
-    console.error("Error updating status on server:", e);
+    console.warn("Failed to update status in Google Sheets, trying server:", e);
+    try {
+      const res = await fetch('/api/orders/update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({ id, status: newStatus })
+      });
+    } catch(err) {
+      console.error("Failed to update status on server:", err);
+    }
   }
   
   renderAll();
@@ -3097,20 +3156,26 @@ async function deleteOrder(id) {
   saveOrdersData();
   
   try {
-    const res = await fetch('/api/orders/delete', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
-      },
-      body: JSON.stringify({ id })
+    // 1. Primary: Delete in SheetDB
+    const res = await fetch(`https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ/id/${id}`, {
+      method: 'DELETE'
     });
     const data = await res.json();
-    if (!data.success) {
-      console.warn("Failed to delete order on server:", data.error);
-    }
+    console.log("Order deleted from Google Sheets:", data);
   } catch(e) {
-    console.error("Error deleting order on server:", e);
+    console.warn("Failed to delete order from Google Sheets, trying server:", e);
+    try {
+      const res = await fetch('/api/orders/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({ id })
+      });
+    } catch(err) {
+      console.error("Failed to delete order on server:", err);
+    }
   }
   
   renderAll();

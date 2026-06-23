@@ -2470,20 +2470,37 @@
       localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
     } catch(e) {}
 
-    // Save on backend server
-    fetch('/api/orders', {
+    // Save to Google Sheets via SheetDB API
+    const sheetData = {
+      id: orderId,
+      date: new Date().toLocaleString('ar-AE', { timeZone: 'Asia/Dubai' }),
+      name,
+      phone,
+      city,
+      address: order.address,
+      products: `${pname} (×${qty})`,
+      subtotal: price,
+      shipping,
+      discount: disc,
+      total,
+      paymentMethod: order.paymentMethod,
+      status: order.status
+    };
+
+    fetch('https://sheetdb.io/api/v1/MpkceJ5WQjSJRp53x-fxqQ', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(order)
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ data: [sheetData] })
     })
     .then(res => res.json())
     .then(data => {
-      if (data.success) {
-        console.log("Order saved on server:", data.order);
-      }
+      console.log("Order saved to Google Sheets:", data);
     })
     .catch(err => {
-      console.warn("Failed to save order to server, using local fallback:", err);
+      console.error("Failed to save order to Google Sheets:", err);
     });
 
     // Firing Purchase event
