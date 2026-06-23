@@ -4,7 +4,7 @@ const path = require('path');
 const crypto = require('crypto');
 const db = require('./db');
 
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 const MIME_TYPES = {
   '.html': 'text/html',
   '.css': 'text/css',
@@ -81,6 +81,27 @@ function extractBase64Images(products) {
 }
 
 const server = http.createServer(async (req, res) => {
+  // Add CORS headers to allow local frontend files to communicate with localhost backend
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+  // Override writeHead to guarantee CORS headers are always merged into any response (even 401, 404, etc.)
+  const originalWriteHead = res.writeHead;
+  res.writeHead = function(statusCode, headers) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    return originalWriteHead.call(this, statusCode, headers);
+  };
+
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
+
   // Normalize URL to prevent directory traversal
   let safeUrl = req.url.split('?')[0];
   

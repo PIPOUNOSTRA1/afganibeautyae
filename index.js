@@ -1,5 +1,21 @@
 // AFGHAN BEAUTY Store Core Logic
 
+// Redirect API requests based on settings or protocol fallback
+(function() {
+  const getSetting = (key) => (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || '';
+  const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
+  
+  if (apiBase) {
+    const originalFetch = window.fetch;
+    window.fetch = function(input, init) {
+      if (typeof input === 'string' && input.startsWith('/api/')) {
+        input = apiBase.replace(/\/$/, '') + input;
+      }
+      return originalFetch(input, init);
+    };
+  }
+})();
+
 // =====================================================
 // IMAGE HELPER — fixes GitHub Pages broken images
 // =====================================================
