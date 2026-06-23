@@ -843,7 +843,6 @@ function closeCheckout() {
   document.body.style.overflow = '';
 }
 
-// Global Helper to create and save orders to localStorage
 // Global Helper to create and save orders to localStorage and backend API
 async function createAndSaveOrder({ name, phone, city, address, paymentMethod, items, subtotal, shipping, discount, total }) {
   const orderId = `AB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -870,41 +869,76 @@ async function createAndSaveOrder({ name, phone, city, address, paymentMethod, i
     localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
   } catch (e) {}
 
-  // Save to Google Sheets via SheetDB API
+  // Send to backend API server
   try {
-    const sheetData = {
-      id: orderId,
-      date: new Date().toLocaleString('ar-AE', { timeZone: 'Asia/Dubai' }),
-      name: order.name,
-      phone: order.phone,
-      city: order.city,
-      address: order.address,
-      products: items.map(item => `${item.name} (×${item.quantity})`).join(', '),
-      subtotal: order.subtotal,
-      shipping: order.shipping,
-      discount: order.discount,
-      total: order.total,
-      paymentMethod: order.paymentMethod,
-      status: order.status
-    };
-
-    const res = await fetch('https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec', {
+    if (!navigator.onLine) throw new Error('Offline');
+    const res = await fetch('/api/orders', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain'
-      },
-      body: JSON.stringify({ data: [sheetData] })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
     });
     const data = await res.json();
-    if (data.created) {
-      console.log("Order saved to Google Sheets successfully:", data);
+    if (data.success) {
+      console.log("Order saved to server successfully:", data);
+    } else {
+      throw new Error(data.error || 'Server error');
     }
   } catch (e) {
-    console.warn("Failed to save order to Google Sheets:", e);
+    console.warn("Failed to save order to server, queuing for later sync:", e);
+    // Queue in pendingOrders for later sync
+    try {
+      let pending = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+      pending.push(order);
+      localStorage.setItem('pendingOrders', JSON.stringify(pending));
+    } catch (e2) {}
   }
 
   return order;
 }
+
+// Sync pending orders to server when back online
+async function syncPendingOrders() {
+  let pending;
+  try {
+    pending = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+  } catch (e) { return; }
+  if (pending.length === 0 || !navigator.onLine) return;
+
+  console.log(`Syncing ${pending.length} pending order(s) to server...`);
+  const stillPending = [];
+
+  for (const order of pending) {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      const data = await res.json();
+      if (data.success) {
+        console.log(`Synced pending order ${order.id} successfully`);
+      } else {
+        stillPending.push(order);
+      }
+    } catch (e) {
+      stillPending.push(order);
+    }
+  }
+
+  localStorage.setItem('pendingOrders', JSON.stringify(stillPending));
+  if (stillPending.length === 0) {
+    console.log("All pending orders synced successfully!");
+  } else {
+    console.warn(`${stillPending.length} order(s) still pending sync`);
+  }
+}
+
+// Auto-sync when coming back online
+window.addEventListener('online', syncPendingOrders);
+// Also try syncing every 60 seconds
+setInterval(syncPendingOrders, 60000);
+// Try syncing on page load
+document.addEventListener('DOMContentLoaded', () => setTimeout(syncPendingOrders, 3000));
 
 // Landing page checkout dynamic implementations
 function renderLpCartCards() {

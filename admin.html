@@ -2726,56 +2726,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadData() {
   try {
-    // 1. Primary: load from Google Apps Script
-    const res = await fetch('https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec');
-    const sheetRows = await res.json();
-    
-    if (Array.isArray(sheetRows)) {
-      orders = sheetRows.map(row => {
-        // Reconstruct items structure from products text
-        const items = [{
-          name: row.products || 'زيت الأفغاني الأصلي الذهبي',
-          quantity: 1,
-          price: Number(row.subtotal || row.total || 0)
-        }];
-
-        return {
-          id: row.id,
-          date: row.date || new Date().toISOString(),
-          name: row.name || 'عميل',
-          phone: row.phone || '',
-          city: row.city || '',
-          address: row.address || '—',
-          items: items,
-          subtotal: Number(row.subtotal || 0),
-          shipping: Number(row.shipping || 0),
-          discount: Number(row.discount || 0),
-          total: Number(row.total || 0),
-          paymentMethod: row.paymentMethod || 'الدفع عند الاستلام (COD)',
-          status: row.status || 'pending'
-        };
-      });
-      // Save locally to keep localStorage in sync
-      localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
-    } else {
-      throw new Error("Invalid response from SheetDB");
+    // Primary: load from backend server API
+    const res = await fetch('/api/orders', {
+      headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
+    });
+    if (res.status === 401) {
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
+      document.getElementById('loginScreen').style.display = 'flex';
+      return;
     }
+    orders = await res.json();
+    // Save locally to keep localStorage in sync
+    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
   } catch(e) {
-    console.warn("Failed to load orders from SheetDB, trying backend server:", e);
-    try {
-      const res = await fetch('/api/orders', {
-        headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
-      });
-      if (res.status === 401) {
-        sessionStorage.removeItem(ADMIN_SESSION_KEY);
-        document.getElementById('loginScreen').style.display = 'flex';
-        return;
-      }
-      orders = await res.json();
-    } catch(err) {
-      console.error("Failed to load orders from server, using local fallback:", err);
-      try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(e2) { orders = []; }
-    }
+    console.warn("Failed to load orders from server, using local fallback:", e);
+    try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(e2) { orders = []; }
   }
 
   try {
@@ -3123,28 +3088,18 @@ async function updateOrderStatus(id, newStatus) {
   saveOrdersData();
   
   try {
-    // 1. Primary: Update in Google Sheets via Apps Script (using POST with query param)
-    const res = await fetch(`https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec?action=update`, {
+    const res = await fetch('/api/orders/update', {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
       body: JSON.stringify({ id, status: newStatus })
     });
     const data = await res.json();
-    console.log("Status updated in Google Sheets:", data);
+    console.log("Status updated on server:", data);
   } catch(e) {
-    console.warn("Failed to update status in Google Sheets, trying server:", e);
-    try {
-      const res = await fetch('/api/orders/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
-        },
-        body: JSON.stringify({ id, status: newStatus })
-      });
-    } catch(err) {
-      console.error("Failed to update status on server:", err);
-    }
+    console.error("Failed to update status on server:", e);
   }
   
   renderAll();
@@ -3156,28 +3111,18 @@ async function deleteOrder(id) {
   saveOrdersData();
   
   try {
-    // 1. Primary: Delete in Google Sheets via Apps Script (using POST with query param)
-    const res = await fetch(`https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec?action=delete`, {
+    const res = await fetch('/api/orders/delete', {
       method: 'POST',
-      headers: { 'Content-Type': 'text/plain' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
+      },
       body: JSON.stringify({ id })
     });
     const data = await res.json();
-    console.log("Order deleted from Google Sheets:", data);
+    console.log("Order deleted from server:", data);
   } catch(e) {
-    console.warn("Failed to delete order from Google Sheets, trying server:", e);
-    try {
-      const res = await fetch('/api/orders/delete', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}`
-        },
-        body: JSON.stringify({ id })
-      });
-    } catch(err) {
-      console.error("Failed to delete order on server:", err);
-    }
+    console.error("Failed to delete order on server:", e);
   }
   
   renderAll();

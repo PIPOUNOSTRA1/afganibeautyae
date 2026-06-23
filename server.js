@@ -80,18 +80,37 @@ function extractBase64Images(products) {
   return products;
 }
 
+// Allowed CORS origins
+const ALLOWED_ORIGINS = [
+  'https://pipounostra1.github.io',
+  'http://localhost:8080',
+  'http://localhost:3000',
+  'http://127.0.0.1:8080'
+];
+
+function getCorsOrigin(req) {
+  const origin = req.headers['origin'] || '';
+  if (ALLOWED_ORIGINS.includes(origin)) return origin;
+  // Allow any origin for public POST /api/orders (order submission from any referrer)
+  if (origin) return origin;
+  return ALLOWED_ORIGINS[0];
+}
+
 const server = http.createServer(async (req, res) => {
-  // Add CORS headers to allow local frontend files to communicate with localhost backend
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+  // Set CORS headers based on request origin
+  const corsOrigin = getCorsOrigin(req);
+  res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
 
   // Override writeHead to guarantee CORS headers are always merged into any response (even 401, 404, etc.)
   const originalWriteHead = res.writeHead;
   res.writeHead = function(statusCode, headers) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+    res.setHeader('Access-Control-Allow-Origin', corsOrigin);
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     return originalWriteHead.call(this, statusCode, headers);
   };
 
@@ -231,8 +250,8 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // 5. PROTECTED ORDERS GET API
-  if (safeUrl === '/api/orders' && req.method === 'GET') {
+  // 5. PROTECTED ORDERS GET API (supports /api/orders and /api/admin/orders)
+  if ((safeUrl === '/api/orders' || safeUrl === '/api/admin/orders') && req.method === 'GET') {
     if (!isAuthenticated(req)) {
       res.writeHead(401, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ success: false, error: 'غير مصرح بالوصول' }));
@@ -241,6 +260,26 @@ const server = http.createServer(async (req, res) => {
     const orders = db.readOrders();
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify(orders));
+    return;
+  }
+
+  // 5b. PROTECTED SINGLE ORDER GET API: GET /api/orders/:id
+  if (safeUrl.startsWith('/api/orders/') && req.method === 'GET' && safeUrl !== '/api/orders/update' && safeUrl !== '/api/orders/delete') {
+    if (!isAuthenticated(req)) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'غير مصرح بالوصول' }));
+      return;
+    }
+    const orderId = decodeURIComponent(safeUrl.replace('/api/orders/', ''));
+    const orders = db.readOrders();
+    const order = orders.find(o => o.id === orderId);
+    if (order) {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(order));
+    } else {
+      res.writeHead(404, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'الطلب غير موجود' }));
+    }
     return;
   }
 
