@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>شكراً لطلبك | أفغاني بيوتي AFGHAN BEAUTY</title>
+  <link rel="icon" type="image/png" href="assets/store-avatar.png">
+  <link rel="stylesheet" href="index.css">
+  
+  <!-- Pre-load settings for pixels -->
+  <script src="settings.js"></script>
+  <script>
+    (function() {
+      // Helper to read setting
+      const getSetting = (key, localKey) => {
+        return (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || localStorage.getItem(localKey) || '';
+      };
+
+      // 1. Meta / Facebook Pixel
+      const fbId = getSetting('fb_pixel_id', 'fb_pixel_id');
+      if (fbId) {
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', fbId);
+        fbq('track', 'PageView');
+      }
+
+      // 2. TikTok Pixel
+      const ttId = getSetting('tt_pixel_id', 'tt_pixel_id');
+      if (ttId) {
+        !function (w, d, t) {
+          w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie"],ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e},ttq.load=function(e,n){var i="https://analytics.tiktok.com/i18n/pixel/events.js";ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=i,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};var o=document.createElement("script");o.type="text/javascript",o.async=!0,o.src=i+"?sdkid="+e+"&lib="+t;var a=document.getElementsByTagName("script")[0];a.parentNode.insertBefore(o,a)};
+          ttq.load(ttId);
+          ttq.page();
+        }(window, document, 'ttq');
+      }
+
+      // 3. Snapchat Pixel
+      const snapId = getSetting('snap_pixel_id', 'snap_pixel_id');
+      if (snapId) {
+        (function(e,t,n){if(e.snaptr)return;var a=e.snaptr=function()
+        {a.handleRequest?a.handleRequest.apply(a,arguments):a.queue.push(arguments)};
+        a.queue=[];var r=t.createElement(n);r.async=!0;
+        r.src="https://sc-static.net/scevent.min.js";
+        var s=t.getElementsByTagName(n)[0];
+        s.parentNode.insertBefore(r,s)})(window,document,"script");
+        snaptr('init', snapId);
+        snaptr('track', 'PAGE_VIEW');
+      }
+
+      // 4. Google Analytics GA4
+      const gaId = getSetting('ga_pixel_id', 'ga_pixel_id');
+      if (gaId) {
+        const s1 = document.createElement('script');
+        s1.async = true;
+        s1.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+        document.head.appendChild(s1);
+        
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', gaId);
+      }
+
+      // 5. Google Tag Manager GTM
+      const gtmId = getSetting('gtm_pixel_id', 'gtm_pixel_id');
+      if (gtmId) {
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer',gtmId);
+      }
+
+      // 6. Unified Pixel Event Tracker
+      window.trackPixelEvent = function(eventName, eventData) {
+        eventData = eventData || {};
+        
+        // Meta / Facebook
+        if (typeof fbq === 'function') {
+          fbq('track', eventName, eventData);
+        }
+        
+        // TikTok
+        if (typeof ttq === 'object' && typeof ttq.track === 'function') {
+          let ttEvent = eventName;
+          if (eventName === 'Purchase') {
+            ttEvent = 'CompletePayment';
+          }
+          
+          const ttData = {
+            value: eventData.value || 0,
+            currency: eventData.currency || 'AED',
+            content_type: 'product',
+            contents: eventData.contents || []
+          };
+          
+          if (ttData.contents.length === 0) {
+            ttData.contents.push({
+              content_id: eventData.content_id || (eventData.content_ids && eventData.content_ids[0]) || 'AFG_OIL',
+              content_name: eventData.content_name || 'زيت الأفغاني الأصلي الذهبي',
+              content_type: 'product',
+              quantity: eventData.num_items || 1,
+              price: eventData.value || 0
+            });
+          }
+          
+          ttq.track(ttEvent, ttData);
+        }
+        
+        // Snapchat
+        if (typeof snaptr === 'function') {
+          let snapEvent = eventName;
+          if (eventName === 'PageView') snapEvent = 'PAGE_VIEW';
+          else if (eventName === 'ViewContent') snapEvent = 'VIEW_CONTENT';
+          else if (eventName === 'AddToCart') snapEvent = 'ADD_CART';
+          else if (eventName === 'InitiateCheckout') snapEvent = 'START_CHECKOUT';
+          else if (eventName === 'Purchase') snapEvent = 'PURCHASE';
+          snaptr('track', snapEvent, eventData);
+        }
+        
+        // GA4
+        if (typeof gtag === 'function') {
+          let gaEvent = eventName;
+          if (eventName === 'PageView') return;
+          else if (eventName === 'ViewContent') gaEvent = 'view_item';
+          else if (eventName === 'AddToCart') gaEvent = 'add_to_cart';
+          else if (eventName === 'InitiateCheckout') gaEvent = 'begin_checkout';
+          else if (eventName === 'Purchase') gaEvent = 'purchase';
+          gtag('event', gaEvent, eventData);
+        }
+      };
+    })();
+  </script>
+
+  <style>
+    /* Styling specifically optimized for the high-end premium thank you layout */
+    body {
+      background: var(--bg-dark, #0c120e);
+      color: var(--text, #ffffff);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .thankyou-card {
+      background: var(--surface, #121d16);
+      border: 1px solid var(--border, rgba(197, 168, 92, 0.2));
+      border-radius: 24px;
+      padding: 2.5rem 2rem;
+      max-width: 580px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+      margin: auto 0;
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .thankyou-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, var(--primary, #C5A85C), transparent);
+    }
+
+    .checkmark-container {
+      width: 80px;
+      height: 80px;
+      background: var(--primary-soft, rgba(197,168,92,0.1));
+      border: 2px solid var(--primary, #C5A85C);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      animation: pulseGlow 2s infinite;
+    }
+
+    .checkmark-container svg {
+      width: 40px;
+      height: 40px;
+      color: var(--primary, #C5A85C);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+    }
+
+    .order-id-badge {
+      display: inline-block;
+      background: var(--surface-card, #1a2a1f);
+      border: 1px solid var(--border, rgba(197,168,92,0.2));
+      color: var(--primary, #C5A85C);
+      padding: 0.5rem 1.25rem;
+      border-radius: 50px;
+      font-family: var(--font-en, sans-serif);
+      font-weight: 800;
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .success-intro {
+      font-size: 0.95rem;
+      color: var(--text-muted, #a6b5a8);
+      line-height: 1.7;
+      margin-bottom: 2rem;
+    }
+
+    /* Receipt Section */
+    .receipt-box {
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px dashed var(--border, rgba(197,168,92,0.15));
+      border-radius: 16px;
+      padding: 1.25rem;
+      text-align: right;
+      margin-bottom: 2rem;
+    }
+
+    .receipt-title {
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      padding-bottom: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .receipt-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.88rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .receipt-label {
+      color: var(--text-dim, #6d7f72);
+    }
+
+    .receipt-value {
+      font-weight: 600;
+      color: var(--text, #ffffff);
+    }
+
+    .receipt-divider {
+      border-top: 1px dashed rgba(255,255,255,0.06);
+      margin: 0.75rem 0;
+    }
+
+    .receipt-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--primary, #C5A85C);
+      margin-top: 0.5rem;
+    }
+
+    /* Buttons */
+    .btn-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .btn-wa {
+      background: #25D366;
+      color: #ffffff !important;
+      border: none;
+      padding: 1rem;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      text-decoration: none;
+      transition: all 0.3s;
+      box-shadow: 0 4px 16px rgba(37,211,102,0.3);
+    }
+
+    .btn-wa:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(37,211,102,0.5);
+    }
+
+    .btn-wa svg {
+      width: 22px;
+      height: 22px;
+      fill: currentColor;
+    }
+
+    .btn-home {
+      background: var(--surface-card, #1a2a1f);
+      border: 1px solid var(--border, rgba(197, 168, 92, 0.2));
+      color: var(--text, #ffffff);
+      padding: 0.9rem;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn-home:hover {
+      background: var(--surface-hover, #24382a);
+      color: var(--primary, #C5A85C);
+    }
+
+    footer {
+      font-size: 0.75rem;
+      color: var(--text-dim, #6d7f72);
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(197,168,92,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(197,168,92,0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="thankyou-card">
+    <div class="checkmark-container">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+
+    <h1>تم استلام طلبكِ بنجاح!</h1>
+    <div class="order-id-badge" id="displayOrderId">#AB-2026-XXXX</div>
+
+    <p class="success-intro">
+      شكراً لثقتكِ بـ <strong>أفغاني بيوتي</strong>! لقد تم استلام طلبكِ بنجاح وجاري تجهيزه للشحن المبرد. سيتصل بك مندوب التوصيل خلال ساعات لتنسيق موعد الاستلام والدفع عند باب منزلكِ.
+    </p>
+
+    <div class="receipt-box">
+      <div class="receipt-title">📋 تفاصيل الفاتورة المستلمة:</div>
+      
+      <div class="receipt-row">
+        <span class="receipt-label">الاسم:</span>
+        <span class="receipt-value" id="receiptName">—</span>
+      </div>
+      
+      <div class="receipt-row">
+        <span class="receipt-label">الهاتف:</span>
+        <span class="receipt-value" id="receiptPhone">—</span>
+      </div>
+
+      <div class="receipt-row">
+        <span class="receipt-label">المدينة:</span>
+        <span class="receipt-value" id="receiptCity">—</span>
+      </div>
+
+      <div class="receipt-row">
+        <span class="receipt-label">العنوان الكامل:</span>
+        <span class="receipt-value" id="receiptAddress">—</span>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-row">
+        <span class="receipt-label">المنتجات:</span>
+        <span class="receipt-value" id="receiptItems">—</span>
+      </div>
+
+      <div class="receipt-row">
+        <span class="receipt-label">طريقة الدفع:</span>
+        <span class="receipt-value">الدفع عند الاستلام (COD)</span>
+      </div>
+
+      <div class="receipt-row">
+        <span class="receipt-label">الشحن:</span>
+        <span class="receipt-value" id="receiptShipping">—</span>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <div class="receipt-total-row">
+        <span>الإجمالي المستحق:</span>
+        <span id="receiptTotal">— د.إ</span>
+      </div>
+    </div>
+
+    <div class="btn-stack">
+      <a href="#" id="waButton" target="_blank" class="btn-wa">
+        <svg viewBox="0 0 24 24">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.967C16.588 1.974 14.107.95 11.49.95c-5.447 0-9.87 4.37-9.874 9.8.001 1.742.483 3.35 1.397 4.825L1.983 20.3l4.664-1.146zm11.393-4.908c-.287-.144-1.702-.84-1.965-.936-.264-.096-.456-.144-.648.144-.192.288-.744.936-.912 1.128-.168.192-.336.216-.624.072-1.354-.68-2.348-1.185-3.185-2.62-.224-.383.224-.356.64-.1.374.23.414.288.624.624.21.336.105.648-.047.792-.153.144-.648.744-.792.936-.144.192-.288.216-.576.072-1.223-.61-2.01-1.233-2.668-2.356-.184-.316.184-.294.524-.956.096-.192.048-.36-.024-.504-.072-.144-.648-1.56-.888-2.136-.234-.564-.471-.486-.648-.495-.168-.008-.36-.01-.552-.01-.192 0-.504.072-.768.36-.264.288-1.008.984-1.008 2.399 0 1.416 1.032 2.784 1.176 2.976.144.192 2.032 3.102 4.921 4.35 2.889 1.248 2.889.832 3.417.784.528-.048 1.704-.696 1.944-1.368.24-.672.24-1.248.168-1.368-.072-.12-.264-.192-.552-.336z"/>
+        </svg>
+        تواصل معنا عبر الواتساب لتأكيد الشحن
+      </a>
+      <a href="landing.html" class="btn-home">🛍️ العودة للمتجر للتسوق</a>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 شركة أفغاني بيوتي (AFGHAN BEAUTY). جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Get last order from localStorage
+      let order = null;
+      try {
+        order = JSON.parse(localStorage.getItem('last_order'));
+      } catch (e) {
+        order = null;
+      }
+
+      if (!order) {
+        // Fallback if no order is stored (e.g. direct load)
+        document.getElementById('displayOrderId').textContent = '#AB-SUCCESS';
+        document.querySelector('.receipt-box').style.display = 'none';
+        setupWhatsAppLink('97141234567', 'مرحباً، قمت بتقديم طلب من متجر أفغاني بيوتي وأريد تأكيده.');
+        return;
+      }
+
+      // 2. Populate order details on receipt UI
+      document.getElementById('displayOrderId').textContent = `#${order.id}`;
+      document.getElementById('receiptName').textContent = order.name || '—';
+      document.getElementById('receiptPhone').textContent = order.phone || '—';
+      document.getElementById('receiptCity').textContent = order.city || '—';
+      document.getElementById('receiptAddress').textContent = order.address || '—';
+      
+      const itemsList = order.items && order.items.map(item => `${item.name} (x${item.quantity})`).join(' + ');
+      document.getElementById('receiptItems').textContent = itemsList || 'زيت الأفغاني الأصلي';
+      
+      document.getElementById('receiptShipping').textContent = order.shipping === 0 ? 'شحن مجاني 🎁' : `${order.shipping} د.إ`;
+      document.getElementById('receiptTotal').textContent = `${order.total} د.إ`;
+
+      // 3. Setup WhatsApp link dynamically
+      const welcomeMsg = `مرحباً، قمت بتقديم الطلب رقم #${order.id} باسم ${order.name || ''} بقيمة ${order.total} د.إ وأريد تأكيد الشحن السريع.`;
+      const waNumber = (window.STORE_SETTINGS && window.STORE_SETTINGS.wa_phone_num) || localStorage.getItem('wa_phone_num') || '97141234567';
+      setupWhatsAppLink(waNumber, welcomeMsg);
+
+      // 4. FIRE PIXELS FOR PURCHASE
+      const trackedKey = 'last_order_tracked_' + order.id;
+      if (!localStorage.getItem(trackedKey)) {
+        if (typeof window.trackPixelEvent === 'function') {
+          console.log(`Firing unified Purchase event for order ${order.id} with value ${order.total}`);
+          window.trackPixelEvent('Purchase', {
+            value: order.total,
+            currency: 'AED',
+            content_name: itemsList || 'زيت الأفغاني الأصلي الذهبي',
+            content_type: 'product',
+            content_ids: order.items ? order.items.map(item => 'AFG_OIL_QTY_' + (item.quantity || 1)) : ['AFG_OIL'],
+            num_items: order.items ? order.items.reduce((acc, item) => acc + (item.quantity || 1), 0) : 1
+          });
+        }
+        localStorage.setItem(trackedKey, 'true');
+      }
+    });
+
+    function setupWhatsAppLink(phone, msg) {
+      const cleanPhone = phone.replace(/[^0-9]/g, '');
+      const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+      const waBtn = document.getElementById('waButton');
+      if (waBtn) waBtn.href = waUrl;
+    }
+  </script>
+</body>
+</html>

@@ -1131,37 +1131,13 @@ async function handleLpOrder(event) {
     total
   });
 
-  // Firing Purchase event
-  if (typeof window.trackPixelEvent === 'function') {
-    window.trackPixelEvent('Purchase', {
-      value: total,
-      currency: 'AED',
-      content_ids: orderItems.map(item => 'AFG_OIL_QTY_' + item.quantity),
-      num_items: orderItems.reduce((sum, item) => sum + item.quantity, 0)
-    });
-  }
-
-  const successOrderId = document.getElementById('lpSuccessOrderId');
-  if (successOrderId) successOrderId.textContent = `#${order.id}`;
-  const successTotal = document.getElementById('lpSuccessTotal');
-  if (successTotal) successTotal.textContent = `${order.total} د.إ`;
-
   cart = [];
   saveCart();
   renderCart();
 
-  const succPage = document.getElementById('successPage');
-  if (succPage) succPage.style.display = 'flex';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  document.getElementById('lp-name').value = '';
-  document.getElementById('lp-phone').value = '';
-  document.getElementById('lp-city').value = '';
-  document.getElementById('lp-district').value = '';
-  document.getElementById('lp-address').value = '';
-  if (document.getElementById('lp-card')) document.getElementById('lp-card').value = '';
-  if (document.getElementById('lp-expiry')) document.getElementById('lp-expiry').value = '';
-  if (document.getElementById('lp-cvv')) document.getElementById('lp-cvv').value = '';
+  // Save order in localStorage for the thank you page and redirect
+  localStorage.setItem('last_order', JSON.stringify(order));
+  window.location.href = 'thankyou.html';
 }
 
 async function handlePlaceOrder(event) {
@@ -1208,40 +1184,13 @@ async function handlePlaceOrder(event) {
     total
   });
 
-  // Firing Purchase event
-  if (typeof window.trackPixelEvent === 'function') {
-    window.trackPixelEvent('Purchase', {
-      value: total,
-      currency: 'AED',
-      content_ids: orderItems.map(item => 'AFG_OIL_QTY_' + item.quantity),
-      num_items: orderItems.reduce((sum, item) => sum + item.quantity, 0)
-    });
-  }
-
-  const successOrderId = document.getElementById('successOrderId');
-  if (successOrderId) successOrderId.textContent = `#${order.id}`;
-  const successName = document.getElementById('successName');
-  if (successName) successName.textContent = order.name;
-  const successPaymentMethod = document.getElementById('successPaymentMethod');
-  if (successPaymentMethod) successPaymentMethod.textContent = order.paymentMethod;
-  const successTotal = document.getElementById('successTotal');
-  if (successTotal) successTotal.textContent = `${order.total} د.إ`;
-
   cart = [];
   saveCart();
   renderCart();
 
-  const succPage = document.getElementById('successPage');
-  if (succPage) succPage.style.display = 'flex';
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  document.getElementById('shippingName').value = '';
-  document.getElementById('shippingPhone').value = '';
-  document.getElementById('shippingCity').value = '';
-  document.getElementById('shippingAddress').value = '';
-  if (document.getElementById('cardNumber')) document.getElementById('cardNumber').value = '';
-  if (document.getElementById('cardExpiry')) document.getElementById('cardExpiry').value = '';
-  if (document.getElementById('cardCvv')) document.getElementById('cardCvv').value = '';
+  // Save order in localStorage for the thank you page and redirect
+  localStorage.setItem('last_order', JSON.stringify(order));
+  window.location.href = 'thankyou.html';
 }
 
 // Dynamic text legacy support

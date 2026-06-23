@@ -2495,29 +2495,9 @@
       }
     })();
 
-    // Firing Purchase event
-    if (typeof window.trackPixelEvent === 'function') {
-      window.trackPixelEvent('Purchase', {
-        value: total,
-        currency: 'AED',
-        content_name: pname,
-        content_type: 'product',
-        content_ids: ['AFG_OIL_QTY_' + qty],
-        num_items: qty
-      });
-    }
-
-    document.getElementById('successOrderId').textContent = 'رقم الطلب: #' + orderId;
-    document.getElementById('successTotal').textContent = total + ' د.إ';
-
-    const sp = document.getElementById('successPage');
-    if (sp) { sp.style.display = 'flex'; sp.style.flexDirection = 'column'; }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    ['lp-name','lp-phone','lp-city','lp-district','lp-address','lp-card','lp-expiry','lp-cvv'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
+    // Save order in localStorage for the thank you page and redirect
+    localStorage.setItem('last_order', JSON.stringify(order));
+    window.location.href = 'thankyou.html';
   }
 
   // ===== FAQ TOGGLE =====
