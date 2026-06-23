@@ -3126,7 +3126,7 @@ async function updateOrderStatus(id, newStatus) {
     // 1. Primary: Update in Google Sheets via Apps Script (using POST with query param)
     const res = await fetch(`https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec?action=update`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ id, status: newStatus })
     });
     const data = await res.json();
@@ -3159,7 +3159,7 @@ async function deleteOrder(id) {
     // 1. Primary: Delete in Google Sheets via Apps Script (using POST with query param)
     const res = await fetch(`https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec?action=delete`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({ id })
     });
     const data = await res.json();

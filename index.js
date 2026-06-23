@@ -891,8 +891,7 @@ async function createAndSaveOrder({ name, phone, city, address, paymentMethod, i
     const res = await fetch('https://script.google.com/macros/s/AKfycbwLq0TgabC85pCLgFO7qbh5AKy-PHv9w0-nVfQ1wua3UnPFI8M9IW13z_GPvBO-YYm47Q/exec', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
+        'Content-Type': 'text/plain'
       },
       body: JSON.stringify({ data: [sheetData] })
     });
