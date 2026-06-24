@@ -864,10 +864,11 @@
         <div>
           <p class="bundle-selector-title">اختاري الكمية المناسبة للحصول على أفضل عروض التوفير:</p>
           <div class="bundle-selector-grid">
-            <div class="bundle-option-btn selected" data-bundle-id="1" onclick="selectProductBundle(1, 129, null, null, this)">
-              <div class="bundle-option-qty">×1</div>
-              <div class="bundle-option-label">عبوة واحدة</div>
+            <div class="bundle-option-btn selected" data-bundle-id="1" onclick="selectProductBundle(1, 129, 258, 'الثانية بـ 1 درهم 🎁', this)">
+              <div class="bundle-option-qty">×1+1</div>
+              <div class="bundle-option-label">عبوة + الثانية بـ 1 درهم</div>
               <div class="bundle-option-label bundle-opt-price">129 د.إ</div>
+              <div class="bundle-option-save">الثانية بـ 1 درهم 🎁</div>
             </div>
             <div class="bundle-option-btn" data-bundle-id="2" onclick="selectProductBundle(2, 189, 258, 'الثالثة مجاناً 🎁', this)">
               <div class="bundle-option-qty">×2</div>
@@ -1203,7 +1204,7 @@
       }
       
       const db = window.bundles || {
-        1: { name: 'عبوة واحدة - زيت الأفغاني الأصلي الذهبي', price: 129 },
+        1: { name: 'عبوة + الثانية بـ 1 درهم - زيت الأفغاني الأصلي الذهبي', price: 129 },
         2: { name: 'عبوتين + عبوة مجانية - زيت الأفغاني الأصلي', price: 189 },
         3: { name: '3 عبوات + عبوة مجانية - زيت الأفغاني الأصلي', price: 237 }
       };

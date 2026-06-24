@@ -237,9 +237,15 @@ const bundles = {};
 window.bundles = bundles;
 
 function updateBundlesLegacyMap(prod) {
-  bundles[1] = { id: 1, name: `عبوة واحدة — ${prod.name}`, price: prod.price, quantity: 1, theme: 'lime' };
-  bundles[2] = { id: 2, name: `عبوتين (توفير 15%) — ${prod.name}`, price: Math.round(prod.price * 2 * 0.85), quantity: 2, theme: 'lime' };
-  bundles[3] = { id: 3, name: `3 عبوات (توفير 25%) — ${prod.name}`, price: Math.round(prod.price * 3 * 0.75), quantity: 3, theme: 'lime' };
+  if (prod.id == 1) {
+    bundles[1] = { id: 1, name: `عبوة + الثانية بـ 1 درهم — ${prod.name}`, price: prod.price, quantity: 2, theme: 'lime' };
+    bundles[2] = { id: 2, name: `عبوتين + عبوة مجانية — ${prod.name}`, price: 189, quantity: 3, theme: 'lime' };
+    bundles[3] = { id: 3, name: `3 عبوات + عبوة مجانية — ${prod.name}`, price: 237, quantity: 4, theme: 'lime' };
+  } else {
+    bundles[1] = { id: 1, name: `عبوة واحدة — ${prod.name}`, price: prod.price, quantity: 1, theme: 'lime' };
+    bundles[2] = { id: 2, name: `عبوتين (توفير 15%) — ${prod.name}`, price: Math.round(prod.price * 2 * 0.85), quantity: 2, theme: 'lime' };
+    bundles[3] = { id: 3, name: `3 عبوات (توفير 25%) — ${prod.name}`, price: Math.round(prod.price * 3 * 0.75), quantity: 3, theme: 'lime' };
+  }
 }
 
 // Dynamic Catalog Renderer for index.html
@@ -1300,7 +1306,35 @@ function loadProductDetails() {
 
   if (opt1) {
     opt1.querySelector('.bundle-opt-price').textContent = `${p.price} د.إ`;
-    opt1.setAttribute('onclick', `selectProductBundle(1, ${p.price}, null, null, this)`);
+    if (p.id == 1) {
+      const p1Old = p.price * 2;
+      opt1.setAttribute('onclick', `selectProductBundle(1, ${p.price}, ${p1Old}, 'الثانية بـ 1 درهم 🎁', this)`);
+      
+      const qtyEl = opt1.querySelector('.bundle-option-qty');
+      if (qtyEl) qtyEl.textContent = '×1+1';
+      
+      const labelEl = opt1.querySelector('.bundle-option-label:not(.bundle-opt-price)');
+      if (labelEl) labelEl.textContent = 'عبوة + الثانية بـ 1 درهم';
+      
+      let saveEl = opt1.querySelector('.bundle-option-save');
+      if (!saveEl) {
+        saveEl = document.createElement('div');
+        saveEl.className = 'bundle-option-save';
+        opt1.appendChild(saveEl);
+      }
+      saveEl.textContent = 'الثانية بـ 1 درهم 🎁';
+    } else {
+      opt1.setAttribute('onclick', `selectProductBundle(1, ${p.price}, null, null, this)`);
+      
+      const qtyEl = opt1.querySelector('.bundle-option-qty');
+      if (qtyEl) qtyEl.textContent = '×1';
+      
+      const labelEl = opt1.querySelector('.bundle-option-label:not(.bundle-opt-price)');
+      if (labelEl) labelEl.textContent = 'عبوة واحدة';
+      
+      const saveEl = opt1.querySelector('.bundle-option-save');
+      if (saveEl) saveEl.remove();
+    }
   }
   if (opt2) {
     const p2 = getUnitPrice(p.id, 2) * 2;
