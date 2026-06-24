@@ -1695,7 +1695,7 @@
       <!-- CTA -->
       <div class="hero-cta-group">
         <a href="#offer" class="btn-hero">
-          🛒 اطلب الآن الدفع عند الاستلام — تبدأ من 129 درهم
+          🛒 اطلب الآن الدفع عند الاستلام — الإجمالي يبدأ من 149 درهم
         </a>
         <p class="btn-hero-sub">🚚 شحن سريع مبرد · شحن مجاني للطلبات فوق 199 درهم</p>
         <div class="hero-trust-row">
@@ -1789,6 +1789,7 @@
                   <li>توصيل مبرد للمنزل بـ 19 د.إ</li>
                   <li>ضمان ذهبي 30 يوماً</li>
                   <li>الدفع عند الاستلام 💵</li>
+                  <li>إجمالي الطلب 149 د.إ شامل التوصيل 💰</li>
                 </ul>
               </div>
             </label>
@@ -2351,6 +2352,7 @@
           <li>توصيل مبرد للمنزل بـ 19 د.إ</li>
           <li>ضمان ذهبي 30 يوماً</li>
           <li>الدفع عند الاستلام 💵</li>
+          <li><strong>إجمالي الطلب 149 د.إ شامل التوصيل 💰</strong></li>
         </ul>
         <a href="#checkout" class="btn-order btn-order-outline" onclick="selectBundleAndScroll(1, 129)">اطلب الآن</a>
       </div>
@@ -2636,10 +2638,12 @@
     // Wait, the user said "التوصيل مجاني لطلبيات التي تفوق 199 درهم" (orders exceeding 199 AED).
     // So 237 AED has free shipping (237 > 199).
     // 189 AED is not > 199, so shipping is 19 AED.
-    // 129 AED is not > 199, so shipping is 19 AED.
+    // 129 AED is not > 199, so shipping is 19 AED. Plus 1 AED for second bottle = total 149.
     const shipping = price > 199 ? 0 : 19;
+    // Add 1 AED for the second bottle in offer 1 (buy 1 get 1 for 1 AED)
+    const secondBottle = qty === 1 ? 1 : 0;
     const disc = 0;
-    const total = price + shipping;
+    const total = price + shipping + secondBottle;
 
     const pname = document.getElementById('summary-product-name');
     if (pname) pname.textContent = name;
