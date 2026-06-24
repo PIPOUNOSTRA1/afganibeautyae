@@ -491,6 +491,32 @@
       font-size: 0.78rem;
       font-weight: 400;
     }
+    .offer-perks-list {
+      display: none;
+      margin-top: 0.75rem;
+      padding-right: 0.5rem;
+      list-style-type: none;
+      flex-direction: column;
+      gap: 0.35rem;
+      border-top: 1px dashed rgba(255, 255, 255, 0.1);
+      padding-top: 0.65rem;
+    }
+    .offer-option.selected .offer-perks-list {
+      display: flex;
+    }
+    .offer-perks-list li {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-weight: 500;
+    }
+    .offer-perks-list li::before {
+      content: "✦";
+      color: var(--primary);
+      font-size: 0.7rem;
+    }
 
     /* Inputs and Select Styling */
     .checkout-form-fields {
@@ -1507,6 +1533,84 @@
       }
     }
 
+    /* ===== PROBLEMS SOLVED SECTION ===== */
+    .solved-section { background: var(--bg2); }
+    .solved-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .solved-card {
+      background: var(--surface);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+    }
+    .solved-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(212,175,55,0.15);
+    }
+    .solved-card-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      display: block;
+    }
+    .solved-card-body {
+      padding: 1.25rem 1.5rem;
+    }
+    .solved-card-title {
+      font-weight: 900;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+    .solved-card-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .solved-card-tag {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, var(--primary), #e8c547);
+      color: #1a1a1a;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 0.3rem 0.75rem;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(212,175,55,0.35);
+    }
+    .solved-mini-faq {
+      max-width: 850px;
+      margin: 3rem auto 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .solved-mini-faq .faq-item { background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius-sm); overflow: hidden; }
+    .solved-mini-faq .faq-q { width: 100%; background: none; border: none; color: var(--text); font-family: var(--font-ar); font-weight: 800; font-size: 0.92rem; padding: 1.15rem 1.5rem; text-align: right; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+    .solved-mini-faq .faq-a { display: none; padding: 0 1.5rem 1.25rem; font-size: 0.82rem; color: var(--text-muted); line-height: 1.7; border-top: 1px solid rgba(255,255,255,0.03); padding-top: 1rem; }
+    .solved-mini-faq .faq-item.open .faq-a { display: block; }
+    .solved-mini-faq .faq-item.open .faq-q-icon { transform: rotate(45deg); }
+    .solved-divider {
+      width: 80px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), transparent);
+      margin: 2.5rem auto 0;
+      border-radius: 10px;
+    }
+    @media (max-width: 768px) {
+      .solved-grid { grid-template-columns: 1fr 1fr; gap: 1rem; }
+    }
+    @media (max-width: 500px) {
+      .solved-grid { grid-template-columns: 1fr; gap: 1rem; }
+    }
+
     /* ===== REDESIGNED FAQ GRID ===== */
     .faq-layout-grid {
       display: grid;
@@ -1664,6 +1768,13 @@
                 <span class="offer-badge">الأكثر طلباً 🔥</span>
                 <span class="offer-title">عبوتين + 1 مجاناً (3 عبوات)</span>
                 <span class="offer-price">189 د.إ <span class="offer-old">387 د.إ</span></span>
+                <ul class="offer-perks-list">
+                  <li>وفّر 198 د.إ — الثالثة مجاناً 🎁</li>
+                  <li>كورس إنبات الفراغات الكامل</li>
+                  <li>توصيل مبرد للمنزل بـ 19 د.إ</li>
+                  <li>ضمان ذهبي 30 يوماً</li>
+                  <li>الدفع عند الاستلام 💵</li>
+                </ul>
               </div>
             </label>
             <label class="offer-option">
@@ -1672,6 +1783,13 @@
                 <span class="offer-badge">الثانية بـ 1 درهم 🎁</span>
                 <span class="offer-title">عبوة + الثانية بـ 1 درهم (عبوتين)</span>
                 <span class="offer-price">129 د.إ <span class="offer-old">258 د.إ</span></span>
+                <ul class="offer-perks-list">
+                  <li>الثانية بـ 1 درهم فقط! 🎁</li>
+                  <li>كورس إنبات وتكثيف مبدئي</li>
+                  <li>توصيل مبرد للمنزل بـ 19 د.إ</li>
+                  <li>ضمان ذهبي 30 يوماً</li>
+                  <li>الدفع عند الاستلام 💵</li>
+                </ul>
               </div>
             </label>
             <label class="offer-option">
@@ -1680,6 +1798,13 @@
                 <span class="offer-badge">توفير العائلة 💎</span>
                 <span class="offer-title">3 عبوات + 1 مجاناً (4 عبوات)</span>
                 <span class="offer-price">237 د.إ <span class="offer-old">516 د.إ</span></span>
+                <ul class="offer-perks-list">
+                  <li>وفر 279 د.إ — الرابعة والتوصيل مجاناً 🎁</li>
+                  <li>كورس العائلة والإنبات الشامل</li>
+                  <li>توصيل سريع مجاني بالكامل 🚚</li>
+                  <li>ضمان ذهبي 30 يوماً</li>
+                  <li>الدفع عند الاستلام 💵</li>
+                </ul>
               </div>
             </label>
           </div>
@@ -1818,6 +1943,131 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PROBLEMS SOLVED BY AFGHAN OIL ===== -->
+<section class="section solved-section" id="solved">
+  <div class="section-inner">
+    <div class="sec-center">
+      <div class="sec-tag">الحلول الفعّالة</div>
+      <h2 class="sec-title">المشاكل التي يحلّها زيت الأفغاني الأصلي الذهبي</h2>
+      <p class="sec-desc sec-center">ستة مشاكل شائعة للشعر واللحية يعالجها الزيت بمكوناته الطبيعية الفعّالة</p>
+    </div>
+
+    <div class="solved-grid">
+      <!-- Card 1 -->
+      <div class="solved-card">
+        <span class="solved-card-tag">✅ يعالج</span>
+        <img src="assets/problem-hair-loss.png" alt="تساقط الشعر الشديد" class="solved-card-img">
+        <div class="solved-card-body">
+          <div class="solved-card-title">تساقط الشعر الشديد والمزمن</div>
+          <div class="solved-card-desc">يغذي البصيلات من الجذور ويقوي الشعيرات الدموية في فروة الرأس، مما يوقف التساقط خلال 10-14 يوماً من الاستخدام المنتظم.</div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="solved-card">
+        <span class="solved-card-tag">✅ يعالج</span>
+        <img src="assets/problem-dry-hair.png" alt="جفاف وتقصف الشعر" class="solved-card-img">
+        <div class="solved-card-body">
+          <div class="solved-card-title">جفاف وتقصّف وهيشان الشعر</div>
+          <div class="solved-card-desc">يرطب الشعر بعمق بزيوته الطبيعية السبعة، يعيد اللمعان والنعومة ويقضي على الأطراف المتقصفة والهيشان نهائياً.</div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="solved-card">
+        <span class="solved-card-tag">✅ يعالج</span>
+        <img src="assets/problem-beard-gaps.png" alt="فراغات اللحية" class="solved-card-img">
+        <div class="solved-card-body">
+          <div class="solved-card-title">فراغات اللحية والشارب</div>
+          <div class="solved-card-desc">ينشط البصيلات الخاملة في منطقة الذقن والشارب ويملأ الفراغات بشعر كثيف ومتناسق خلال 3-4 أسابيع.</div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="solved-card">
+        <span class="solved-card-tag">✅ يعالج</span>
+        <img src="assets/problem-dandruff.png" alt="قشرة فروة الرأس" class="solved-card-img">
+        <div class="solved-card-body">
+          <div class="solved-card-title">القشرة وحكة فروة الرأس</div>
+          <div class="solved-card-desc">يطهر فروة الرأس من ترسبات الكلور والأملاح، يزيل القشرة ويهدئ التهيج والحكة بفضل خصائصه المضادة للفطريات.</div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="solved-card">
+        <span class="solved-card-tag">✅ يعالج</span>
+        <img src="assets/problem-receding.png" alt="تراجع خط الشعر" class="solved-card-img">
+        <div class="solved-card-body">
+          <div class="solved-card-title">تراجع خط الشعر والصلع غير الوراثي</div>
+          <div class="solved-card-desc">يحفز نمو شعر جديد (Baby Hair) في مقدمة الرأس والمناطق الفارغة ويعيد خط الشعر الطبيعي تدريجياً.</div>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="solved-card">
+        <span class="solved-card-tag">✅ يعالج</span>
+        <img src="assets/problem-weak-hair.png" alt="ضعف وترقق الشعر" class="solved-card-img">
+        <div class="solved-card-body">
+          <div class="solved-card-title">ضعف وترقّق الشعر وتكسّره</div>
+          <div class="solved-card-desc">يقوّي بنية الشعرة من الداخل بالكيراتين الطبيعي والبروتينات، يمنع التكسر ويزيد سماكة الشعرة بنسبة ملحوظة.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="solved-divider"></div>
+
+    <!-- Mini FAQ for Problems -->
+    <div class="sec-center" style="margin-top:2.5rem;">
+      <div class="sec-tag">سؤال وجواب</div>
+      <h3 class="sec-title" style="font-size:1.4rem;">أسئلة شائعة حول المشاكل والعلاج</h3>
+    </div>
+    <div class="solved-mini-faq">
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+          <span>هل يناسب زيت الأفغاني جميع أنواع الشعر؟</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">نعم، زيت الأفغاني الأصلي الذهبي مناسب لجميع أنواع الشعر سواء كان ناعماً أو خشناً، مجعداً أو أملساً. تركيبته الطبيعية تتكيف مع طبيعة شعرك وتعالج المشاكل المحددة التي تعاني منها.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+          <span>كم يستغرق حتى أرى نتائج ملموسة؟</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">توقف التساقط يُلاحظ خلال 10-14 يوماً. إنبات شعر جديد (Baby Hair) يبدأ بالظهور خلال 3-4 أسابيع. الكثافة الكاملة تحتاج 6-8 أسابيع من الاستخدام المنتظم.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+          <span>هل يعالج الفراغات القديمة في الرأس واللحية؟</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">نعم، طالما البصيلة لم تمت نهائياً. الزيت ينشط البصيلات الخاملة ويحفزها على إنتاج شعر جديد، حتى في الفراغات القديمة التي لم ينمو فيها شعر لسنوات.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+          <span>هل يمكن استخدامه مع علاجات أخرى؟</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">نعم، زيت الأفغاني الأصلي طبيعي 100% ويمكن استخدامه مع أي شامبو أو بلسم. لكن ننصح بعدم استخدامه مع المينوكسيديل لأن الزيت بديل طبيعي أفضل وبدون آثار جانبية.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+          <span>هل النتائج دائمة أم مؤقتة؟</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">لأن الزيت طبيعي وخالٍ من الهرمونات والمينوكسيديل، فإن النتائج دائمة وثابتة. الشعر الذي ينبت بفضل الزيت لا يتساقط بعد التوقف عن الاستخدام، على عكس المنتجات الكيميائية.</div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this.parentElement)">
+          <span>هل الزيت آمن على البشرة الحساسة؟</span>
+          <span class="faq-q-icon">+</span>
+        </button>
+        <div class="faq-a">بالتأكيد. الزيت مكون من مواد طبيعية 100% بدون أي مواد كيميائية أو عطور صناعية. مناسب حتى لأصحاب البشرة الحساسة والأطفال فوق 12 سنة.</div>
       </div>
     </div>
   </div>
