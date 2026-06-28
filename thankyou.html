@@ -676,7 +676,7 @@
           if (typeof window.trackPixelEvent === 'function') {
             console.log(`✅ Server save confirmed. Firing Purchase event for order ${order.id} with value ${order.total}`);
             window.trackPixelEvent('Purchase', {
-              value: order.total,
+              value: parseFloat(order.total) || 0,
               currency: 'AED',
               content_name: itemsList || 'زيت الأفغاني الأصلي الذهبي',
               content_type: 'product',
