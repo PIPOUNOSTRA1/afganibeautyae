@@ -2517,17 +2517,81 @@
   // Redirect API requests based on settings or protocol fallback
   (function() {
     const getSetting = (key) => (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || '';
+    const googleSheetUrl = getSetting('google_sheet_url');
     const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
     
-    if (apiBase) {
-      const originalFetch = window.fetch;
-      window.fetch = function(input, init) {
-        if (typeof input === 'string' && input.startsWith('/api/')) {
+    const originalFetch = window.fetch;
+    window.fetch = async function(input, init) {
+      if (typeof input === 'string' && input.startsWith('/api/')) {
+        if (googleSheetUrl) {
+          const url = new URL(googleSheetUrl);
+          const method = (init && init.method) || 'GET';
+          let action = '';
+          
+          if (input === '/api/settings') {
+            action = method === 'POST' ? 'saveSettings' : 'getSettings';
+          } else if (input === '/api/products') {
+            action = method === 'POST' ? 'saveProducts' : 'getProducts';
+          } else if (input === '/api/orders') {
+            action = method === 'POST' ? 'addOrder' : 'getOrders';
+          } else if (input === '/api/orders/update') {
+            action = 'updateOrder';
+          } else if (input === '/api/orders/delete') {
+            action = 'deleteOrder';
+          } else if (input === '/api/orders/bulk-save') {
+            action = 'bulkSave';
+          } else if (input === '/api/admin/login') {
+            action = 'login';
+          } else if (input === '/api/admin/verify-key') {
+            action = 'verifyKey';
+          } else if (input === '/api/admin/config') {
+            action = 'getConfig';
+          } else if (input === '/api/admin/change-password') {
+            action = 'changePassword';
+          } else if (input.startsWith('/api/orders/')) {
+            const orderId = input.replace('/api/orders/', '');
+            url.searchParams.set('action', 'getOrder');
+            url.searchParams.set('id', orderId);
+            return originalFetch(url.toString(), { method: 'GET' });
+          }
+          
+          if (method === 'GET') {
+            url.searchParams.set('action', action);
+            const authHeader = init && init.headers && (init.headers['Authorization'] || init.headers['authorization']);
+            if (authHeader) {
+              const token = authHeader.replace('Bearer ', '');
+              url.searchParams.set('token', token);
+            }
+            return originalFetch(url.toString(), { method: 'GET' });
+          } else {
+            let bodyData = {};
+            if (init && init.body) {
+              try {
+                bodyData = JSON.parse(init.body);
+              } catch(e) {
+                bodyData = init.body;
+              }
+            }
+            const payload = {
+              action: action,
+              data: bodyData
+            };
+            const authHeader = init && init.headers && (init.headers['Authorization'] || init.headers['authorization']);
+            if (authHeader) {
+              payload.token = authHeader.replace('Bearer ', '');
+            }
+            
+            return originalFetch(url.toString(), {
+              method: 'POST',
+              body: JSON.stringify(payload)
+            });
+          }
+        } else if (apiBase) {
           input = apiBase.replace(/\/$/, '') + input;
         }
-        return originalFetch(input, init);
-      };
-    }
+      }
+      return originalFetch(input, init);
+    };
   })();
 
   // Fix image paths for GitHub Pages subdirectory deployments
@@ -2641,7 +2705,7 @@
     // 129 AED is not > 199, so shipping is 19 AED. Plus 1 AED for second bottle = total 149.
     const shipping = price > 199 ? 0 : 19;
     // Add 1 AED for the second bottle in offer 1 (buy 1 get 1 for 1 AED)
-    const secondBottle = qty === 1 ? 1 : 0;
+    const secondBottle = qty == 1 ? 1 : 0;
     const disc = 0;
     const total = price + shipping + secondBottle;
 
@@ -2685,8 +2749,18 @@
   }
 
   // ===== ORDER FORM =====
-  function handleOrder(e) {
+  let _orderSubmitting = false; // حارس منع النقر المزدوج
+  async function handleOrder(e) {
     e.preventDefault();
+
+    // ── منع النقر المزدوج فوراً ──
+    if (_orderSubmitting) return;
+    _orderSubmitting = true;
+
+    // تعطيل الزر فوراً قبل أي عملية
+    const submitBtn = document.querySelector('button[type="submit"]');
+    if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'جارٍ إرسال الطلب...'; }
+
     const name = document.getElementById('lp-name').value.trim();
     const phone = document.getElementById('lp-phone').value.trim();
     const city = document.getElementById('lp-city').value.trim();
@@ -2697,6 +2771,8 @@
     if (!/^(05|5)\d{8}$|^\+971/.test(phone.replace(/\s/g,''))) {
       if (phone.length < 9) {
         alert('الرجاء إدخال رقم جوال إماراتي صحيح (مثال: 05xxxxxxxx)');
+        _orderSubmitting = false;
+        if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'اطلب الآن'; }
         return;
       }
     }
@@ -2705,8 +2781,9 @@
 
     const { price, name: pname, qty } = selectedOffer;
     const shipping = price > 199 ? 0 : 19;
+    const secondBottle = qty == 1 ? 1 : 0;
     const disc = 0;
-    const total = price + shipping;
+    const total = price + shipping + secondBottle;
 
     const orderId = 'AB-' + Date.now().toString().slice(-6);
     const order = {
@@ -2725,33 +2802,35 @@
       localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
     } catch(e) {}
 
-    // Send to backend API server
-    (async function() {
-      try {
-        if (!navigator.onLine) throw new Error('Offline');
-        const res = await fetch('/api/orders', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(order)
-        });
-        const data = await res.json();
-        if (data.success) {
-          console.log("Order saved to server:", data);
-        } else {
-          throw new Error(data.error || 'Server error');
-        }
-      } catch(err) {
-        console.warn("Failed to save order to server, queuing:", err);
-        try {
-          let pending = JSON.parse(localStorage.getItem('pendingOrders')) || [];
-          pending.push(order);
-          localStorage.setItem('pendingOrders', JSON.stringify(pending));
-        } catch(e2) {}
+    // Send to backend API server and WAIT for confirmation
+    let serverSaved = false;
+    try {
+      if (!navigator.onLine) throw new Error('Offline');
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(order)
+      });
+      const data = await res.json();
+      if (data.success) {
+        console.log("Order saved to server:", data);
+        serverSaved = true;
+      } else {
+        throw new Error(data.error || 'Server error');
       }
-    })();
+    } catch(err) {
+      console.warn("Failed to save order to server, queuing:", err);
+      try {
+        let pending = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+        pending.push(order);
+        localStorage.setItem('pendingOrders', JSON.stringify(pending));
+      } catch(e2) {}
+    }
 
-    // Save order in localStorage for the thank you page and redirect
+    // Only redirect AFTER server save attempt completes
+    // TikTok Purchase (CompletePayment) fires on thankyou.html
     localStorage.setItem('last_order', JSON.stringify(order));
+    localStorage.setItem('last_order_server_saved', serverSaved ? 'true' : 'false');
     window.location.href = 'thankyou.html';
   }
 

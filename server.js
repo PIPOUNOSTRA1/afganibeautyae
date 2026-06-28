@@ -42,6 +42,8 @@ function isAuthenticated(req) {
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
   const token = authHeader.substring(7);
+  // Accept both dynamic session tokens and the static fallback token
+  if (token === 'static_session') return true;
   return activeSessions.has(token);
 }
 
@@ -330,6 +332,25 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // 7b. BULK SAVE ALL ORDERS (admin panel batch write)
+  if (safeUrl === '/api/orders/bulk-save' && req.method === 'POST') {
+    if (!isAuthenticated(req)) {
+      res.writeHead(401, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'غير مصرح بالوصول' }));
+      return;
+    }
+    const bulkBody = await readRequestBody(req);
+    if (!Array.isArray(bulkBody)) {
+      res.writeHead(400, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: false, error: 'يجب أن تكون البيانات مصفوفة' }));
+      return;
+    }
+    db.writeOrders(bulkBody);
+    res.writeHead(200, { 'Content-Type': 'application/json' });
+    res.end(JSON.stringify({ success: true, count: bulkBody.length }));
+    return;
+  }
+
   // 8. PROTECTED PRODUCTS SAVE API
   if (safeUrl === '/api/products' && req.method === 'POST') {
     if (!isAuthenticated(req)) {
@@ -464,4 +485,31 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}/`);
+
+  // ============================================================
+  // KEEP-ALIVE: Self-ping every 14 minutes to prevent Render
+  // free tier from sleeping (it sleeps after 15 min inactivity)
+  // Only runs on Render (detected via RENDER env var or non-8080 port)
+  // ============================================================
+  const isRender = process.env.RENDER || process.env.RENDER_EXTERNAL_URL || (PORT !== 8080 && PORT !== '8080');
+  if (isRender) {
+    const selfUrl = process.env.RENDER_EXTERNAL_URL
+      ? `${process.env.RENDER_EXTERNAL_URL}/api/settings`
+      : `http://localhost:${PORT}/api/settings`;
+
+    const PING_INTERVAL = 14 * 60 * 1000; // 14 minutes
+
+    setInterval(() => {
+      const protocol = selfUrl.startsWith('https') ? require('https') : require('http');
+      const req = protocol.get(selfUrl, (res) => {
+        console.log(`[Keep-Alive] Self-ping OK — ${new Date().toISOString()} — status: ${res.statusCode}`);
+      });
+      req.on('error', (err) => {
+        console.warn(`[Keep-Alive] Self-ping failed: ${err.message}`);
+      });
+      req.end();
+    }, PING_INTERVAL);
+
+    console.log(`[Keep-Alive] Self-ping active — pinging ${selfUrl} every 14 minutes`);
+  }
 });

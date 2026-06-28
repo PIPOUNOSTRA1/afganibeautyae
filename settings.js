@@ -1,5 +1,6 @@
 window.STORE_SETTINGS = {
   api_base_url: "https://afganibeautyae-1w.onrender.com",
+  google_sheet_url: "",
   fb_pixel_id: "",
   tt_pixel_id: "D8OR5PJC77UDGOQMC10G",
   snap_pixel_id: "",

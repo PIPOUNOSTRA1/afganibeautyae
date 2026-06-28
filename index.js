@@ -3,17 +3,81 @@
 // Redirect API requests based on settings or protocol fallback
 (function() {
   const getSetting = (key) => (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || '';
+  const googleSheetUrl = getSetting('google_sheet_url');
   const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
   
-  if (apiBase) {
-    const originalFetch = window.fetch;
-    window.fetch = function(input, init) {
-      if (typeof input === 'string' && input.startsWith('/api/')) {
+  const originalFetch = window.fetch;
+  window.fetch = async function(input, init) {
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+      if (googleSheetUrl) {
+        const url = new URL(googleSheetUrl);
+        const method = (init && init.method) || 'GET';
+        let action = '';
+        
+        if (input === '/api/settings') {
+          action = method === 'POST' ? 'saveSettings' : 'getSettings';
+        } else if (input === '/api/products') {
+          action = method === 'POST' ? 'saveProducts' : 'getProducts';
+        } else if (input === '/api/orders') {
+          action = method === 'POST' ? 'addOrder' : 'getOrders';
+        } else if (input === '/api/orders/update') {
+          action = 'updateOrder';
+        } else if (input === '/api/orders/delete') {
+          action = 'deleteOrder';
+        } else if (input === '/api/orders/bulk-save') {
+          action = 'bulkSave';
+        } else if (input === '/api/admin/login') {
+          action = 'login';
+        } else if (input === '/api/admin/verify-key') {
+          action = 'verifyKey';
+        } else if (input === '/api/admin/config') {
+          action = 'getConfig';
+        } else if (input === '/api/admin/change-password') {
+          action = 'changePassword';
+        } else if (input.startsWith('/api/orders/')) {
+          const orderId = input.replace('/api/orders/', '');
+          url.searchParams.set('action', 'getOrder');
+          url.searchParams.set('id', orderId);
+          return originalFetch(url.toString(), { method: 'GET' });
+        }
+        
+        if (method === 'GET') {
+          url.searchParams.set('action', action);
+          const authHeader = init && init.headers && (init.headers['Authorization'] || init.headers['authorization']);
+          if (authHeader) {
+            const token = authHeader.replace('Bearer ', '');
+            url.searchParams.set('token', token);
+          }
+          return originalFetch(url.toString(), { method: 'GET' });
+        } else {
+          let bodyData = {};
+          if (init && init.body) {
+            try {
+              bodyData = JSON.parse(init.body);
+            } catch(e) {
+              bodyData = init.body;
+            }
+          }
+          const payload = {
+            action: action,
+            data: bodyData
+          };
+          const authHeader = init && init.headers && (init.headers['Authorization'] || init.headers['authorization']);
+          if (authHeader) {
+            payload.token = authHeader.replace('Bearer ', '');
+          }
+          
+          return originalFetch(url.toString(), {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+      } else if (apiBase) {
         input = apiBase.replace(/\/$/, '') + input;
       }
-      return originalFetch(input, init);
-    };
-  }
+    }
+    return originalFetch(input, init);
+  };
 })();
 
 // =====================================================
@@ -1092,22 +1156,31 @@ function loadLandingPageCheckout() {
   };
 }
 
+let _lpOrderSubmitting = false;
 async function handleLpOrder(event) {
   event.preventDefault();
   
   if (cart.length === 0) return;
+  if (_lpOrderSubmitting) return; // منع النقر المزدوج
+  _lpOrderSubmitting = true;
 
   const name = document.getElementById('lp-name').value.trim();
   const phone = document.getElementById('lp-phone').value.trim();
   const city = document.getElementById('lp-city').value.trim();
-  const district = document.getElementById('lp-district').value.trim();
+  const districtEl = document.getElementById('lp-district');
+  const district = districtEl ? districtEl.value.trim() : '';
   const addressDetail = document.getElementById('lp-address').value.trim();
 
   const phoneRegex = /^(05|5)\d{8}$/;
   if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
     alert('الرجاء إدخال رقم جوال إماراتي صحيح (مثال: 05xxxxxxxx)');
+    _lpOrderSubmitting = false;
     return;
   }
+
+  // تعطيل زر الإرسال
+  const submitBtn = document.getElementById('lp-submit-btn') || document.querySelector('#lpCheckoutForm [type="submit"]');
+  if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'جارٍ إرسال الطلب...'; }
 
   const paymentMethod = 'cod';
 
@@ -1124,32 +1197,71 @@ async function handleLpOrder(event) {
     quantity: item.quantity
   }));
 
-  const order = await createAndSaveOrder({
+  // حفظ الطلب وتتبع نجاح الحفظ على الخادم
+  let serverSaved = false;
+  const orderId = `AB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+  const order = {
+    id: orderId,
     name,
     phone,
     city,
-    address: `${district}، ${addressDetail}`,
-    paymentMethod,
+    address: district ? `${district}، ${addressDetail}` : addressDetail,
+    paymentMethod: 'الدفع عند الاستلام (COD)',
     items: orderItems,
     subtotal,
     shipping: shippingCost,
     discount,
-    total
-  });
+    total,
+    date: new Date().toISOString(),
+    status: 'pending'
+  };
+
+  // حفظ محلي كاحتياط
+  try {
+    let orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || [];
+    orders.unshift(order);
+    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+  } catch (e) {}
+
+  // إرسال للخادم
+  try {
+    if (!navigator.onLine) throw new Error('Offline');
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+    const data = await res.json();
+    if (data.success) {
+      serverSaved = true;
+    } else {
+      throw new Error(data.error || 'Server error');
+    }
+  } catch (err) {
+    console.warn('Failed to save order to server, queuing:', err);
+    try {
+      let pending = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+      pending.push(order);
+      localStorage.setItem('pendingOrders', JSON.stringify(pending));
+    } catch (e2) {}
+  }
 
   cart = [];
   saveCart();
-  renderCart();
 
-  // Save order in localStorage for the thank you page and redirect
+  // حفظ الطلب الأخير وحالة الخادم لصفحة الشكر
   localStorage.setItem('last_order', JSON.stringify(order));
+  localStorage.setItem('last_order_server_saved', serverSaved ? 'true' : 'false');
   window.location.href = 'thankyou.html';
 }
 
+let _placeOrderSubmitting = false;
 async function handlePlaceOrder(event) {
   event.preventDefault();
   
   if (cart.length === 0) return;
+  if (_placeOrderSubmitting) return; // منع النقر المزدوج
+  _placeOrderSubmitting = true;
 
   const name = document.getElementById('shippingName').value.trim();
   const phone = document.getElementById('shippingPhone').value.trim();
@@ -1159,8 +1271,13 @@ async function handlePlaceOrder(event) {
   const phoneRegex = /^(05|5)\d{8}$/;
   if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
     alert('الرجاء إدخال رقم جوال إماراتي صحيح (مثال: 05xxxxxxxx)');
+    _placeOrderSubmitting = false;
     return;
   }
+
+  // تعطيل زر الإرسال
+  const placeBtn = document.getElementById('placeOrderBtn') || document.querySelector('[onclick*="handlePlaceOrder"]');
+  if (placeBtn) { placeBtn.disabled = true; placeBtn.textContent = 'جارٍ إرسال الطلب...'; }
 
   const paymentMethod = 'cod';
 
@@ -1177,25 +1294,62 @@ async function handlePlaceOrder(event) {
     quantity: item.quantity
   }));
 
-  const order = await createAndSaveOrder({
+  // حفظ الطلب وتتبع نجاح الحفظ على الخادم
+  let serverSaved = false;
+  const orderId = `AB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+  const order = {
+    id: orderId,
     name,
     phone,
     city,
     address,
-    paymentMethod,
+    paymentMethod: 'الدفع عند الاستلام (COD)',
     items: orderItems,
     subtotal,
     shipping: shippingCost,
     discount,
-    total
-  });
+    total,
+    date: new Date().toISOString(),
+    status: 'pending'
+  };
+
+  // حفظ محلي كاحتياط
+  try {
+    let orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || [];
+    orders.unshift(order);
+    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
+  } catch (e) {}
+
+  // إرسال للخادم
+  try {
+    if (!navigator.onLine) throw new Error('Offline');
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(order)
+    });
+    const data = await res.json();
+    if (data.success) {
+      serverSaved = true;
+    } else {
+      throw new Error(data.error || 'Server error');
+    }
+  } catch (err) {
+    console.warn('Failed to save order to server, queuing:', err);
+    try {
+      let pending = JSON.parse(localStorage.getItem('pendingOrders')) || [];
+      pending.push(order);
+      localStorage.setItem('pendingOrders', JSON.stringify(pending));
+    } catch (e2) {}
+  }
 
   cart = [];
   saveCart();
   renderCart();
 
-  // Save order in localStorage for the thank you page and redirect
+  // حفظ الطلب الأخير وحالة الخادم لصفحة الشكر
   localStorage.setItem('last_order', JSON.stringify(order));
+  localStorage.setItem('last_order_server_saved', serverSaved ? 'true' : 'false');
   window.location.href = 'thankyou.html';
 }
 

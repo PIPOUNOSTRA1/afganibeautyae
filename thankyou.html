@@ -668,21 +668,28 @@
       document.getElementById('receiptShipping').textContent = order.shipping === 0 ? 'شحن مجاني 🎁' : `${order.shipping} د.إ`;
       document.getElementById('receiptTotal').textContent = `${order.total} د.إ`;
 
-      // 4. FIRE PIXELS FOR PURCHASE
+      // 4. FIRE PIXELS FOR PURCHASE — only after server confirmed save
       const trackedKey = 'last_order_tracked_' + order.id;
+      const serverSaved = localStorage.getItem('last_order_server_saved') === 'true';
       if (!localStorage.getItem(trackedKey)) {
-        if (typeof window.trackPixelEvent === 'function') {
-          console.log(`Firing unified Purchase event for order ${order.id} with value ${order.total}`);
-          window.trackPixelEvent('Purchase', {
-            value: order.total,
-            currency: 'AED',
-            content_name: itemsList || 'زيت الأفغاني الأصلي الذهبي',
-            content_type: 'product',
-            content_ids: order.items ? order.items.map(item => 'AFG_OIL_QTY_' + (item.quantity || 1)) : ['AFG_OIL'],
-            num_items: order.items ? order.items.reduce((acc, item) => acc + (item.quantity || 1), 0) : 1
-          });
+        if (serverSaved) {
+          if (typeof window.trackPixelEvent === 'function') {
+            console.log(`✅ Server save confirmed. Firing Purchase event for order ${order.id} with value ${order.total}`);
+            window.trackPixelEvent('Purchase', {
+              value: order.total,
+              currency: 'AED',
+              content_name: itemsList || 'زيت الأفغاني الأصلي الذهبي',
+              content_type: 'product',
+              content_ids: order.items ? order.items.map(item => 'AFG_OIL_QTY_' + (item.quantity || 1)) : ['AFG_OIL'],
+              num_items: order.items ? order.items.reduce((acc, item) => acc + (item.quantity || 1), 0) : 1
+            });
+          }
+        } else {
+          console.warn(`⚠️ Order ${order.id} was NOT confirmed saved on server. Purchase pixel skipped to avoid false data.`);
         }
+        // تعيين المفتاح ومسح حالة الخادم — مهما كانت النتيجة
         localStorage.setItem(trackedKey, 'true');
+        localStorage.removeItem('last_order_server_saved'); // مسح لمنع إعادة الإطلاق
       }
     });
 

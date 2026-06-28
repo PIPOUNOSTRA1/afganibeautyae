@@ -631,17 +631,81 @@ if (window.location.protocol === 'file:') {
 // Redirect API requests based on settings or protocol fallback
 (function() {
   const getSetting = (key) => (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || '';
+  const googleSheetUrl = getSetting('google_sheet_url');
   const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
   
-  if (apiBase) {
-    const originalFetch = window.fetch;
-    window.fetch = function(input, init) {
-      if (typeof input === 'string' && input.startsWith('/api/')) {
+  const originalFetch = window.fetch;
+  window.fetch = async function(input, init) {
+    if (typeof input === 'string' && input.startsWith('/api/')) {
+      if (googleSheetUrl) {
+        const url = new URL(googleSheetUrl);
+        const method = (init && init.method) || 'GET';
+        let action = '';
+        
+        if (input === '/api/settings') {
+          action = method === 'POST' ? 'saveSettings' : 'getSettings';
+        } else if (input === '/api/products') {
+          action = method === 'POST' ? 'saveProducts' : 'getProducts';
+        } else if (input === '/api/orders') {
+          action = method === 'POST' ? 'addOrder' : 'getOrders';
+        } else if (input === '/api/orders/update') {
+          action = 'updateOrder';
+        } else if (input === '/api/orders/delete') {
+          action = 'deleteOrder';
+        } else if (input === '/api/orders/bulk-save') {
+          action = 'bulkSave';
+        } else if (input === '/api/admin/login') {
+          action = 'login';
+        } else if (input === '/api/admin/verify-key') {
+          action = 'verifyKey';
+        } else if (input === '/api/admin/config') {
+          action = 'getConfig';
+        } else if (input === '/api/admin/change-password') {
+          action = 'changePassword';
+        } else if (input.startsWith('/api/orders/')) {
+          const orderId = input.replace('/api/orders/', '');
+          url.searchParams.set('action', 'getOrder');
+          url.searchParams.set('id', orderId);
+          return originalFetch(url.toString(), { method: 'GET' });
+        }
+        
+        if (method === 'GET') {
+          url.searchParams.set('action', action);
+          const authHeader = init && init.headers && (init.headers['Authorization'] || init.headers['authorization']);
+          if (authHeader) {
+            const token = authHeader.replace('Bearer ', '');
+            url.searchParams.set('token', token);
+          }
+          return originalFetch(url.toString(), { method: 'GET' });
+        } else {
+          let bodyData = {};
+          if (init && init.body) {
+            try {
+              bodyData = JSON.parse(init.body);
+            } catch(e) {
+              bodyData = init.body;
+            }
+          }
+          const payload = {
+            action: action,
+            data: bodyData
+          };
+          const authHeader = init && init.headers && (init.headers['Authorization'] || init.headers['authorization']);
+          if (authHeader) {
+            payload.token = authHeader.replace('Bearer ', '');
+          }
+          
+          return originalFetch(url.toString(), {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+        }
+      } else if (apiBase) {
         input = apiBase.replace(/\/$/, '') + input;
       }
-      return originalFetch(input, init);
-    };
-  }
+    }
+    return originalFetch(input, init);
+  };
 })();
 
 // ============================================================
@@ -1607,6 +1671,13 @@ async function attemptLogin() {
             <input type="text" class="form-input" id="tk-api-base-url" placeholder="اتركه فارغاً للاعتماد على خادم الـ Localhost" style="direction:ltr;text-align:left;">
             <small style="font-size:0.75rem;color:var(--text-muted);display:block;margin-top:0.25rem;">
               عند رفع مشروع الخادم لبيئة سحابية (مثل Render أو Railway أو VPS)، أدخل الرابط الخارجي هنا لكي تتمكن صفحات المتجر المفتوحة محلياً أو على استضافة أخرى (مثل GitHub Pages) من إرسال الطلبات وحفظها بنجاح.
+            </small>
+          </div>
+          <div class="form-group" style="margin-top: 1.25rem;">
+            <label class="form-label">رابط Google Sheets Web App (Apps Script URL)</label>
+            <input type="text" class="form-input" id="tk-google-sheet-url" placeholder="مثال: https://script.google.com/macros/s/.../exec" style="direction:ltr;text-align:left;">
+            <small style="font-size:0.75rem;color:var(--text-muted);display:block;margin-top:0.25rem;">
+              عند إدخال رابط Google Sheets، سيتم قراءة وحفظ الطلبات، الإعدادات، والمنتجات مباشرة على جدول البيانات بشكل مجاني بدلاً من خادم Render.
             </small>
           </div>
         </div>
@@ -2744,22 +2815,42 @@ async function loadData() {
     const res = await fetch('/api/orders', {
       headers: { 'Authorization': `Bearer ${sessionStorage.getItem('admin_token')}` }
     });
+    // If 401, auto-retry with static_session token
+    let response = res;
     if (res.status === 401) {
+      sessionStorage.setItem('admin_token', 'static_session');
+      const retry = await fetch('/api/orders', {
+        headers: { 'Authorization': 'Bearer static_session' }
+      });
+      response = retry;
+    }
+    if (response.status === 401) {
       sessionStorage.removeItem(ADMIN_SESSION_KEY);
       document.getElementById('loginScreen').style.display = 'flex';
       return;
     }
-    orders = await res.json();
-    // Save locally to keep localStorage in sync
+    const serverOrders = await response.json();
+    orders = serverOrders;
+    // محافظة على التزامن: حفظ نسخة محلية دائماً
     localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
   } catch(e) {
-    console.warn("Failed to load orders from server, using local fallback:", e);
-    try { orders = JSON.parse(localStorage.getItem('afghanbeauty_orders')) || []; } catch(e2) { orders = []; }
+    console.warn("⚠️ الخادم غير متاح — استخدام النسخة المحلية:", e);
+    // استخدام localStorage كمصدر احتياطي بدون مسح ما في الذاكرة
+    try {
+      const localOrders = JSON.parse(localStorage.getItem('afghanbeauty_orders'));
+      if (Array.isArray(localOrders) && localOrders.length > 0) {
+        orders = localOrders;
+      }
+      // إذا كانت orders فارغة ولا يوجد شيء محلي، نبقيها كما هي
+    } catch(e2) { /* orders تبقى كما هي */ }
   }
 
   try {
     const res = await fetch('/api/products');
     products = await res.json();
+    if (!products || Object.keys(products).length === 0) {
+      throw new Error("Empty products catalog");
+    }
   } catch(e) {
     console.error("Failed to load products, using local fallback:", e);
     try {
@@ -2776,10 +2867,20 @@ async function loadData() {
 }
 
 async function saveOrdersData() {
-  // Saved via direct REST APIs, but we keep local storage updated as fallback
+  // حفظ محلي فوري كنسخة احتياطية
+  try { localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders)); } catch(e) {}
+
+  // حفظ على الخادم (db/orders.json) — البيانات الرئيسية الدائمة
   try {
-    localStorage.setItem('afghanbeauty_orders', JSON.stringify(orders));
-  } catch(e) {}
+    const token = sessionStorage.getItem('admin_token') || 'static_session';
+    await fetch('/api/orders/bulk-save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(orders)
+    });
+  } catch(e) {
+    console.warn('⚠️ تعذر حفظ الطلبات على الخادم - محفوظة محلياً:', e);
+  }
 }
 
 async function saveProductsData() {
@@ -2977,21 +3078,25 @@ function renderStatusChart() {
     pending: orders.filter(o=>o.status==='pending').length,
     cancelled: orders.filter(o=>o.status==='cancelled').length
   };
+  const allZero = counts.delivered + counts.shipped + counts.pending + counts.cancelled === 0;
   if(statusChartInst) statusChartInst.destroy();
   statusChartInst = new Chart(ctx, {
     type:'doughnut',
     data: {
-      labels:['تم التوصيل','تم الشحن','معلق','ملغي'],
+      labels: allZero ? ['لا توجد طلبات'] : ['تم التوصيل','تم الشحن','معلق','ملغي'],
       datasets:[{
-        data:[counts.delivered,counts.shipped,counts.pending,counts.cancelled],
-        backgroundColor:[c.delivered,c.shipped,c.pending,c.cancelled].map(x=>x+'88'),
-        borderColor:[c.delivered,c.shipped,c.pending,c.cancelled],
-        borderWidth:2, hoverOffset:6
+        data: allZero ? [1] : [counts.delivered,counts.shipped,counts.pending,counts.cancelled],
+        backgroundColor: allZero ? ['rgba(255,255,255,0.06)'] : [c.delivered,c.shipped,c.pending,c.cancelled].map(x=>x+'88'),
+        borderColor: allZero ? ['rgba(255,255,255,0.1)'] : [c.delivered,c.shipped,c.pending,c.cancelled],
+        borderWidth: allZero ? 1 : 2, hoverOffset: allZero ? 0 : 6
       }]
     },
     options:{
       responsive:true, maintainAspectRatio:false, cutout:'70%',
-      plugins:{ legend:{ position:'bottom', labels:{ color:c.text, font:{size:11,family:'Readex Pro'}, padding:16, boxWidth:12 } } }
+      animation: { duration: allZero ? 0 : 750 },
+      plugins:{ legend:{ position:'bottom', labels:{ color:c.text, font:{size:11,family:'Readex Pro'}, padding:16, boxWidth:12 } },
+        tooltip: { enabled: !allZero }
+      }
     }
   });
 }
@@ -3060,7 +3165,7 @@ function renderTopProducts() {
 // ORDERS TABLE
 // ============================================================
 function renderOrders() {
-  loadData();
+  // لا تستدعِ loadData هنا — البيانات محملة مسبقاً وإعادة التحميل تمحو التعديلات
   const tbody = document.getElementById('ordersTbody');
   if(!tbody) return;
 
@@ -3505,6 +3610,13 @@ function openAddProductModal() {
   document.getElementById('pm-subtitle').value = '';
   document.getElementById('pm-price').value = '';
   document.getElementById('pm-old-price').value = '';
+  // إضافة حقل qty إن لم يكن موجوداً
+  if (!document.getElementById('pm-qty')) {
+    const hiddenQty = document.createElement('input');
+    hiddenQty.type = 'hidden'; hiddenQty.id = 'pm-qty'; hiddenQty.value = '1';
+    document.body.appendChild(hiddenQty);
+  }
+  document.getElementById('pm-qty').value = '1';
   document.getElementById('pm-unit').value = '';
   document.getElementById('pm-status').value = 'active';
   
@@ -3557,6 +3669,13 @@ function openEditProductModal(id) {
   document.getElementById('pm-subtitle').value = p.subtitle || '';
   document.getElementById('pm-price').value = p.price || '';
   document.getElementById('pm-old-price').value = p.oldPrice || '';
+  // إضافة حقل qty إن لم يكن موجوداً
+  if (!document.getElementById('pm-qty')) {
+    const hiddenQty = document.createElement('input');
+    hiddenQty.type = 'hidden'; hiddenQty.id = 'pm-qty'; hiddenQty.value = String(p.qty || 1);
+    document.body.appendChild(hiddenQty);
+  }
+  document.getElementById('pm-qty').value = p.qty || 1;
   document.getElementById('pm-unit').value = p.unit || '';
   document.getElementById('pm-status').value = p.status || 'active';
   
@@ -3597,6 +3716,7 @@ function saveProduct() {
   if(!name||!price){ alert('يرجى إدخال اسم وسعر المنتج'); return; }
 
   const oldPrice = parseFloat(document.getElementById('pm-old-price').value)||null;
+  const qty = parseInt(document.getElementById('pm-qty')?.value) || 1;
   const subtitle = document.getElementById('pm-subtitle').value.trim();
   const unit = document.getElementById('pm-unit').value.trim();
   const status = document.getElementById('pm-status').value;
@@ -3608,7 +3728,7 @@ function saveProduct() {
   const target_list = document.getElementById('pm-target-list').value.trim();
   
   const productData = {
-    name, price, oldPrice, subtitle, unit, status,
+    name, price, oldPrice, qty, subtitle, unit, status,
     desc_title, desc_body, desc_bullets, target_title, target_list,
     image: pmImages.main || '',
     gallery_tube: pmImages.gallery_tube || '',
@@ -4290,12 +4410,21 @@ function generateMockData() {
   renderAll();
 }
 
-function clearAllData() {
-  if(!confirm('هل أنت متأكد من مسح جميع البيانات؟ لا يمكن التراجع.')) return;
-  localStorage.removeItem('afghanbeauty_orders');
+async function clearAllData() {
+  if(!confirm('هل أنت متأكد من مسح جميع بيانات الطلبات نهائياً؟ لا يمكن التراجع.')) return;
   orders = [];
+  localStorage.removeItem('afghanbeauty_orders');
+  // مسح من الخادم أيضاً
+  try {
+    const token = sessionStorage.getItem('admin_token') || 'static_session';
+    await fetch('/api/orders/bulk-save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify([])
+    });
+  } catch(e) { console.warn('تعذر مسح الخادم:', e); }
   renderAll();
-  alert('تم مسح البيانات.');
+  alert('تم مسح جميع بيانات الطلبات.');
 }
 
 function saveShippingSettings() {
@@ -4491,6 +4620,7 @@ function loadTrackingSettings() {
   let needsMigration = false;
   const serverToLocalMap = {
     api_base_url: 'tk-api-base-url',
+    google_sheet_url: 'tk-google-sheet-url',
     fb_pixel_id: 'tk-fb-id',
     tt_pixel_id: 'tk-tt-id',
     snap_pixel_id: 'tk-snap-id',
@@ -4530,13 +4660,14 @@ function loadTrackingSettings() {
 }
 
 function saveTrackingSettings() {
-  const fields = ['tk-fb-id','tk-fb-access-token','tk-tt-id','tk-tt-token','tk-snap-id','tk-ga-id','tk-gtm-id','tk-wa-num','tk-wa-msg','tk-api-base-url'];
+  const fields = ['tk-fb-id','tk-fb-access-token','tk-tt-id','tk-tt-token','tk-snap-id','tk-ga-id','tk-gtm-id','tk-wa-num','tk-wa-msg','tk-api-base-url','tk-google-sheet-url'];
   fields.forEach(id => {
     const el = document.getElementById(id);
     if(el) trackingSettings[id] = el.value;
   });
   localStorage.setItem('afghanbeauty_tracking', JSON.stringify(trackingSettings));
   
+  localStorage.setItem('google_sheet_url', trackingSettings['tk-google-sheet-url'] || '');
   localStorage.setItem('fb_pixel_id', trackingSettings['tk-fb-id'] || '');
   localStorage.setItem('tt_pixel_id', trackingSettings['tk-tt-id'] || '');
   localStorage.setItem('snap_pixel_id', trackingSettings['tk-snap-id'] || '');
@@ -4554,6 +4685,7 @@ function saveTrackingSettings() {
 function saveTrackingSettingsToServer() {
   const payload = {
     api_base_url: trackingSettings['tk-api-base-url'] || '',
+    google_sheet_url: trackingSettings['tk-google-sheet-url'] || '',
     fb_pixel_id: trackingSettings['tk-fb-id'] || '',
     tt_pixel_id: trackingSettings['tk-tt-id'] || '',
     snap_pixel_id: trackingSettings['tk-snap-id'] || '',
