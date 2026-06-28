@@ -634,6 +634,22 @@
         
         container.appendChild(particle);
       }
+    // Helper to format and SHA-256 hash phone number for TikTok Advanced Matching
+    async function hashPhoneForTikTok(phone) {
+      if (!phone) return '';
+      let cleanPhone = phone.replace(/\D/g, ''); // Keep only digits
+      if (cleanPhone.startsWith('05')) {
+        cleanPhone = '971' + cleanPhone.substring(1);
+      } else if (cleanPhone.startsWith('5') && cleanPhone.length === 9) {
+        cleanPhone = '971' + cleanPhone;
+      }
+      cleanPhone = '+' + cleanPhone;
+      
+      const encoder = new TextEncoder();
+      const data = encoder.encode(cleanPhone);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -675,14 +691,31 @@
         if (serverSaved) {
           if (typeof window.trackPixelEvent === 'function') {
             console.log(`✅ Server save confirmed. Firing Purchase event for order ${order.id} with value ${order.total}`);
-            window.trackPixelEvent('Purchase', {
-              value: parseFloat(order.total) || 0,
-              currency: 'AED',
-              content_name: itemsList || 'زيت الأفغاني الأصلي الذهبي',
-              content_type: 'product',
-              content_ids: order.items ? order.items.map(item => 'AFG_OIL_QTY_' + (item.quantity || 1)) : ['AFG_OIL'],
-              num_items: order.items ? order.items.reduce((acc, item) => acc + (item.quantity || 1), 0) : 1
-            });
+            
+            const fireEvent = () => {
+              window.trackPixelEvent('Purchase', {
+                value: parseFloat(order.total) || 0,
+                currency: 'AED',
+                content_name: itemsList || 'زيت الأفغاني الأصلي الذهبي',
+                content_type: 'product',
+                content_ids: order.items ? order.items.map(item => 'AFG_OIL_QTY_' + (item.quantity || 1)) : ['AFG_OIL'],
+                num_items: order.items ? order.items.reduce((acc, item) => acc + (item.quantity || 1), 0) : 1
+              });
+            };
+
+            // Advanced Matching for TikTok
+            if (order.phone) {
+              hashPhoneForTikTok(order.phone)
+                .then(hashedPhone => {
+                  if (hashedPhone && typeof ttq === 'object' && typeof ttq.identify === 'function') {
+                    ttq.identify({ phone_number: hashedPhone });
+                  }
+                })
+                .catch(e => console.warn("Failed to hash phone:", e))
+                .finally(fireEvent);
+            } else {
+              fireEvent();
+            }
           }
         } else {
           console.warn(`⚠️ Order ${order.id} was NOT confirmed saved on server. Purchase pixel skipped to avoid false data.`);
