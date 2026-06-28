@@ -630,21 +630,30 @@ if (window.location.protocol === 'file:') {
 
 // Redirect API requests based on settings or protocol fallback
 (function() {
-  const getSetting = (key) => (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || '';
-  const googleSheetUrl = getSetting('google_sheet_url');
-  const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
+  const getSetting = (key) => {
+    return (window.STORE_SETTINGS && window.STORE_SETTINGS[key]) || localStorage.getItem(key) || '';
+  };
   
   const originalFetch = window.fetch;
   window.fetch = async function(input, init) {
     if (typeof input === 'string' && input.startsWith('/api/')) {
+      const googleSheetUrl = getSetting('google_sheet_url');
+      const apiBase = getSetting('api_base_url') || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
+
+      // Exclude settings API from Google Sheets redirection (always use Render backend as source of truth)
+      if (input === '/api/settings') {
+        if (apiBase) {
+          input = apiBase.replace(/\/$/, '') + input;
+        }
+        return originalFetch(input, init);
+      }
+
       if (googleSheetUrl) {
         const url = new URL(googleSheetUrl);
         const method = (init && init.method) || 'GET';
         let action = '';
         
-        if (input === '/api/settings') {
-          action = method === 'POST' ? 'saveSettings' : 'getSettings';
-        } else if (input === '/api/products') {
+        if (input === '/api/products') {
           action = method === 'POST' ? 'saveProducts' : 'getProducts';
         } else if (input === '/api/orders') {
           action = method === 'POST' ? 'addOrder' : 'getOrders';
@@ -707,6 +716,41 @@ if (window.location.protocol === 'file:') {
     return originalFetch(input, init);
   };
 })();
+
+// Function to load settings dynamically from the Render server and update config
+async function loadSettingsFromServer() {
+  try {
+    const apiBase = (window.STORE_SETTINGS && window.STORE_SETTINGS.api_base_url) || (window.location.protocol === 'file:' ? 'http://localhost:8080' : '');
+    const url = apiBase ? apiBase.replace(/\/$/, '') + '/api/settings' : '/api/settings';
+    
+    const res = await fetch(url);
+    const settings = await res.json();
+    if (settings && typeof settings === 'object') {
+      window.STORE_SETTINGS = window.STORE_SETTINGS || {};
+      Object.assign(window.STORE_SETTINGS, settings);
+      
+      // Persist to localStorage
+      Object.entries(settings).forEach(([key, val]) => {
+        if (val !== undefined && val !== null) {
+          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
+        }
+      });
+      console.log("Dynamically loaded settings from server successfully.");
+      // Reload UI elements if dynamic loaded settings are modified
+      if (typeof loadTrackingSettings === 'function') {
+        loadTrackingSettings();
+      }
+      if (typeof loadTrackingForm === 'function') {
+        loadTrackingForm();
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to load dynamic settings from server:", err);
+  }
+}
+
+// Call on load
+loadSettingsFromServer();
 
 // ============================================================
 // Admin Auth System — Password + API Key (URL)
